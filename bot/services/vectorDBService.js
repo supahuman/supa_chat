@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import chunkingService from './chunkingService.js';
+import LangChainChunkingService from './langchainChunkingService.js';
 import KnowledgeBase from '../models/KnowledgeBase.js';
-import OpenAI from 'openai';
 
 class VectorDBService {
   constructor() {
@@ -11,16 +11,26 @@ class VectorDBService {
       process.env.EMBEDDING_MODEL || 'text-embedding-3-small';
     this.embeddingDimensions = Number(process.env.EMBEDDING_DIMENSIONS || 1536);
     this.openai = null;
+    
+    // Chunking strategy selection
+    this.chunkingStrategy = process.env.CHUNKING_STRATEGY || 'custom'; // custom | langchain
+    this.langchainChunker = null;
+    
+    // Initialize LangChain chunker if needed
+    if (this.chunkingStrategy === 'langchain') {
+      this.langchainChunker = new LangChainChunkingService({
+        chunkSize: Number(process.env.LANGCHAIN_CHUNK_SIZE || 1000),
+        chunkOverlap: Number(process.env.LANGCHAIN_CHUNK_OVERLAP || 200),
+        supportedTypes: (process.env.LANGCHAIN_SUPPORTED_TYPES || 'txt,md,pdf,docx,csv,json,html').split(',')
+      });
+    }
   }
 
   async initialize() {
     try {
-      if (this.provider === 'atlas') {
-        if (!process.env.OPENAI_API_KEY) {
-          console.warn('⚠️ OPENAI_API_KEY not set; embeddings will be unavailable');
-        } else {
-          this.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-        }
+      // Initialize LangChain chunker if needed
+      if (this.chunkingStrategy === 'langchain' && this.langchainChunker) {
+        console.log('🔗 LangChain chunker initialized with embeddings');
       }
 
       this.initialized = true;
@@ -56,7 +66,17 @@ class VectorDBService {
         'knowledge-base',
         'african-vibes-knowledge.md'
       );
-      const chunks = await chunkingService.processFile(filePath);
+      
+      let chunks = [];
+      
+      // Use appropriate chunking strategy
+      if (this.chunkingStrategy === 'langchain' && this.langchainChunker) {
+        console.log('🔧 Using LangChain chunking strategy');
+        chunks = await this.langchainChunker.processDocument(filePath);
+      } else {
+        console.log('🔧 Using custom chunking strategy');
+        chunks = await chunkingService.processFile(filePath);
+      }
 
       if (chunks.length === 0) {
         console.log('⚠️ No chunks found in knowledge base file');
@@ -67,17 +87,19 @@ class VectorDBService {
 
       let documents = [];
 
-      if (this.provider === 'atlas' && this.openai) {
-        const texts = chunks.map((c) => c.content);
-        const embeddings = await this.generateEmbeddings(texts);
-        documents = chunks.map((chunk, idx) => ({
-          content: chunk.content,
-          title: chunk.title,
-          category: chunk.metadata.category,
-          metadata: chunk.metadata,
-          embedding: embeddings[idx],
+      // Generate embeddings if using LangChain
+      if (this.chunkingStrategy === 'langchain' && this.langchainChunker) {
+        console.log('🔗 Generating embeddings with LangChain...');
+        const documentsWithEmbeddings = await this.langchainChunker.generateEmbeddings(chunks);
+        documents = documentsWithEmbeddings.map((doc) => ({
+          content: doc.content,
+          title: doc.title,
+          category: doc.metadata.category,
+          metadata: doc.metadata,
+          embedding: doc.embedding,
         }));
       } else {
+        // Custom chunking - no embeddings for now
         documents = chunks.map((chunk) => ({
           content: chunk.content,
           title: chunk.title,
@@ -107,38 +129,54 @@ class VectorDBService {
     }
 
     try {
-      if (this.provider === 'atlas' && this.openai) {
-        const [embedding] = await this.generateEmbeddings([query]);
-
-        const collection = mongoose.connection.collection('knowledgebases');
-        const vectorResults = await collection
-          .aggregate([
-            {
-              $vectorSearch: {
-                index: process.env.ATLAS_VECTOR_INDEX || 'vector_index',
-                path: 'embedding',
-                queryVector: embedding,
-                numCandidates: Number(process.env.VECTOR_CANDIDATES || 200),
-                limit,
-                similarity: process.env.VECTOR_SIMILARITY || 'cosine',
+      // Use LangChain embeddings for vector search
+      if (this.chunkingStrategy === 'langchain' && this.langchainChunker) {
+        console.log('🔗 Using LangChain embeddings for vector search...');
+        
+        try {
+          const queryEmbedding = await this.langchainChunker.generateQueryEmbedding(query);
+          console.log(`🔍 Generated query embedding with ${queryEmbedding.length} dimensions`);
+          
+          const collection = mongoose.connection.collection('knowledgebases');
+          const vectorResults = await collection
+            .aggregate([
+              {
+                $vectorSearch: {
+                  index: process.env.ATLAS_VECTOR_INDEX || 'vector_index',
+                  path: 'embedding',
+                  queryVector: queryEmbedding,
+                  numCandidates: Number(process.env.VECTOR_CANDIDATES || 200),
+                  limit,
+                  similarity: process.env.VECTOR_SIMILARITY || 'cosine',
+                },
               },
-            },
-            {
-              $project: {
-                content: 1,
-                metadata: 1,
-                score: { $meta: 'vectorSearchScore' },
+              {
+                $project: {
+                  content: 1,
+                  metadata: 1,
+                  title: 1,
+                  category: 1,
+                  score: { $meta: 'vectorSearchScore' },
+                },
               },
-            },
-          ])
-          .toArray();
+            ])
+            .toArray();
 
-        return {
-          success: true,
-          results: vectorResults.map((r) => r.content),
-          metadatas: vectorResults.map((r) => r.metadata),
-          distances: vectorResults.map((r) => 1 - (r.score || 0)),
-        };
+          if (vectorResults.length > 0) {
+            console.log(`📚 Vector search found ${vectorResults.length} relevant results`);
+            return {
+              success: true,
+              results: vectorResults.map((r) => r.content),
+              metadatas: vectorResults.map((r) => r.metadata),
+              distances: vectorResults.map((r) => 1 - (r.score || 0)),
+            };
+          } else {
+            console.log('⚠️ Vector search returned 0 results, falling back to regex search');
+          }
+        } catch (vectorError) {
+          console.error('❌ Vector search failed:', vectorError.message);
+          console.log('⚠️ Falling back to regex search');
+        }
       }
 
       // Fallback to regex-based ranking if embeddings unavailable
@@ -269,9 +307,9 @@ class VectorDBService {
 
     try {
       let embedding = [];
-      if (this.provider === 'atlas' && this.openai) {
-        const [e] = await this.generateEmbeddings([content]);
-        embedding = e;
+      if (this.chunkingStrategy === 'langchain' && this.langchainChunker) {
+        const [e] = await this.langchainChunker.generateEmbeddings([{ content }]);
+        embedding = e.embedding;
       }
       const document = new KnowledgeBase({
         content,
@@ -289,13 +327,102 @@ class VectorDBService {
     }
   }
 
-  async generateEmbeddings(texts) {
-    if (!this.openai) return texts.map(() => []);
-    const response = await this.openai.embeddings.create({
-      model: this.embeddingModel,
-      input: texts,
-    });
-    return response.data.map((d) => d.embedding);
+
+  /**
+   * Process multiple documents for client use (LangChain only)
+   */
+  async processClientDocuments(filePaths, options = {}) {
+    if (!this.initialized) {
+      return { success: false, error: 'Service not initialized' };
+    }
+
+    if (this.chunkingStrategy !== 'langchain' || !this.langchainChunker) {
+      return { 
+        success: false, 
+        error: 'LangChain chunking not enabled. Set CHUNKING_STRATEGY=langchain' 
+      };
+    }
+
+    try {
+      console.log(`📚 Processing ${filePaths.length} client documents...`);
+      
+      // Process all documents
+      const chunks = await this.langchainChunker.processDocuments(filePaths, options);
+      
+      if (chunks.length === 0) {
+        return { success: false, error: 'No content found in documents' };
+      }
+
+      console.log(`📚 Processing ${chunks.length} chunks...`);
+
+      let documents = [];
+
+      // Generate embeddings using LangChain
+      console.log('🔗 Generating embeddings for client documents...');
+      const documentsWithEmbeddings = await this.langchainChunker.generateEmbeddings(chunks);
+      documents = documentsWithEmbeddings.map((doc) => ({
+        content: doc.content,
+        title: doc.title,
+        category: doc.metadata.category,
+        metadata: {
+          ...doc.metadata,
+          source: 'client-upload',
+          processedAt: new Date().toISOString()
+        },
+        embedding: doc.embedding,
+      }));
+
+      // Insert into database
+      await KnowledgeBase.insertMany(documents);
+
+      console.log(`✅ Client documents processed successfully (${documents.length} chunks)`);
+      return { 
+        success: true, 
+        count: documents.length,
+        chunks: documents.map(d => ({
+          id: d._id,
+          title: d.title,
+          category: d.category,
+          fileType: d.metadata.fileType
+        }))
+      };
+    } catch (error) {
+      console.error('❌ Failed to process client documents:', error);
+      return { success: false, error: error.message };
+    }
+  }
+
+  /**
+   * Get supported file types for client uploads
+   */
+  getSupportedFileTypes() {
+    if (this.chunkingStrategy === 'langchain' && this.langchainChunker) {
+      return this.langchainChunker.getSupportedTypes();
+    }
+    return ['md', 'txt']; // Custom chunker only supports these
+  }
+
+  /**
+   * Get chunking strategy information
+   */
+  getChunkingInfo() {
+    return {
+      strategy: this.chunkingStrategy,
+      supportedTypes: this.getSupportedFileTypes(),
+      isLangChainEnabled: this.chunkingStrategy === 'langchain',
+      embeddingInfo: this.chunkingStrategy === 'langchain' ? 
+        this.langchainChunker?.getEmbeddingInfo() : null,
+      config: this.chunkingStrategy === 'langchain' ? {
+        chunkSize: this.langchainChunker?.options.chunkSize,
+        chunkOverlap: this.langchainChunker?.options.chunkOverlap,
+        supportedTypes: this.langchainChunker?.options.supportedTypes,
+        embeddingProvider: this.langchainChunker?.options.embeddingProvider
+      } : {
+        chunkSize: 500,
+        chunkOverlap: 100,
+        supportedTypes: ['md', 'txt']
+      }
+    };
   }
 
   async getKnowledgeBaseStats() {
@@ -318,6 +445,7 @@ class VectorDBService {
         success: true,
         totalChunks,
         categories: categoryStats,
+        chunkingInfo: this.getChunkingInfo()
       };
     } catch (error) {
       console.error('❌ Failed to get stats:', error);
