@@ -107,7 +107,8 @@ class VectorDBService {
     }
 
     try {
-      if (this.provider === 'atlas' && this.openai) {
+      // Temporarily disable vector search to use regex fallback
+      if (false && this.provider === 'atlas' && this.openai) {
         const [embedding] = await this.generateEmbeddings([query]);
 
         const collection = mongoose.connection.collection('knowledgebases');
