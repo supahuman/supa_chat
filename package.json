@@ -1,0 +1,16 @@
+{
+  "name": "supa_chatbot",
+  "private": true,
+  
+  "scripts": {
+    "dev": "pnpm -C bot dev",
+    "start": "pnpm -C bot start",
+    "dev:bot": "pnpm --filter bot dev",
+    "start:bot": "pnpm --filter bot start",
+    "install:all": "pnpm install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
+
