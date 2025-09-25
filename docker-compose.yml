@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  # MongoDB database
+  mongodb:
+    image: mongo:7
+    container_name: supa-chatbot-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: supa_chatbot
+    volumes:
+      - mongodb_data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+    networks:
+      - supa-chatbot-network
+
+  # Bot backend service
+  bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: supa-chatbot-bot
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - MONGODB_URI=mongodb://admin:password@mongodb:27017/supa_chatbot?authSource=admin
+      - BOT_ENABLED=true
+      - ALLOW_PUBLIC_BOT=true
+      - VECTOR_PROVIDER=atlas
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    depends_on:
+      - mongodb
+    networks:
+      - supa-chatbot-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Chat widget frontend
+  widget:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: supa-chatbot-widget
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_BOT_API_URL=http://bot:4000
+    depends_on:
+      - bot
+    networks:
+      - supa-chatbot-network
+
+  # Nginx reverse proxy (optional)
+  nginx:
+    image: nginx:alpine
+    container_name: supa-chatbot-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - bot
+      - widget
+    networks:
+      - supa-chatbot-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  supa-chatbot-network:
+    driver: bridge

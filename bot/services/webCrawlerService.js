@@ -3,7 +3,7 @@ import { JSDOM } from 'jsdom';
 
 class WebCrawlerService {
   constructor() {
-    this.baseUrl = 'https://africanvibes.net';
+    this.baseUrl = 'https://www.africanvibes.net';
     this.helpCenterUrl = `${this.baseUrl}/help-center`;
     this.crawledPages = new Set();
     this.extractedContent = [];
@@ -62,7 +62,7 @@ class WebCrawlerService {
         method: 'GET',
         headers: {
           'User-Agent':
-            'Mozilla/5.0 (compatible; AfricanVibesBot/1.0; +https://africanvibes.net)',
+            'Mozilla/5.0 (compatible; AfricanVibesBot/1.0; +https://www.africanvibes.net)',
           Accept:
             'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
           'Accept-Language': 'en-US,en;q=0.5',
@@ -114,7 +114,7 @@ class WebCrawlerService {
         method: 'GET',
         headers: {
           'User-Agent':
-            'Mozilla/5.0 (compatible; AfricanVibesBot/1.0; +https://africanvibes.net)',
+            'Mozilla/5.0 (compatible; AfricanVibesBot/1.0; +https://www.africanvibes.net)',
           Accept:
             'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
           'Accept-Language': 'en-US,en;q=0.5',

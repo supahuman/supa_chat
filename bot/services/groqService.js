@@ -16,7 +16,7 @@ class GroqService {
       this.groq = new Groq({
         apiKey: process.env.GROQ_API_KEY,
       });
-      this.model = 'llama3-8b-8192'; // Fast and effective for chat
+      this.model = 'llama-3.1-8b-instant'; // Updated to current model
       this.initialized = true;
       console.log('✅ Groq service initialized successfully');
     } catch (error) {
