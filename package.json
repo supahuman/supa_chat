@@ -3,8 +3,8 @@
   "private": true,
   
   "scripts": {
-    "dev": "pnpm -C bot dev",
-    "start": "pnpm -C bot start",
+    "dev": "concurrently -n bot,widget -c green,cyan \"pnpm -C bot dev\" \"pnpm -C chat-widget dev\"",
+    "start": "concurrently -n bot,widget -c green,cyan \"pnpm -C bot start\" \"pnpm -C chat-widget start\"",
     "dev:bot": "pnpm --filter bot dev",
     "start:bot": "pnpm --filter bot start",
     "install:all": "pnpm install"
