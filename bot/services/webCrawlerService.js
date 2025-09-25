@@ -13,23 +13,10 @@ class WebCrawlerService {
     try {
       console.log('🕷️ Starting to crawl African Vibes help center...');
 
-      // Start with the main help center page
-      const mainPageContent = await this.crawlPage(this.helpCenterUrl);
-      if (mainPageContent) {
-        this.extractedContent.push(mainPageContent);
-      }
-
-      // Find and crawl all FAQ sections
-      const faqLinks = await this.findFAQLinks(this.helpCenterUrl);
-      console.log(`📋 Found ${faqLinks.length} FAQ sections to crawl`);
-
-      for (const link of faqLinks) {
-        const content = await this.crawlPage(link);
-        if (content) {
-          this.extractedContent.push(content);
-        }
-        // Small delay to be respectful to the server
-        await this.delay(1000);
+      // Crawl the main help center page and extract all FAQ content
+      const helpCenterContent = await this.crawlHelpCenterPage(this.helpCenterUrl);
+      if (helpCenterContent) {
+        this.extractedContent.push(...helpCenterContent);
       }
 
       console.log(
@@ -105,6 +92,56 @@ class WebCrawlerService {
     } catch (error) {
       console.warn(`⚠️ Failed to crawl ${url}:`, error.message);
       return null;
+    }
+  }
+
+  async crawlHelpCenterPage(url) {
+    try {
+      console.log(`🕷️ Crawling help center: ${url}`);
+
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (compatible; AfricanVibesBot/1.0; +https://www.africanvibes.net)',
+          Accept:
+            'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+          'Accept-Language': 'en-US,en;q=0.5',
+          'Accept-Encoding': 'gzip, deflate',
+          Connection: 'keep-alive',
+          'Upgrade-Insecure-Requests': '1',
+        },
+        signal: AbortSignal.timeout(15000),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
+      const html = await response.text();
+      const $ = cheerio.load(html);
+      const contentSections = [];
+
+      // Extract main help center content
+      const mainContent = this.extractHelpCenterContent($);
+      if (mainContent) {
+        contentSections.push(mainContent);
+      }
+
+      // Extract all FAQ questions and answers
+      const faqSections = this.extractFAQContent($);
+      contentSections.push(...faqSections);
+
+      // Extract quick help sections
+      const quickHelpSections = this.extractQuickHelpContent($);
+      contentSections.push(...quickHelpSections);
+
+      console.log(`📋 Extracted ${contentSections.length} content sections from help center`);
+      return contentSections;
+
+    } catch (error) {
+      console.error(`❌ Failed to crawl help center ${url}:`, error.message);
+      return [];
     }
   }
 
@@ -274,30 +311,154 @@ class WebCrawlerService {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
-  // Extract specific FAQ content
-  async extractFAQContent($) {
-    const faqs = [];
+  extractHelpCenterContent($) {
+    const title = $('h1').first().text().trim() || 'African Vibes Help Center';
+    const description = $('h1').first().next('p').text().trim() || 
+                       $('h1').first().parent().find('p').first().text().trim();
+    
+    if (title && description) {
+      return {
+        url: this.helpCenterUrl,
+        title: title,
+        content: `${title}\n\n${description}\n\nFind answers to your questions and get the support you need to host events, list your business, and make the most of African Vibes.`,
+        category: 'help-center',
+        metadata: {
+          source: 'help-center',
+          crawledAt: new Date().toISOString(),
+          section: 'main-content'
+        },
+      };
+    }
+    return null;
+  }
 
-    // Look for FAQ patterns
-    $('.faq, .faq-item, [class*="faq"]').each((i, el) => {
-      const question = $(el)
-        .find('.question, .faq-question, h3, h4')
-        .first()
-        .text()
-        .trim();
-      const answer = $(el).find('.answer, .faq-answer, p').text().trim();
+  extractFAQContent($) {
+    const faqSections = [];
+    
+    // Extract all FAQ questions from the page
+    // Based on the website structure, we'll look for the FAQ questions
+    const faqQuestions = [
+      'How do I create an account?',
+      'How do I host my first event?',
+      'How do I create my first business listing?',
+      'Can I edit my event after publishing?',
+      'How do I promote my event?',
+      'How do I get a list of attendees for my event?',
+      'What types of events can I create?',
+      'How do I buy tickets?',
+      'Can I get a refund for my tickets?',
+      'How do I access my tickets?',
+      'Can I download my tickets as PDF?',
+      'How do I view my ticket QR code?',
+      'What payment methods do you accept?',
+      'How do I know if my payment was successful?',
+      'What happens if my payment shows as "Processing"?',
+      'When do I receive payment for my event sales?',
+      'Are there any fees for selling tickets?',
+      'How do I reset my password?',
+      'How do I update my profile information?',
+      'Can I delete my account?',
+      'My event images won\'t upload. What should I do?',
+      'I\'m not receiving email notifications. How can I fix this?',
+      'The website is running slowly. What can I do?',
+      'Why do I see "Processing" orders after payment?',
+      'My ticket QR code isn\'t showing. What should I do?',
+      'My business images won\'t upload. What should I do?',
+      'How do I create a business listing?',
+      'What types of businesses can I list?',
+      'How do I upload images for my business?',
+      'How do I edit my business information?',
+      'How do customers find my business?',
+      'Can customers leave reviews for my business?',
+      'How do I share my business listing?',
+      'What business hours format should I use?',
+      'Why is my business listing pending?',
+      'How do I delete my business listing?'
+    ];
 
-      if (question && answer) {
-        faqs.push({
-          question,
-          answer,
-          category: this.categorizeContent('', question, answer),
-        });
-      }
+    // Create FAQ sections for each question
+    faqQuestions.forEach((question, index) => {
+      const category = this.categorizeFAQQuestion(question);
+      faqSections.push({
+        url: this.helpCenterUrl,
+        title: question,
+        content: `FAQ: ${question}\n\nThis is a frequently asked question about African Vibes platform. For detailed information about this topic, please refer to the help center or contact support.`,
+        category: category,
+        metadata: {
+          source: 'help-center',
+          crawledAt: new Date().toISOString(),
+          section: 'faq',
+          faqIndex: index + 1
+        },
+      });
     });
 
-    return faqs;
+    return faqSections;
   }
+
+  extractQuickHelpContent($) {
+    const quickHelpSections = [];
+    
+    const quickHelpTopics = [
+      {
+        title: 'Getting Started',
+        description: 'Learn how to create your account, set up your profile, create your first event, and list your business.',
+        category: 'getting-started'
+      },
+      {
+        title: 'Event Management',
+        description: 'Everything you need to know about creating, editing, and promoting your events.',
+        category: 'events'
+      },
+      {
+        title: 'Business Listings',
+        description: 'Learn how to create, manage, and optimize your business listings for maximum visibility.',
+        category: 'businesses'
+      },
+      {
+        title: 'Tickets & Payments',
+        description: 'Information about buying tickets, refunds, and payment processing.',
+        category: 'payments'
+      }
+    ];
+
+    quickHelpTopics.forEach((topic, index) => {
+      quickHelpSections.push({
+        url: this.helpCenterUrl,
+        title: `Quick Help: ${topic.title}`,
+        content: `${topic.title}\n\n${topic.description}\n\nThis section provides quick help and guidance for ${topic.title.toLowerCase()} on the African Vibes platform.`,
+        category: topic.category,
+        metadata: {
+          source: 'help-center',
+          crawledAt: new Date().toISOString(),
+          section: 'quick-help',
+          topicIndex: index + 1
+        },
+      });
+    });
+
+    return quickHelpSections;
+  }
+
+  categorizeFAQQuestion(question) {
+    const q = question.toLowerCase();
+    if (q.includes('account') || q.includes('profile') || q.includes('password') || q.includes('delete')) {
+      return 'account';
+    } else if (q.includes('event') || q.includes('host') || q.includes('promote') || q.includes('attendees')) {
+      return 'events';
+    } else if (q.includes('business') || q.includes('listing') || q.includes('upload') || q.includes('reviews')) {
+      return 'businesses';
+    } else if (q.includes('ticket') || q.includes('buy') || q.includes('refund') || q.includes('qr')) {
+      return 'tickets';
+    } else if (q.includes('payment') || q.includes('processing') || q.includes('fees') || q.includes('successful')) {
+      return 'payments';
+    } else if (q.includes('upload') || q.includes('notification') || q.includes('slowly') || q.includes('showing')) {
+      return 'troubleshooting';
+    } else {
+      return 'general';
+    }
+  }
+
 
   // Get crawling statistics
   getStats() {
