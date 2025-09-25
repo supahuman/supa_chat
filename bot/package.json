@@ -7,7 +7,17 @@
   "main": "app.js",
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon --watch . app.js"
+    "dev": "nodemon --watch . app.js",
+    "chunking:status": "node scripts/chunking-control.js status",
+    "chunking:list": "node scripts/chunking-control.js list",
+    "chunking:switch": "node scripts/chunking-control.js switch",
+    "chunking:test": "node scripts/chunking-control.js test",
+    "strategy:status": "node scripts/chunking-strategy.js status",
+    "strategy:switch": "node scripts/chunking-strategy.js switch",
+    "strategy:clean": "node scripts/chunking-strategy.js clean",
+    "strategy:reload": "node scripts/chunking-strategy.js reload",
+    "strategy:validate": "node scripts/chunking-strategy.js validate",
+    "strategy:config": "node scripts/chunking-strategy.js config"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -21,7 +31,15 @@
     "cheerio": "^1.0.0-rc.12",
     "openai": "^4.56.0",
     "mongoose": "^8.6.1",
-    "morgan": "^1.10.0"
+    "morgan": "^1.10.0",
+    "langchain": "^0.3.34",
+    "@langchain/core": "^0.3.58",
+    "@langchain/openai": "^0.1.0",
+    "@langchain/textsplitters": "^0.0.0",
+    "pdf-parse": "^1.1.1",
+    "mammoth": "^1.6.0",
+    "csv-parser": "^3.0.0",
+    "commander": "^11.1.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"
