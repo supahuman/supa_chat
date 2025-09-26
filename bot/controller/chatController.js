@@ -1,5 +1,6 @@
-import ragService from '../services/ragService.js';
 import conversationService from '../services/conversationService.js';
+import ClientRAGService from '../services/client/ClientRAGService.js';
+import ClientConfigService from '../services/client/ClientConfigService.js';
 
 // @desc    Process chat message
 // @route   POST /api/bot/chat
@@ -65,7 +66,20 @@ export const processChatMessage = async (req, res) => {
       `📝 Processing with ${conversationHistory.length} previous messages`
     );
 
-    const ragResult = await ragService.processQuery(
+    // Use the new client system with default 'supa-chat' client
+    const clientConfigService = new ClientConfigService();
+    const clientConfig = clientConfigService.getClientConfig('supa-chat');
+    
+    if (!clientConfig) {
+      return res.status(500).json({
+        success: false,
+        error: 'Client configuration not found',
+      });
+    }
+
+    const clientRAGService = new ClientRAGService();
+    const ragResult = await clientRAGService.processQuery(
+      'supa-chat',
       message,
       conversationHistory
     );
@@ -184,6 +198,68 @@ export const deleteConversation = async (req, res) => {
     res.status(500).json({
       success: false,
       error: 'Internal server error',
+    });
+  }
+};
+
+// @desc    Process chat message for specific client
+// @route   POST /api/client/:clientId/chat
+// @access  Public (for client integration)
+export const processClientChatMessage = async (req, res) => {
+  try {
+    const { clientId } = req.params;
+    const { message, sessionId } = req.body;
+
+    if (!message) {
+      return res.status(400).json({
+        success: false,
+        error: 'Message is required',
+      });
+    }
+
+    console.log(`📝 Processing chat for client ${clientId}, session ${sessionId}`);
+
+    // Use client-specific RAG service
+    const clientConfigService = new ClientConfigService();
+    const clientConfig = clientConfigService.getClientConfig(clientId);
+    
+    if (!clientConfig) {
+      return res.status(404).json({
+        success: false,
+        error: 'Client configuration not found',
+      });
+    }
+
+    const clientRAGService = new ClientRAGService();
+    const ragResult = await clientRAGService.processQuery(
+      clientId,
+      message,
+      [] // No conversation history for now
+    );
+
+    if (!ragResult.success) {
+      return res.status(500).json({
+        success: false,
+        error: ragResult.error
+      });
+    }
+
+    res.json({
+      success: true,
+      response: ragResult.response,
+      sources: ragResult.sources,
+      confidence: ragResult.confidence,
+      model: ragResult.model,
+      usage: ragResult.usage,
+      clientId,
+      sessionId
+    });
+
+  } catch (error) {
+    console.error('❌ Client chat processing error:', error.message);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error'
     });
   }
 };

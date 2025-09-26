@@ -6,51 +6,24 @@
  */
 export async function initializeBot() {
   let chatRoutes = null;
-  let knowledgeBaseRoutes = null;
   let langchainKnowledgeBaseRoutes = null;
   let chunkingStrategyRoutes = null;
+  let clientRoutes = null;
 
   if (process.env.BOT_ENABLED === 'true') {
     try {
       chatRoutes = (await import('../routes/chatRoutes.js')).default;
-      knowledgeBaseRoutes = (
-        await import('../routes/knowledgeBaseRoutes.js')
-      ).default;
       langchainKnowledgeBaseRoutes = (
         await import('../routes/langchainKnowledgeBaseRoutes.js')
       ).default;
       chunkingStrategyRoutes = (
         await import('../routes/chunkingStrategyRoutes.js')
       ).default;
+      clientRoutes = (await import('../routes/clientRoutes.js')).default;
       console.log('🤖 Bot routes loaded successfully');
 
-      // Initialize knowledge base service with crawling
-      try {
-        const knowledgeBaseService = (
-          await import('../services/knowledgeBaseService.js')
-        ).default;
-        await knowledgeBaseService.initialize();
-
-        // Load complete knowledge base (static + crawled)
-        const loadResult =
-          await knowledgeBaseService.loadCompleteKnowledgeBase();
-
-        if (loadResult.success) {
-          console.log('📚 Complete knowledge base loaded successfully');
-          console.log(`📖 Static: ${loadResult.static?.count || 0} chunks`);
-          console.log(
-            `🕷️ Crawled: ${loadResult.crawled?.addedChunks || 0} chunks`
-          );
-          console.log(`📊 Total: ${loadResult.stats?.totalChunks || 0} chunks`);
-        } else {
-          console.warn('⚠️ Knowledge base loading failed:', loadResult.error);
-        }
-      } catch (error) {
-        console.warn(
-          '⚠️ Knowledge base service initialization failed:',
-          error.message
-        );
-      }
+      // Knowledge base is now handled by client-specific services
+      console.log('📚 Knowledge base handled by client-specific services');
     } catch (error) {
       console.warn('⚠️ Bot routes not loaded:', error.message);
     }
@@ -58,7 +31,7 @@ export async function initializeBot() {
     console.log('ℹ️ Bot is disabled. Set BOT_ENABLED=true to enable.');
   }
 
-  return { chatRoutes, knowledgeBaseRoutes, langchainKnowledgeBaseRoutes, chunkingStrategyRoutes };
+  return { chatRoutes, langchainKnowledgeBaseRoutes, chunkingStrategyRoutes, clientRoutes };
 }
 
 /**
@@ -67,11 +40,10 @@ export async function initializeBot() {
  * @param {Object} botRoutes - Object containing chatRoutes and knowledgeBaseRoutes
  */
 export function registerBotRoutes(app, botRoutes) {
-  const { chatRoutes, knowledgeBaseRoutes, langchainKnowledgeBaseRoutes, chunkingStrategyRoutes } = botRoutes;
+  const { chatRoutes, langchainKnowledgeBaseRoutes, chunkingStrategyRoutes, clientRoutes } = botRoutes;
 
-  if (chatRoutes && knowledgeBaseRoutes) {
+  if (chatRoutes) {
     app.use('/api/bot', chatRoutes); // Chat routes for AI customer service
-    app.use('/api/bot/knowledge-base', knowledgeBaseRoutes); // Knowledge base management routes
     
     // Register LangChain routes if available
     if (langchainKnowledgeBaseRoutes) {
@@ -84,10 +56,11 @@ export function registerBotRoutes(app, botRoutes) {
       app.use('/api/bot/chunking-strategy', chunkingStrategyRoutes);
       console.log('⚙️ Chunking strategy API endpoints available at /api/bot/chunking-strategy');
     }
+    if (clientRoutes) {
+      app.use('/api/client', clientRoutes);
+      console.log('👥 Client management API endpoints available at /api/client');
+    }
     
     console.log('🤖 Bot API endpoints available at /api/bot');
-    console.log(
-      '📚 Knowledge base API endpoints available at /api/bot/knowledge-base'
-    );
   }
 }

@@ -1,53 +1,56 @@
 import express from 'express';
-import { protect, isAdmin } from '../middleware/auth.js';
 import {
   processClientDocuments,
   getSupportedFileTypes,
-  getLangChainConfig,
-  updateLangChainConfig,
+  getChunkingInfo,
+  updateChunkingConfig,
   testLangChainProcessing,
   getLangChainStats,
-  toggleLangChain,
+  toggleLangChainEnabled
 } from '../controller/langchainKnowledgeBaseController.js';
 
 const router = express.Router();
 
-// All routes require authentication
-router.use(protect);
-
-// @desc    Process client documents with LangChain
-// @route   POST /api/bot/knowledge-base/langchain/process
-// @access  Private
+/**
+ * Process client documents with LangChain
+ * POST /api/bot/knowledge-base/langchain/process
+ */
 router.post('/process', processClientDocuments);
 
-// @desc    Get supported file types for LangChain processing
-// @route   GET /api/bot/knowledge-base/langchain/supported-types
-// @access  Private
+/**
+ * Get supported file types for LangChain processing
+ * GET /api/bot/knowledge-base/langchain/supported-types
+ */
 router.get('/supported-types', getSupportedFileTypes);
 
-// @desc    Get LangChain chunking configuration
-// @route   GET /api/bot/knowledge-base/langchain/config
-// @access  Private
-router.get('/config', getLangChainConfig);
+/**
+ * Get LangChain chunking configuration
+ * GET /api/bot/knowledge-base/langchain/config
+ */
+router.get('/config', getChunkingInfo);
 
-// @desc    Update LangChain chunking configuration
-// @route   PUT /api/bot/knowledge-base/langchain/config
-// @access  Private/Admin
-router.put('/config', isAdmin, updateLangChainConfig);
+/**
+ * Update LangChain chunking configuration
+ * PUT /api/bot/knowledge-base/langchain/config
+ */
+router.put('/config', updateChunkingConfig);
 
-// @desc    Test LangChain document processing
-// @route   POST /api/bot/knowledge-base/langchain/test
-// @access  Private/Admin
-router.post('/test', isAdmin, testLangChainProcessing);
+/**
+ * Test LangChain document processing
+ * POST /api/bot/knowledge-base/langchain/test
+ */
+router.post('/test', testLangChainProcessing);
 
-// @desc    Get LangChain processing statistics
-// @route   GET /api/bot/knowledge-base/langchain/stats
-// @access  Private
+/**
+ * Get LangChain processing statistics
+ * GET /api/bot/knowledge-base/langchain/stats
+ */
 router.get('/stats', getLangChainStats);
 
-// @desc    Enable/disable LangChain chunking
-// @route   POST /api/bot/knowledge-base/langchain/toggle
-// @access  Private/Admin
-router.post('/toggle', isAdmin, toggleLangChain);
+/**
+ * Toggle LangChain processing on/off
+ * POST /api/bot/knowledge-base/langchain/toggle
+ */
+router.post('/toggle', toggleLangChainEnabled);
 
 export default router;
