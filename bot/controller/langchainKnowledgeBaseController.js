@@ -1,6 +1,7 @@
-import vectorDBService from '../services/vectorDBService.js';
 import LangChainChunkingService from '../services/langchainChunkingService.js';
 import chunkingConfig from '../utils/chunkingConfig.js';
+import ClientConfigService from '../services/client/ClientConfigService.js';
+import DatabaseFactory from '../services/database/DatabaseFactory.js';
 
 // @desc    Process client documents with LangChain
 // @route   POST /api/bot/knowledge-base/langchain/process
@@ -8,39 +9,96 @@ import chunkingConfig from '../utils/chunkingConfig.js';
 export const processClientDocuments = async (req, res) => {
   try {
     const { filePaths, options = {} } = req.body;
-    
-    if (!filePaths || !Array.isArray(filePaths) || filePaths.length === 0) {
+    const { clientId = 'supa-chat' } = req.params;
+
+    if (!filePaths || !Array.isArray(filePaths)) {
       return res.status(400).json({
         success: false,
-        error: 'filePaths array is required'
+        error: 'filePaths array is required',
       });
     }
 
-    // Check if LangChain is enabled
-    if (vectorDBService.chunkingStrategy !== 'langchain') {
-      return res.status(400).json({
+    console.log(`🔗 Processing ${filePaths.length} documents for client ${clientId} with LangChain`);
+
+    // Get client configuration
+    const clientConfigService = new ClientConfigService();
+    const clientConfig = clientConfigService.getClientConfig(clientId);
+    
+    if (!clientConfig) {
+      return res.status(404).json({
         success: false,
-        error: 'LangChain chunking is not enabled. Set CHUNKING_STRATEGY=langchain'
+        error: 'Client configuration not found',
       });
     }
 
-    // Initialize vector DB service if needed
-    if (!vectorDBService.initialized) {
-      await vectorDBService.initialize();
+    // Create database connection for client
+    const vectorDB = DatabaseFactory.create(clientConfig.vectorDB.type, clientConfig.vectorDB);
+    await vectorDB.connect();
+
+    // Initialize LangChain chunking service
+    const langchainService = new LangChainChunkingService();
+    
+    const results = [];
+    let totalChunks = 0;
+
+    for (const filePath of filePaths) {
+      try {
+        console.log(`📄 Processing: ${filePath}`);
+        
+        // Process document with LangChain
+        const chunks = await langchainService.processDocument(filePath, options);
+        
+        if (chunks && chunks.length > 0) {
+          // Add documents to client's database
+          const addResult = await vectorDB.addDocuments(chunks);
+          
+          if (addResult.success) {
+            results.push({
+              filePath,
+              success: true,
+              chunks: chunks.length,
+              added: addResult.count
+            });
+            totalChunks += chunks.length;
+          } else {
+            results.push({
+              filePath,
+              success: false,
+              error: addResult.error
+            });
+          }
+        } else {
+          results.push({
+            filePath,
+            success: false,
+            error: 'No chunks generated'
+          });
+        }
+      } catch (error) {
+        console.error(`❌ Error processing ${filePath}:`, error.message);
+        results.push({
+          filePath,
+          success: false,
+          error: error.message
+        });
+      }
     }
 
-    const result = await vectorDBService.processClientDocuments(filePaths, options);
-    
-    if (result.success) {
-      res.json(result);
-    } else {
-      res.status(400).json(result);
-    }
+    await vectorDB.disconnect();
+
+    res.json({
+      success: true,
+      message: `Processed ${filePaths.length} documents for client ${clientId}`,
+      results,
+      totalChunks,
+      clientId
+    });
+
   } catch (error) {
-    console.error('Error processing client documents:', error);
+    console.error('❌ LangChain document processing error:', error);
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 };
@@ -50,19 +108,18 @@ export const processClientDocuments = async (req, res) => {
 // @access  Private
 export const getSupportedFileTypes = async (req, res) => {
   try {
-    const supportedTypes = chunkingConfig.getStrategyInfo('langchain')?.supportedTypes || [];
+    const supportedTypes = chunkingConfig.getSupportedFileTypes();
     
     res.json({
       success: true,
       supportedTypes,
-      strategy: 'langchain',
-      isEnabled: vectorDBService.chunkingStrategy === 'langchain'
+      message: 'LangChain supported file types retrieved successfully'
     });
   } catch (error) {
-    console.error('Error getting supported file types:', error);
+    console.error('❌ Error getting supported file types:', error);
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 };
@@ -70,150 +127,87 @@ export const getSupportedFileTypes = async (req, res) => {
 // @desc    Get LangChain chunking configuration
 // @route   GET /api/bot/knowledge-base/langchain/config
 // @access  Private
-export const getLangChainConfig = async (req, res) => {
+export const getChunkingInfo = async (req, res) => {
   try {
-    const config = chunkingConfig.getStrategyInfo('langchain');
-    const isEnabled = vectorDBService.chunkingStrategy === 'langchain';
+    const config = chunkingConfig.getLangChainConfig();
     
     res.json({
       success: true,
-      isEnabled,
-      config: config || null,
-      currentConfig: isEnabled ? {
-        chunkSize: vectorDBService.langchainChunker?.options.chunkSize,
-        chunkOverlap: vectorDBService.langchainChunker?.options.chunkOverlap,
-        supportedTypes: vectorDBService.langchainChunker?.options.supportedTypes
-      } : null
+      config,
+      message: 'LangChain configuration retrieved successfully'
     });
   } catch (error) {
-    console.error('Error getting LangChain config:', error);
+    console.error('❌ Error getting chunking info:', error);
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 };
 
 // @desc    Update LangChain chunking configuration
 // @route   PUT /api/bot/knowledge-base/langchain/config
-// @access  Private/Admin
-export const updateLangChainConfig = async (req, res) => {
+// @access  Private
+export const updateChunkingConfig = async (req, res) => {
   try {
     const { chunkSize, chunkOverlap, supportedTypes } = req.body;
     
-    // Validate configuration
-    const config = { chunkSize, chunkOverlap, supportedTypes };
-    const validation = chunkingConfig.validateConfig('langchain', config);
+    const updateResult = chunkingConfig.updateLangChainConfig({
+      chunkSize,
+      chunkOverlap,
+      supportedTypes
+    });
     
-    if (!validation.valid) {
-      return res.status(400).json({
+    if (updateResult.success) {
+      res.json({
+        success: true,
+        message: 'LangChain configuration updated successfully',
+        config: updateResult.config
+      });
+    } else {
+      res.status(400).json({
         success: false,
-        error: 'Invalid configuration',
-        details: validation.errors
+        error: updateResult.error
       });
     }
-
-    // Initialize vector DB service if needed
-    if (!vectorDBService.initialized) {
-      await vectorDBService.initialize();
-    }
-
-    // Switch to LangChain strategy if not already enabled
-    if (vectorDBService.chunkingStrategy !== 'langchain') {
-      vectorDBService.chunkingStrategy = 'langchain';
-    }
-
-    // Update LangChain chunker configuration
-    vectorDBService.langchainChunker = new LangChainChunkingService({
-      chunkSize: chunkSize || 1000,
-      chunkOverlap: chunkOverlap || 200,
-      supportedTypes: supportedTypes || ['txt', 'md', 'pdf', 'docx', 'csv', 'json', 'html']
-    });
-
-    res.json({
-      success: true,
-      message: 'LangChain configuration updated successfully',
-      config: {
-        chunkSize: vectorDBService.langchainChunker.options.chunkSize,
-        chunkOverlap: vectorDBService.langchainChunker.options.chunkOverlap,
-        supportedTypes: vectorDBService.langchainChunker.options.supportedTypes
-      }
-    });
   } catch (error) {
-    console.error('Error updating LangChain config:', error);
+    console.error('❌ Error updating chunking config:', error);
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 };
 
 // @desc    Test LangChain document processing
 // @route   POST /api/bot/knowledge-base/langchain/test
-// @access  Private/Admin
+// @access  Private
 export const testLangChainProcessing = async (req, res) => {
   try {
-    const { filePath, testContent } = req.body;
+    const { filePath, options = {} } = req.body;
     
-    if (!filePath && !testContent) {
+    if (!filePath) {
       return res.status(400).json({
         success: false,
-        error: 'Either filePath or testContent is required'
+        error: 'filePath is required',
       });
     }
 
-    // Create a temporary LangChain chunker for testing
-    const testChunker = new LangChainChunkingService({
-      chunkSize: 500, // Smaller chunks for testing
-      chunkOverlap: 100,
-      supportedTypes: ['txt', 'md', 'pdf', 'docx', 'csv', 'json', 'html']
-    });
-
-    let chunks = [];
+    console.log(`🧪 Testing LangChain processing for: ${filePath}`);
     
-    if (filePath) {
-      // Test with actual file
-      chunks = await testChunker.processDocument(filePath);
-    } else {
-      // Test with provided content
-      const fs = await import('fs/promises');
-      const path = await import('path');
-      const os = await import('os');
-      
-      // Create temporary file
-      const tempDir = os.tmpdir();
-      const tempFile = path.join(tempDir, `test-${Date.now()}.txt`);
-      
-      try {
-        await fs.writeFile(tempFile, testContent, 'utf-8');
-        chunks = await testChunker.processDocument(tempFile);
-        await fs.unlink(tempFile); // Clean up
-      } catch (error) {
-        if (await fs.access(tempFile).then(() => true).catch(() => false)) {
-          await fs.unlink(tempFile); // Clean up on error
-        }
-        throw error;
-      }
-    }
-
+    const langchainService = new LangChainChunkingService();
+    const chunks = await langchainService.processDocument(filePath, options);
+    
     res.json({
       success: true,
-      chunks: chunks.map(chunk => ({
-        content: chunk.content.substring(0, 200) + (chunk.content.length > 200 ? '...' : ''),
-        title: chunk.title,
-        category: chunk.metadata.category,
-        fileType: chunk.metadata.fileType,
-        chunkIndex: chunk.metadata.chunkIndex
-      })),
-      totalChunks: chunks.length,
-      summary: {
-        totalCharacters: chunks.reduce((sum, chunk) => sum + chunk.content.length, 0),
-        averageChunkSize: Math.round(chunks.reduce((sum, chunk) => sum + chunk.content.length, 0) / chunks.length),
-        categories: [...new Set(chunks.map(chunk => chunk.metadata.category))]
-      }
+      message: 'LangChain processing test completed',
+      filePath,
+      chunksGenerated: chunks ? chunks.length : 0,
+      sampleChunk: chunks && chunks.length > 0 ? chunks[0] : null
     });
+    
   } catch (error) {
-    console.error('Error testing LangChain processing:', error);
+    console.error('❌ LangChain test error:', error);
     res.status(500).json({
       success: false,
       error: error.message,
@@ -226,82 +220,70 @@ export const testLangChainProcessing = async (req, res) => {
 // @access  Private
 export const getLangChainStats = async (req, res) => {
   try {
-    // Initialize vector DB service if needed
-    if (!vectorDBService.initialized) {
-      await vectorDBService.initialize();
-    }
-
-    const stats = await vectorDBService.getKnowledgeBaseStats();
+    const { clientId = 'supa-chat' } = req.params;
     
-    if (!stats.success) {
-      return res.status(500).json(stats);
+    // Get client configuration
+    const clientConfigService = new ClientConfigService();
+    const clientConfig = clientConfigService.getClientConfig(clientId);
+    
+    if (!clientConfig) {
+      return res.status(404).json({
+        success: false,
+        error: 'Client configuration not found',
+      });
     }
 
-    // Filter for LangChain processed documents
-    const langchainStats = {
-      totalDocuments: stats.totalChunks,
-      langchainDocuments: 0,
-      customDocuments: 0,
-      categories: stats.categories,
-      chunkingInfo: stats.chunkingInfo
-    };
-
-    // This would require a database query to count by source
-    // For now, we'll return the basic stats
+    // Get database stats
+    const vectorDB = DatabaseFactory.create(clientConfig.vectorDB.type, clientConfig.vectorDB);
+    await vectorDB.connect();
+    const stats = await vectorDB.getStats();
+    await vectorDB.disconnect();
+    
     res.json({
       success: true,
-      ...langchainStats,
-      isLangChainEnabled: vectorDBService.chunkingStrategy === 'langchain'
+      message: 'LangChain statistics retrieved successfully',
+      clientId,
+      stats,
+      config: chunkingConfig.getLangChainConfig()
     });
+    
   } catch (error) {
-    console.error('Error getting LangChain stats:', error);
+    console.error('❌ Error getting LangChain stats:', error);
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 };
 
-// @desc    Enable/disable LangChain chunking
+// @desc    Toggle LangChain processing on/off
 // @route   POST /api/bot/knowledge-base/langchain/toggle
-// @access  Private/Admin
-export const toggleLangChain = async (req, res) => {
+// @access  Private
+export const toggleLangChainEnabled = async (req, res) => {
   try {
     const { enabled } = req.body;
     
     if (typeof enabled !== 'boolean') {
       return res.status(400).json({
         success: false,
-        error: 'enabled must be a boolean value'
+        error: 'enabled must be a boolean value',
       });
     }
 
-    // Initialize vector DB service if needed
-    if (!vectorDBService.initialized) {
-      await vectorDBService.initialize();
-    }
-
-    if (enabled) {
-      // Enable LangChain
-      vectorDBService.chunkingStrategy = 'langchain';
-      vectorDBService.langchainChunker = new LangChainChunkingService();
-    } else {
-      // Disable LangChain (switch to custom)
-      vectorDBService.chunkingStrategy = 'custom';
-      vectorDBService.langchainChunker = null;
-    }
-
+    const updateResult = chunkingConfig.toggleLangChainEnabled(enabled);
+    
     res.json({
       success: true,
-      message: `LangChain chunking ${enabled ? 'enabled' : 'disabled'}`,
-      currentStrategy: vectorDBService.chunkingStrategy,
-      isLangChainEnabled: enabled
+      message: `LangChain processing ${enabled ? 'enabled' : 'disabled'}`,
+      enabled: updateResult.enabled,
+      config: updateResult.config
     });
+    
   } catch (error) {
-    console.error('Error toggling LangChain:', error);
+    console.error('❌ Error toggling LangChain:', error);
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: 'Internal server error',
     });
   }
 };

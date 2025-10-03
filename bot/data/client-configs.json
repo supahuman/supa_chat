@@ -1,0 +1,33 @@
+{
+  "supa-chat": {
+    "name": "Supa Chat",
+    "description": "Default client for Supa Chatbot",
+    "vectorDB": {
+      "type": "mongodb",
+      "connectionString": "mongodb+srv://username:password@cluster.mongodb.net/database",
+      "database": "supa_chatbot",
+      "collection": "knowledgebases",
+      "vectorIndex": "vector_index",
+      "numCandidates": 20,
+      "similarity": 0.7
+    },
+    "llm": {
+      "provider": "groq",
+      "model": "llama3-8b-8192",
+      "temperature": 0.7,
+      "maxTokens": 1000
+    },
+    "chunking": {
+      "strategy": "langchain",
+      "chunkSize": 1000,
+      "chunkOverlap": 200
+    },
+    "webCrawler": {
+      "enabled": true,
+      "urls": [
+        "https://www.africanvibes.net/help-center"
+      ],
+      "refreshInterval": 24
+    }
+  }
+}

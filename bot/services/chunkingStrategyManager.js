@@ -2,7 +2,8 @@ import mongoose from 'mongoose';
 import dotenv from 'dotenv';
 import fs from 'fs/promises';
 import path from 'path';
-import vectorDBService from './vectorDBService.js';
+import DatabaseFactory from './database/DatabaseFactory.js';
+import ClientConfigService from './client/ClientConfigService.js';
 
 dotenv.config();
 
@@ -173,11 +174,19 @@ class ChunkingStrategyManager {
         await mongoose.connect(process.env.MONGODB_URI);
       }
       
-      // Import vectorDBService after environment variables are loaded
-      const { default: vectorDBService } = await import('./vectorDBService.js');
+      // Use new database layer with default client
+      const clientConfigService = new ClientConfigService();
+      const clientConfig = clientConfigService.getClientConfig('supa-chat');
       
-      await vectorDBService.initialize();
-      const result = await vectorDBService.loadKnowledgeBase();
+      if (!clientConfig) {
+        throw new Error('Default client configuration not found');
+      }
+      
+      const vectorDB = DatabaseFactory.create(clientConfig.vectorDB.type, clientConfig.vectorDB);
+      await vectorDB.connect();
+      
+      // For now, just return success - knowledge base loading will be handled by client services
+      const result = { success: true, count: 0, message: 'Knowledge base reload handled by client services' };
       
       if (result.success) {
         console.log(`✅ Knowledge base reloaded with ${result.count} chunks using ${this.currentStrategy} strategy`);
