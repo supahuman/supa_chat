@@ -13,7 +13,7 @@
     },
     "llm": {
       "provider": "groq",
-      "model": "llama3-8b-8192",
+      "model": "llama-3.1-8b-instant",
       "temperature": 0.7,
       "maxTokens": 1000
     },
@@ -26,6 +26,39 @@
       "enabled": true,
       "urls": [
         "https://www.africanvibes.net/help-center"
+      ],
+      "refreshInterval": 24
+    }
+  },
+  "techcorp": {
+    "name": "TechCorp Customer Support",
+    "description": "TechCorp's internal customer support chatbot",
+    "vectorDB": {
+      "type": "mongodb",
+      "connectionString": "mongodb+srv://techcorp:password@techcorp-cluster.mongodb.net/techcorp_support",
+      "database": "techcorp_support",
+      "collection": "knowledge_base",
+      "vectorIndex": "techcorp_vector_index",
+      "numCandidates": 25,
+      "similarity": 0.8
+    },
+    "llm": {
+      "provider": "openai",
+      "model": "gpt-4",
+      "temperature": 0.7,
+      "maxTokens": 1500
+    },
+    "openaiApiKey": "sk-techcorp-openai-key-here",
+    "chunking": {
+      "strategy": "langchain",
+      "chunkSize": 1200,
+      "chunkOverlap": 250
+    },
+    "webCrawler": {
+      "enabled": true,
+      "urls": [
+        "https://help.techcorp.com",
+        "https://docs.techcorp.com"
       ],
       "refreshInterval": 24
     }

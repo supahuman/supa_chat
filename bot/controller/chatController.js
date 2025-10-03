@@ -1,6 +1,7 @@
 import conversationService from '../services/conversationService.js';
 import ClientRAGService from '../services/client/ClientRAGService.js';
 import ClientConfigService from '../services/client/ClientConfigService.js';
+import AgentService from '../services/agent/AgentService.js';
 
 // @desc    Process chat message
 // @route   POST /api/bot/chat
@@ -203,7 +204,7 @@ export const deleteConversation = async (req, res) => {
 };
 
 // @desc    Process chat message for specific client
-// @route   POST /api/client/:clientId/chat
+// @route   POST /api/client/:clientId/bot
 // @access  Public (for client integration)
 export const processClientChatMessage = async (req, res) => {
   try {
@@ -230,6 +231,64 @@ export const processClientChatMessage = async (req, res) => {
       });
     }
 
+    // Check for escalation triggers
+    const agentService = new AgentService();
+    const escalationCheck = agentService.shouldEscalate(clientId, message, {
+      sessionId,
+      confidence: 0.8, // This would come from RAG result
+      unresolvedCount: 0 // This would be tracked per session
+    });
+
+    // If escalation is needed, create escalation and return appropriate response
+    if (escalationCheck.shouldEscalate) {
+      console.log(`🚨 Escalation triggered: ${escalationCheck.reason}`);
+      
+      const escalation = agentService.createEscalation({
+        clientId,
+        sessionId,
+        userId: sessionId, // Using sessionId as userId for now
+        reason: escalationCheck.reason,
+        priority: escalationCheck.priority,
+        messages: [{ content: message, sender: 'customer', senderType: 'customer' }]
+      });
+
+      // Try to assign to available agent
+      const availableAgents = agentService.getAvailableAgents(clientId);
+      if (availableAgents.length > 0) {
+        const assignedAgent = availableAgents[0];
+        agentService.assignEscalation(escalation.id, assignedAgent.id);
+        agentService.assignAgentToChat(assignedAgent.id, clientId, sessionId);
+        
+        return res.json({
+          success: true,
+          response: `I understand you need human assistance. I've connected you with ${assignedAgent.name}, who will be with you shortly.`,
+          escalation: {
+            id: escalation.id,
+            status: 'assigned',
+            agent: {
+              name: assignedAgent.name,
+              id: assignedAgent.id
+            }
+          },
+          clientId,
+          sessionId
+        });
+      } else {
+        return res.json({
+          success: true,
+          response: `I understand you need human assistance. All our agents are currently busy, but I've added you to the queue. Someone will be with you as soon as possible.`,
+          escalation: {
+            id: escalation.id,
+            status: 'pending',
+            estimatedWaitTime: '5-10 minutes'
+          },
+          clientId,
+          sessionId
+        });
+      }
+    }
+
+    // Process with RAG if no escalation needed
     const clientRAGService = new ClientRAGService();
     const ragResult = await clientRAGService.processQuery(
       clientId,

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useSendMessageMutation } from '../../../store/botApi';
 
-export function useChatSession(isOpen) {
+export function useChatSession(isOpen, clientId = 'supa-chat') {
   const [messages, setMessages] = useState([]);
   const [inputMessage, setInputMessage] = useState('');
   const [sessionId, setSessionId] = useState(null);
@@ -45,7 +45,7 @@ export function useChatSession(isOpen) {
     setMessages((prev) => [...prev, { role: 'user', content: userMessage }]);
 
     try {
-      const response = await sendMessageReq({ message: userMessage, sessionId }).unwrap();
+      const response = await sendMessageReq({ message: userMessage, sessionId, clientId }).unwrap();
       if (response?.success) {
         setMessages((prev) => [...prev, { role: 'assistant', content: response.response }]);
       } else {

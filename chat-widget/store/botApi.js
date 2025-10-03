@@ -10,11 +10,11 @@ export const botApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Conversation'],
+  tagTypes: ['Conversation', 'Clients', 'Client'],
   endpoints: (builder) => ({
     sendMessage: builder.mutation({
-      query: ({ message, sessionId }) => ({
-        url: '/api/client/supa-chat/bot',
+      query: ({ message, sessionId, clientId = 'supa-chat' }) => ({
+        url: `/api/client/${clientId}/bot`,
         method: 'POST',
         body: { message, sessionId },
       }),
@@ -24,9 +24,66 @@ export const botApi = createApi({
       query: (sessionId) => `/api/bot/conversations/${sessionId}`,
       providesTags: (result, error, sessionId) => [{ type: 'Conversation', id: sessionId }],
     }),
+    // Client management endpoints
+    getClients: builder.query({
+      query: () => '/api/client',
+      providesTags: ['Clients'],
+    }),
+    getClient: builder.query({
+      query: (clientId) => `/api/client/${clientId}`,
+      providesTags: (result, error, clientId) => [{ type: 'Client', id: clientId }],
+    }),
+    createClient: builder.mutation({
+      query: (clientData) => ({
+        url: '/api/client',
+        method: 'POST',
+        body: clientData,
+      }),
+      invalidatesTags: ['Clients'],
+    }),
+    updateClient: builder.mutation({
+      query: ({ clientId, ...clientData }) => ({
+        url: `/api/client/${clientId}`,
+        method: 'PUT',
+        body: clientData,
+      }),
+      invalidatesTags: (result, error, { clientId }) => [
+        { type: 'Client', id: clientId },
+        'Clients'
+      ],
+    }),
+    deleteClient: builder.mutation({
+      query: (clientId) => ({
+        url: `/api/client/${clientId}`,
+        method: 'DELETE',
+      }),
+      invalidatesTags: ['Clients'],
+    }),
+    testDatabaseConnection: builder.mutation({
+      query: (clientId) => ({
+        url: `/api/client/${clientId}/test-database`,
+        method: 'POST',
+      }),
+    }),
+    testLLMConnection: builder.mutation({
+      query: (clientId) => ({
+        url: `/api/client/${clientId}/test-llm`,
+        method: 'POST',
+      }),
+    }),
   }),
 });
 
-export const { useSendMessageMutation, useGetConversationQuery } = botApi;
+export const { 
+  useSendMessageMutation, 
+  useGetConversationQuery,
+  useGetClientsQuery,
+  useGetClientQuery,
+  useCreateClientMutation,
+  useUpdateClientMutation,
+  useDeleteClientMutation,
+  useTestDatabaseConnectionMutation,
+  useTestLLMConnectionMutation
+} = botApi;
 
 

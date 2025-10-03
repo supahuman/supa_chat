@@ -1,0 +1,110 @@
+{
+  "example-mongodb-groq": {
+    "name": "MongoDB + Groq Client",
+    "description": "Client using MongoDB Atlas with Groq LLM",
+    "vectorDB": {
+      "type": "mongodb",
+      "connectionString": "mongodb+srv://client:password@cluster.mongodb.net/clientdb",
+      "database": "client_knowledge",
+      "collection": "documents",
+      "vectorIndex": "client_vector_index",
+      "numCandidates": 20,
+      "similarity": 0.7
+    },
+    "llm": {
+      "provider": "groq",
+      "model": "llama-3.1-8b-instant",
+      "temperature": 0.7,
+      "maxTokens": 1000
+    },
+    "groqApiKey": "client_groq_api_key_here",
+    "chunking": {
+      "strategy": "langchain",
+      "chunkSize": 1000,
+      "chunkOverlap": 200
+    }
+  },
+
+  "example-supabase-openai": {
+    "name": "Supabase + OpenAI Client",
+    "description": "Client using Supabase with OpenAI LLM",
+    "vectorDB": {
+      "type": "supabase",
+      "url": "https://client-project.supabase.co",
+      "key": "client_supabase_anon_key",
+      "database": "client_knowledge",
+      "collection": "documents",
+      "vectorIndex": "client_embeddings",
+      "numCandidates": 20,
+      "similarity": 0.7
+    },
+    "llm": {
+      "provider": "openai",
+      "model": "gpt-4",
+      "temperature": 0.8,
+      "maxTokens": 1500
+    },
+    "openaiApiKey": "client_openai_api_key_here",
+    "chunking": {
+      "strategy": "langchain",
+      "chunkSize": 1500,
+      "chunkOverlap": 300
+    }
+  },
+
+  "example-mongodb-anthropic": {
+    "name": "MongoDB + Anthropic Client",
+    "description": "Client using MongoDB with Anthropic Claude",
+    "vectorDB": {
+      "type": "mongodb",
+      "connectionString": "mongodb+srv://client:password@cluster.mongodb.net/clientdb",
+      "database": "client_knowledge",
+      "collection": "documents",
+      "vectorIndex": "client_vector_index",
+      "numCandidates": 25,
+      "similarity": 0.8
+    },
+    "llm": {
+      "provider": "anthropic",
+      "model": "claude-3-sonnet-20240229",
+      "temperature": 0.6,
+      "maxTokens": 2000
+    },
+    "anthropicApiKey": "client_anthropic_api_key_here",
+    "chunking": {
+      "strategy": "custom",
+      "chunkSize": 800,
+      "chunkOverlap": 150
+    }
+  },
+
+  "example-mixed-providers": {
+    "name": "Mixed Providers Client",
+    "description": "Client using different providers for different purposes",
+    "vectorDB": {
+      "type": "mongodb",
+      "connectionString": "mongodb+srv://client:password@cluster.mongodb.net/clientdb",
+      "database": "client_knowledge",
+      "collection": "documents",
+      "vectorIndex": "client_vector_index",
+      "numCandidates": 20,
+      "similarity": 0.7
+    },
+    "llm": {
+      "provider": "openai",
+      "model": "gpt-3.5-turbo",
+      "temperature": 0.7,
+      "maxTokens": 1000
+    },
+    "openaiApiKey": "client_openai_api_key_here",
+    "embeddingProvider": {
+      "provider": "openai",
+      "model": "text-embedding-3-large"
+    },
+    "chunking": {
+      "strategy": "langchain",
+      "chunkSize": 1200,
+      "chunkOverlap": 250
+    }
+  }
+}

@@ -1,5 +1,5 @@
-import groqService from '../groqService.js';
 import DatabaseFactory from '../database/DatabaseFactory.js';
+import LLMFactory from '../llm/LLMFactory.js';
 import ClientConfigService from './ClientConfigService.js';
 
 /**
@@ -45,7 +45,7 @@ class ClientRAGService {
       const context = this.prepareContext(searchResult.results, searchResult.metadatas);
 
       // Generate AI response
-      const response = await this.generateResponse(userQuery, context, conversationHistory);
+      const response = await this.generateResponse(userQuery, context, conversationHistory, clientConfig);
 
       await vectorDB.disconnect();
 
@@ -120,13 +120,14 @@ class ClientRAGService {
   }
 
   /**
-   * Generate AI response using Groq
+   * Generate AI response using client's configured LLM
    * @param {string} userQuery - User's question
    * @param {string} context - Knowledge base context
    * @param {Array} conversationHistory - Previous messages
+   * @param {Object} clientConfig - Client configuration
    * @returns {Object} AI response
    */
-  async generateResponse(userQuery, context, conversationHistory = []) {
+  async generateResponse(userQuery, context, conversationHistory = [], clientConfig) {
     const systemPrompt = `You are a helpful AI assistant. Use the provided context to answer questions accurately and helpfully.
 
 Context: ${context}
@@ -148,7 +149,19 @@ Guidelines:
       messages.push({ role: msg.role, content: msg.content });
     });
 
-    return await groqService.generateResponse(messages);
+    // Create LLM instance using client's configuration
+    const llm = LLMFactory.create(clientConfig.llm.provider, {
+      apiKey: clientConfig[`${clientConfig.llm.provider}ApiKey`],
+      model: clientConfig.llm.model,
+      ...clientConfig.llm
+    });
+
+    await llm.initialize();
+
+    return await llm.generateResponse(messages, {
+      temperature: clientConfig.llm.temperature || 0.7,
+      maxTokens: clientConfig.llm.maxTokens || 1000
+    });
   }
 
   /**

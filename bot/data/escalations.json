@@ -1,0 +1,78 @@
+[
+  {
+    "id": "escalation_1759521740458_fq96lhqbk",
+    "clientId": "supa-chat",
+    "sessionId": "test_session",
+    "userId": "test_user",
+    "reason": "Customer requested human assistance",
+    "priority": "medium",
+    "status": "pending",
+    "assignedAgent": null,
+    "messages": [
+      {
+        "content": "I want to speak to a human agent",
+        "sender": "customer",
+        "senderType": "customer"
+      }
+    ],
+    "createdAt": "2025-10-03T20:02:20.458Z",
+    "updatedAt": "2025-10-03T20:02:20.459Z"
+  },
+  {
+    "id": "escalation_1759521740464_rjfzncrzr",
+    "clientId": "supa-chat",
+    "sessionId": "test_session",
+    "userId": "test_user",
+    "reason": "Customer requested human assistance",
+    "priority": "medium",
+    "status": "pending",
+    "assignedAgent": null,
+    "messages": [
+      {
+        "content": "Can I talk to a manager?",
+        "sender": "customer",
+        "senderType": "customer"
+      }
+    ],
+    "createdAt": "2025-10-03T20:02:20.464Z",
+    "updatedAt": "2025-10-03T20:02:20.464Z"
+  },
+  {
+    "id": "escalation_1759521740499_ftjlhoy4v",
+    "clientId": "supa-chat",
+    "sessionId": "test_session",
+    "userId": "test_user",
+    "reason": "Multiple unresolved queries",
+    "priority": "medium",
+    "status": "pending",
+    "assignedAgent": null,
+    "messages": [
+      {
+        "content": "I have a complex technical issue with my account that keeps giving me errors when I try to upload files and it crashes the application",
+        "sender": "customer",
+        "senderType": "customer"
+      }
+    ],
+    "createdAt": "2025-10-03T20:02:20.500Z",
+    "updatedAt": "2025-10-03T20:02:20.500Z"
+  },
+  {
+    "id": "escalation_1759521795118_f3g7h3wom",
+    "clientId": "supa-chat",
+    "sessionId": "chat_1759521770518_r62ugcpm9",
+    "userId": "chat_1759521770518_r62ugcpm9",
+    "reason": "Customer requested human assistance",
+    "priority": "medium",
+    "status": "assigned",
+    "assignedAgent": "agent_1703123456789_abc123def",
+    "messages": [
+      {
+        "content": "can u get me a live agent?",
+        "sender": "customer",
+        "senderType": "customer"
+      }
+    ],
+    "createdAt": "2025-10-03T20:03:15.118Z",
+    "updatedAt": "2025-10-03T20:03:15.151Z"
+  }
+]
