@@ -17,6 +17,8 @@ app.get('/health', (_req, res) => {
 });
 
 import { initializeBot, registerBotRoutes } from './utils/botUtils.js';
+import clientManagementRoutes from './routes/clientManagementRoutes.js';
+import escalationRoutes from './routes/escalationRoutes.js';
 
 async function bootstrap() {
   const port = process.env.PORT || 4000;
@@ -34,6 +36,12 @@ async function bootstrap() {
       console.error('❌ MongoDB connection failed:', err.message);
     }
   }
+
+  // Register client management routes
+  app.use('/api/client', clientManagementRoutes);
+  
+  // Register escalation routes
+  app.use('/api/escalation', escalationRoutes);
 
   try {
     const botRoutes = await initializeBot();

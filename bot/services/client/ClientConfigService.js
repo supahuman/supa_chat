@@ -73,11 +73,12 @@ class ClientConfigService {
     const config = this.configs.get(clientId);
     if (!config) return null;
     
-    // Add API keys from environment variables
+    // Add API keys from environment variables or client config
     return {
       ...config,
-      openaiApiKey: process.env.OPENAI_API_KEY,
-      groqApiKey: process.env.GROQ_API_KEY,
+      openaiApiKey: config.openaiApiKey || process.env.OPENAI_API_KEY,
+      groqApiKey: config.groqApiKey || process.env.GROQ_API_KEY,
+      anthropicApiKey: config.anthropicApiKey || process.env.ANTHROPIC_API_KEY,
       mongodbUri: process.env.MONGODB_URI
     };
   }

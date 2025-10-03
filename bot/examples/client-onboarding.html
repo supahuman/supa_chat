@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Client Onboarding - Supa Chatbot</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        input, select, textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .test-button {
+            background-color: #28a745;
+        }
+        .test-button:hover {
+            background-color: #218838;
+        }
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+        }
+        .section h3 {
+            margin-top: 0;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 Supa Chatbot Client Onboarding</h1>
+        <p style="text-align: center; color: #666; margin-bottom: 30px;">
+            Configure your database and LLM provider to get started with your custom chatbot.
+        </p>
+
+        <form id="onboardingForm">
+            <!-- Basic Information -->
+            <div class="section">
+                <h3>📋 Basic Information</h3>
+                <div class="form-group">
+                    <label for="clientId">Client ID (unique identifier):</label>
+                    <input type="text" id="clientId" name="clientId" required 
+                           placeholder="e.g., techcorp, mycompany, support-bot">
+                </div>
+                <div class="form-group">
+                    <label for="name">Company/Project Name:</label>
+                    <input type="text" id="name" name="name" required 
+                           placeholder="e.g., TechCorp Customer Support">
+                </div>
+                <div class="form-group">
+                    <label for="description">Description (optional):</label>
+                    <textarea id="description" name="description" rows="3" 
+                              placeholder="Brief description of your chatbot's purpose"></textarea>
+                </div>
+            </div>
+
+            <!-- Vector Database Configuration -->
+            <div class="section">
+                <h3>🗄️ Vector Database Configuration</h3>
+                <div class="form-group">
+                    <label for="dbType">Database Type:</label>
+                    <select id="dbType" name="dbType" required onchange="toggleDbFields()">
+                        <option value="">Select database type</option>
+                        <option value="mongodb">MongoDB Atlas</option>
+                        <option value="supabase">Supabase</option>
+                    </select>
+                </div>
+                
+                <div id="mongodbFields" style="display: none;">
+                    <div class="form-group">
+                        <label for="mongodbConnection">MongoDB Connection String:</label>
+                        <input type="text" id="mongodbConnection" name="mongodbConnection" 
+                               placeholder="mongodb+srv://username:password@cluster.mongodb.net/database">
+                    </div>
+                    <div class="form-group">
+                        <label for="mongodbDatabase">Database Name:</label>
+                        <input type="text" id="mongodbDatabase" name="mongodbDatabase" 
+                               placeholder="e.g., mycompany_knowledge">
+                    </div>
+                    <div class="form-group">
+                        <label for="mongodbCollection">Collection Name:</label>
+                        <input type="text" id="mongodbCollection" name="mongodbCollection" 
+                               placeholder="e.g., documents">
+                    </div>
+                    <div class="form-group">
+                        <label for="mongodbVectorIndex">Vector Index Name:</label>
+                        <input type="text" id="mongodbVectorIndex" name="mongodbVectorIndex" 
+                               placeholder="e.g., vector_index">
+                    </div>
+                </div>
+
+                <div id="supabaseFields" style="display: none;">
+                    <div class="form-group">
+                        <label for="supabaseUrl">Supabase URL:</label>
+                        <input type="text" id="supabaseUrl" name="supabaseUrl" 
+                               placeholder="https://your-project.supabase.co">
+                    </div>
+                    <div class="form-group">
+                        <label for="supabaseKey">Supabase API Key:</label>
+                        <input type="text" id="supabaseKey" name="supabaseKey" 
+                               placeholder="your_supabase_anon_key">
+                    </div>
+                    <div class="form-group">
+                        <label for="supabaseDatabase">Database Name:</label>
+                        <input type="text" id="supabaseDatabase" name="supabaseDatabase" 
+                               placeholder="e.g., mycompany_knowledge">
+                    </div>
+                </div>
+
+                <button type="button" class="test-button" onclick="testDatabaseConnection()">
+                    🔍 Test Database Connection
+                </button>
+                <div id="dbStatus"></div>
+            </div>
+
+            <!-- LLM Configuration -->
+            <div class="section">
+                <h3>🤖 LLM Provider Configuration</h3>
+                <div class="form-group">
+                    <label for="llmProvider">LLM Provider:</label>
+                    <select id="llmProvider" name="llmProvider" required onchange="toggleLLMFields()">
+                        <option value="">Select LLM provider</option>
+                        <option value="groq">Groq (Fast & Cost-effective)</option>
+                        <option value="openai">OpenAI (GPT models)</option>
+                        <option value="anthropic">Anthropic (Claude)</option>
+                    </select>
+                </div>
+                
+                <div id="groqFields" style="display: none;">
+                    <div class="form-group">
+                        <label for="groqApiKey">Groq API Key:</label>
+                        <input type="text" id="groqApiKey" name="groqApiKey" 
+                               placeholder="gsk_your_groq_api_key_here">
+                    </div>
+                    <div class="form-group">
+                        <label for="groqModel">Model:</label>
+                        <select id="groqModel" name="groqModel">
+                            <option value="llama-3.1-8b-instant">Llama 3.1 8B Instant</option>
+                            <option value="llama-3.1-70b-versatile">Llama 3.1 70B Versatile</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="openaiFields" style="display: none;">
+                    <div class="form-group">
+                        <label for="openaiApiKey">OpenAI API Key:</label>
+                        <input type="text" id="openaiApiKey" name="openaiApiKey" 
+                               placeholder="sk-your_openai_api_key_here">
+                    </div>
+                    <div class="form-group">
+                        <label for="openaiModel">Model:</label>
+                        <select id="openaiModel" name="openaiModel">
+                            <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                            <option value="gpt-4">GPT-4</option>
+                            <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="anthropicFields" style="display: none;">
+                    <div class="form-group">
+                        <label for="anthropicApiKey">Anthropic API Key:</label>
+                        <input type="text" id="anthropicApiKey" name="anthropicApiKey" 
+                               placeholder="sk-ant-your_anthropic_api_key_here">
+                    </div>
+                    <div class="form-group">
+                        <label for="anthropicModel">Model:</label>
+                        <select id="anthropicModel" name="anthropicModel">
+                            <option value="claude-3-haiku-20240307">Claude 3 Haiku</option>
+                            <option value="claude-3-sonnet-20240229">Claude 3 Sonnet</option>
+                            <option value="claude-3-opus-20240229">Claude 3 Opus</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="temperature">Temperature (0.0 - 1.0):</label>
+                    <input type="number" id="temperature" name="temperature" min="0" max="1" step="0.1" value="0.7">
+                </div>
+                <div class="form-group">
+                    <label for="maxTokens">Max Tokens:</label>
+                    <input type="number" id="maxTokens" name="maxTokens" min="100" max="4000" value="1000">
+                </div>
+
+                <button type="button" class="test-button" onclick="testLLMConnection()">
+                    🔍 Test LLM Connection
+                </button>
+                <div id="llmStatus"></div>
+            </div>
+
+            <!-- Submit -->
+            <div style="text-align: center; margin-top: 30px;">
+                <button type="submit" id="submitBtn">
+                    🚀 Create Client Configuration
+                </button>
+            </div>
+        </form>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:4000/api';
+
+        function toggleDbFields() {
+            const dbType = document.getElementById('dbType').value;
+            document.getElementById('mongodbFields').style.display = dbType === 'mongodb' ? 'block' : 'none';
+            document.getElementById('supabaseFields').style.display = dbType === 'supabase' ? 'block' : 'none';
+        }
+
+        function toggleLLMFields() {
+            const provider = document.getElementById('llmProvider').value;
+            document.getElementById('groqFields').style.display = provider === 'groq' ? 'block' : 'none';
+            document.getElementById('openaiFields').style.display = provider === 'openai' ? 'block' : 'none';
+            document.getElementById('anthropicFields').style.display = provider === 'anthropic' ? 'block' : 'none';
+        }
+
+        async function testDatabaseConnection() {
+            const dbType = document.getElementById('dbType').value;
+            const statusDiv = document.getElementById('dbStatus');
+            
+            if (!dbType) {
+                statusDiv.innerHTML = '<div class="error">Please select a database type first</div>';
+                return;
+            }
+
+            statusDiv.innerHTML = '<div class="info">Testing database connection...</div>';
+
+            try {
+                const config = buildVectorDBConfig();
+                const response = await fetch(`${API_BASE}/client/test-database`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(config)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    statusDiv.innerHTML = '<div class="success">✅ Database connection successful!</div>';
+                } else {
+                    statusDiv.innerHTML = `<div class="error">❌ Database connection failed: ${result.error}</div>`;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="error">❌ Error testing connection: ${error.message}</div>`;
+            }
+        }
+
+        async function testLLMConnection() {
+            const provider = document.getElementById('llmProvider').value;
+            const statusDiv = document.getElementById('llmStatus');
+            
+            if (!provider) {
+                statusDiv.innerHTML = '<div class="error">Please select an LLM provider first</div>';
+                return;
+            }
+
+            statusDiv.innerHTML = '<div class="info">Testing LLM connection...</div>';
+
+            try {
+                const config = buildLLMConfig();
+                const response = await fetch(`${API_BASE}/client/test-llm`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(config)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    statusDiv.innerHTML = '<div class="success">✅ LLM connection successful!</div>';
+                } else {
+                    statusDiv.innerHTML = `<div class="error">❌ LLM connection failed: ${result.error}</div>`;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="error">❌ Error testing connection: ${error.message}</div>`;
+            }
+        }
+
+        function buildVectorDBConfig() {
+            const dbType = document.getElementById('dbType').value;
+            
+            if (dbType === 'mongodb') {
+                return {
+                    type: 'mongodb',
+                    connectionString: document.getElementById('mongodbConnection').value,
+                    database: document.getElementById('mongodbDatabase').value,
+                    collection: document.getElementById('mongodbCollection').value,
+                    vectorIndex: document.getElementById('mongodbVectorIndex').value
+                };
+            } else if (dbType === 'supabase') {
+                return {
+                    type: 'supabase',
+                    url: document.getElementById('supabaseUrl').value,
+                    key: document.getElementById('supabaseKey').value,
+                    database: document.getElementById('supabaseDatabase').value
+                };
+            }
+        }
+
+        function buildLLMConfig() {
+            const provider = document.getElementById('llmProvider').value;
+            const config = {
+                provider: provider,
+                model: document.getElementById(`${provider}Model`).value,
+                temperature: parseFloat(document.getElementById('temperature').value),
+                maxTokens: parseInt(document.getElementById('maxTokens').value)
+            };
+
+            // Add API key
+            config[`${provider}ApiKey`] = document.getElementById(`${provider}ApiKey`).value;
+
+            return config;
+        }
+
+        document.getElementById('onboardingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const resultDiv = document.getElementById('result');
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating...';
+
+            try {
+                const formData = new FormData(e.target);
+                const config = {
+                    clientId: formData.get('clientId'),
+                    config: {
+                        name: formData.get('name'),
+                        description: formData.get('description'),
+                        vectorDB: buildVectorDBConfig(),
+                        llm: buildLLMConfig(),
+                        chunking: {
+                            strategy: 'langchain',
+                            chunkSize: 1000,
+                            chunkOverlap: 200
+                        }
+                    }
+                };
+
+                const response = await fetch(`${API_BASE}/client`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(config)
+                });
+
+                const result = await response.json();
+                
+                if (result.success) {
+                    resultDiv.innerHTML = `
+                        <div class="success">
+                            <h3>🎉 Client Created Successfully!</h3>
+                            <p><strong>Client ID:</strong> ${result.clientId}</p>
+                            <p><strong>Name:</strong> ${result.config.name}</p>
+                            <p><strong>Database:</strong> ${result.config.vectorDB.type}</p>
+                            <p><strong>LLM:</strong> ${result.config.llm.provider} (${result.config.llm.model})</p>
+                            <br>
+                            <p>You can now use your chatbot with the client ID: <code>${result.clientId}</code></p>
+                            <p>Chat endpoint: <code>POST /api/client/${result.clientId}/bot</code></p>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">❌ Error: ${result.error}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">❌ Error: ${error.message}</div>`;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '🚀 Create Client Configuration';
+            }
+        });
+    </script>
+</body>
+</html>

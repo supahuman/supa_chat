@@ -1,0 +1,160 @@
+[
+  {
+    "id": "agent_1703123456789_abc123def",
+    "name": "Sarah Johnson",
+    "email": "sarah@supachatbot.com",
+    "clientId": "supa-chat",
+    "status": "online",
+    "skills": [
+      "Technical Support",
+      "Billing",
+      "General"
+    ],
+    "maxConcurrentChats": 5,
+    "currentChats": 1,
+    "availability": {
+      "monday": {
+        "start": "09:00",
+        "end": "17:00",
+        "available": true
+      },
+      "tuesday": {
+        "start": "09:00",
+        "end": "17:00",
+        "available": true
+      },
+      "wednesday": {
+        "start": "09:00",
+        "end": "17:00",
+        "available": true
+      },
+      "thursday": {
+        "start": "09:00",
+        "end": "17:00",
+        "available": true
+      },
+      "friday": {
+        "start": "09:00",
+        "end": "17:00",
+        "available": true
+      },
+      "saturday": {
+        "start": "10:00",
+        "end": "14:00",
+        "available": false
+      },
+      "sunday": {
+        "start": "10:00",
+        "end": "14:00",
+        "available": false
+      }
+    },
+    "createdAt": "2024-01-15T10:30:00.000Z",
+    "updatedAt": "2025-10-03T20:03:15.152Z"
+  },
+  {
+    "id": "agent_1703123456790_def456ghi",
+    "name": "Mike Chen",
+    "email": "mike@supachatbot.com",
+    "clientId": "supa-chat",
+    "status": "online",
+    "skills": [
+      "Technical Support",
+      "Sales"
+    ],
+    "maxConcurrentChats": 4,
+    "currentChats": 1,
+    "availability": {
+      "monday": {
+        "start": "08:00",
+        "end": "16:00",
+        "available": true
+      },
+      "tuesday": {
+        "start": "08:00",
+        "end": "16:00",
+        "available": true
+      },
+      "wednesday": {
+        "start": "08:00",
+        "end": "16:00",
+        "available": true
+      },
+      "thursday": {
+        "start": "08:00",
+        "end": "16:00",
+        "available": true
+      },
+      "friday": {
+        "start": "08:00",
+        "end": "16:00",
+        "available": true
+      },
+      "saturday": {
+        "start": "09:00",
+        "end": "13:00",
+        "available": true
+      },
+      "sunday": {
+        "start": "09:00",
+        "end": "13:00",
+        "available": false
+      }
+    },
+    "createdAt": "2024-01-15T10:35:00.000Z",
+    "updatedAt": "2024-01-15T10:35:00.000Z"
+  },
+  {
+    "id": "agent_1703123456791_ghi789jkl",
+    "name": "Emily Davis",
+    "email": "emily@supachatbot.com",
+    "clientId": "supa-chat",
+    "status": "offline",
+    "skills": [
+      "Billing",
+      "General",
+      "Account Management"
+    ],
+    "maxConcurrentChats": 3,
+    "currentChats": 0,
+    "availability": {
+      "monday": {
+        "start": "10:00",
+        "end": "18:00",
+        "available": true
+      },
+      "tuesday": {
+        "start": "10:00",
+        "end": "18:00",
+        "available": true
+      },
+      "wednesday": {
+        "start": "10:00",
+        "end": "18:00",
+        "available": true
+      },
+      "thursday": {
+        "start": "10:00",
+        "end": "18:00",
+        "available": true
+      },
+      "friday": {
+        "start": "10:00",
+        "end": "18:00",
+        "available": true
+      },
+      "saturday": {
+        "start": "11:00",
+        "end": "15:00",
+        "available": true
+      },
+      "sunday": {
+        "start": "11:00",
+        "end": "15:00",
+        "available": true
+      }
+    },
+    "createdAt": "2024-01-15T10:40:00.000Z",
+    "updatedAt": "2024-01-15T10:40:00.000Z"
+  }
+]
