@@ -70,7 +70,16 @@ class ClientConfigService {
       console.warn('⚠️ ClientConfigService not initialized yet');
       return null;
     }
-    return this.configs.get(clientId) || null;
+    const config = this.configs.get(clientId);
+    if (!config) return null;
+    
+    // Add API keys from environment variables
+    return {
+      ...config,
+      openaiApiKey: process.env.OPENAI_API_KEY,
+      groqApiKey: process.env.GROQ_API_KEY,
+      mongodbUri: process.env.MONGODB_URI
+    };
   }
 
   /**
