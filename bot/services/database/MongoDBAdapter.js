@@ -15,6 +15,15 @@ class MongoDBAdapter extends VectorDBInterface {
 
   async connect(config = this.config) {
     try {
+      // Check if mongoose is already connected
+      if (mongoose.connection.readyState === 1) {
+        console.log('✅ Reusing existing MongoDB connection');
+        this.connection = mongoose.connection;
+        this.collection = this.connection.db.collection('knowledgebases');
+        return true;
+      }
+      
+      // If not connected, establish new connection
       this.connection = await mongoose.connect(config.connectionString);
       this.collection = this.connection.connection.db.collection('knowledgebases');
       console.log('✅ MongoDB connected successfully');
@@ -116,11 +125,10 @@ class MongoDBAdapter extends VectorDBInterface {
   }
 
   async disconnect() {
-    if (this.connection) {
-      await mongoose.disconnect();
-      this.connection = null;
-      this.collection = null;
-    }
+    // Don't disconnect the main mongoose connection
+    // Just clear our references
+    this.connection = null;
+    this.collection = null;
   }
 }
 
