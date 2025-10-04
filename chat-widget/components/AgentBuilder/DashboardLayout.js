@@ -11,6 +11,7 @@ import {
   Menu,
   X
 } from 'lucide-react';
+import AIPersona from './AIPersona';
 
 const DashboardLayout = ({ children }) => {
   const [activeTab, setActiveTab] = useState('build');
@@ -122,7 +123,7 @@ const DashboardLayout = ({ children }) => {
 
             {/* Dynamic Content */}
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-6">
-              {children || getDefaultContent(activeTab, activeSidebarItem)}
+              {children || getDynamicContent(activeTab, activeSidebarItem)}
             </div>
           </div>
         </main>
@@ -166,6 +167,17 @@ const getContentDescription = (tab, sidebarItem) => {
   };
   
   return descriptions[tab]?.[sidebarItem] || 'Configure your AI agent settings.';
+};
+
+// Helper function to get dynamic content based on tab and sidebar item
+const getDynamicContent = (tab, sidebarItem) => {
+  // AI Persona component
+  if (sidebarItem === 'ai-persona') {
+    return <AIPersona />;
+  }
+
+  // Default placeholder content for other sections
+  return getDefaultContent(tab, sidebarItem);
 };
 
 // Helper function to get default content
