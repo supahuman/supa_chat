@@ -74,7 +74,7 @@ const DashboardLayout = ({ children }) => {
       {/* Mobile backdrop overlay */}
       {sidebarOpen && (
         <div 
-          className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"
+          className="fixed inset-0 bg-black bg-opacity-10 z-40 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -83,7 +83,7 @@ const DashboardLayout = ({ children }) => {
         {/* Sidebar */}
         <aside className={`${
           sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        } fixed md:relative md:translate-x-0 z-50 w-64 md:w-64 h-screen md:h-full bg-white dark:bg-gray-800 shadow-lg border-r border-gray-200 dark:border-gray-700 transition-transform duration-300 ease-in-out top-0 md:top-0`}>
+        } fixed md:relative md:translate-x-0 z-50 w-64 md:w-64 h-screen md:h-screen bg-white dark:bg-gray-800 shadow-lg border-r border-gray-200 dark:border-gray-700 transition-transform duration-300 ease-in-out top-0`}>
           <div className="p-4 md:p-6 h-full overflow-y-auto">
             {/* Mobile menu button for sidebar */}
             <div className="md:hidden flex items-center justify-between mb-4">
