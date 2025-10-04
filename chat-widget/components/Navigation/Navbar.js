@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Menu, X, Settings, MessageCircle, Home, Users } from 'lucide-react';
+import { Menu, X, Settings, MessageCircle, Home, Users, Bot } from 'lucide-react';
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
@@ -10,6 +10,7 @@ export default function Navbar() {
 
   const navigation = [
     { name: 'Home', href: '/', icon: Home },
+    { name: 'Agent Builder', href: '/agent-builder', icon: Bot },
     { name: 'Client Management', href: '/clients', icon: Settings },
     { name: 'Agent Dashboard', href: '/agents', icon: Users },
   ];

@@ -4,7 +4,7 @@
     "description": "Default client for Supa Chatbot",
     "vectorDB": {
       "type": "mongodb",
-      "connectionString": "mongodb+srv://username:password@cluster.mongodb.net/database",
+      "connectionString": "mongodb://localhost:27017",
       "database": "supa_chatbot",
       "collection": "knowledgebases",
       "vectorIndex": "vector_index",
@@ -25,7 +25,8 @@
     "webCrawler": {
       "enabled": true,
       "urls": [
-        "https://www.africanvibes.net/help-center"
+        "https://docs.supachatbot.com",
+        "https://help.supachatbot.com"
       ],
       "refreshInterval": 24
     }

@@ -1,7 +1,7 @@
-import conversationService from '../services/conversationService.js';
 import ClientRAGService from '../services/client/ClientRAGService.js';
 import ClientConfigService from '../services/client/ClientConfigService.js';
 import AgentService from '../services/agent/AgentService.js';
+import ConversationService from '../services/conversation/ConversationService.js';
 
 // @desc    Process chat message
 // @route   POST /api/bot/chat
@@ -18,50 +18,18 @@ export const processChatMessage = async (req, res) => {
       });
     }
 
-    // Get or create conversation
-    let conversation = null;
-    if (sessionId) {
-      conversation = await conversationService.getConversation(
-        sessionId,
-        userId
-      );
-    }
-
-    if (!conversation) {
-      // Generate new session ID
-      const newSessionId = conversationService.generateSessionId();
-      const createResult = await conversationService.createConversation(
-        userId,
-        newSessionId
-      );
-
-      if (!createResult.success) {
-        return res.status(500).json({
-          success: false,
-          error: 'Failed to create conversation',
-        });
-      }
-
-      conversation = createResult.conversation;
-    }
-
+    // Use new conversation service
+    const conversationService = new ConversationService();
+    
     // Add user message to conversation
-    await conversationService.addMessage(conversation.sessionId, {
+    conversationService.addMessage(sessionId || `session_${Date.now()}`, {
       role: 'user',
       content: message,
-      timestamp: new Date(),
+      clientId: 'supa-chat'
     });
 
-    // Process with RAG
-    const historyResult = await conversationService.getConversationHistory(
-      conversation.sessionId
-    );
-
-    // Ensure conversationHistory is always an array
-    let conversationHistory = [];
-    if (historyResult.success && Array.isArray(historyResult.messages)) {
-      conversationHistory = historyResult.messages;
-    }
+    // Get conversation history for context
+    const conversationHistory = conversationService.getConversationContext(sessionId || `session_${Date.now()}`, 5);
 
     console.log(
       `📝 Processing with ${conversationHistory.length} previous messages`
@@ -87,16 +55,16 @@ export const processChatMessage = async (req, res) => {
 
     if (ragResult.success) {
       // Add bot response to conversation
-      await conversationService.addMessage(conversation.sessionId, {
+      conversationService.addMessage(sessionId || `session_${Date.now()}`, {
         role: 'assistant',
         content: ragResult.response,
-        timestamp: new Date(),
+        clientId: 'supa-chat'
       });
 
       res.json({
         success: true,
         response: ragResult.response,
-        sessionId: conversation.sessionId,
+        sessionId: sessionId || `session_${Date.now()}`,
         confidence: ragResult.confidence,
         model: ragResult.model,
         usage: ragResult.usage,
@@ -231,25 +199,56 @@ export const processClientChatMessage = async (req, res) => {
       });
     }
 
-    // Check for escalation triggers
+    // Check if this session is already escalated
     const agentService = new AgentService();
+    const existingEscalations = agentService.getEscalationsByClient(clientId);
+    const activeEscalation = existingEscalations.find(e => 
+      e.sessionId === sessionId && 
+      (e.status === 'assigned' || e.status === 'in_progress')
+    );
+
+    // If already escalated, don't process with AI
+    if (activeEscalation) {
+      return res.json({
+        success: true,
+        response: `You're already connected with a human agent. They will respond to your message shortly.`,
+        escalation: {
+          id: activeEscalation.id,
+          status: activeEscalation.status,
+          agent: {
+            name: activeEscalation.assignedAgent ? 'Human Agent' : 'Queue',
+            id: activeEscalation.assignedAgent
+          }
+        },
+        clientId,
+        sessionId
+      });
+    }
+
+    // Check for escalation triggers
     const escalationCheck = agentService.shouldEscalate(clientId, message, {
       sessionId,
-      confidence: 0.8, // This would come from RAG result
-      unresolvedCount: 0 // This would be tracked per session
+      confidence: 0.8,
+      unresolvedCount: 0
     });
 
     // If escalation is needed, create escalation and return appropriate response
     if (escalationCheck.shouldEscalate) {
       console.log(`🚨 Escalation triggered: ${escalationCheck.reason}`);
       
+      // Generate conversation summary for agents
+      const conversationService = new ConversationService();
+      const summary = conversationService.generateSummary(sessionId, escalationCheck.reason);
+      console.log('📋 Generated conversation summary:', summary?.summary);
+      
       const escalation = agentService.createEscalation({
         clientId,
         sessionId,
-        userId: sessionId, // Using sessionId as userId for now
+        userId: sessionId,
         reason: escalationCheck.reason,
         priority: escalationCheck.priority,
-        messages: [{ content: message, sender: 'customer', senderType: 'customer' }]
+        messages: [{ content: message, sender: 'customer', senderType: 'customer' }],
+        summary: summary // Include summary in escalation
       });
 
       // Try to assign to available agent
@@ -288,12 +287,23 @@ export const processClientChatMessage = async (req, res) => {
       }
     }
 
+    // Add user message to conversation history
+    const conversationService = new ConversationService();
+    conversationService.addMessage(sessionId, {
+      role: 'user',
+      content: message,
+      clientId
+    });
+
+    // Get conversation history for context
+    const conversationHistory = conversationService.getConversationContext(sessionId, 5);
+
     // Process with RAG if no escalation needed
     const clientRAGService = new ClientRAGService();
     const ragResult = await clientRAGService.processQuery(
       clientId,
       message,
-      [] // No conversation history for now
+      conversationHistory
     );
 
     if (!ragResult.success) {
@@ -302,6 +312,13 @@ export const processClientChatMessage = async (req, res) => {
         error: ragResult.error
       });
     }
+
+    // Add bot response to conversation history
+    conversationService.addMessage(sessionId, {
+      role: 'assistant',
+      content: ragResult.response,
+      clientId
+    });
 
     res.json({
       success: true,
