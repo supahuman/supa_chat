@@ -11,7 +11,7 @@
       "General"
     ],
     "maxConcurrentChats": 5,
-    "currentChats": 1,
+    "currentChats": 4,
     "availability": {
       "monday": {
         "start": "09:00",
@@ -50,7 +50,7 @@
       }
     },
     "createdAt": "2024-01-15T10:30:00.000Z",
-    "updatedAt": "2025-10-03T20:03:15.152Z"
+    "updatedAt": "2025-10-03T20:18:27.978Z"
   },
   {
     "id": "agent_1703123456790_def456ghi",

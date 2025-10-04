@@ -36,7 +36,7 @@ class ClientRAGService {
       const searchResult = await this.searchClientKnowledgeBase(vectorDB, userQuery);
       if (!searchResult.success) {
         console.log('⚠️ Knowledge base search failed, using LLM directly');
-        return await this.generateDirectResponse(userQuery, conversationHistory);
+        return await this.generateDirectResponse(userQuery, conversationHistory, clientConfig);
       }
 
       console.log(`📚 Found ${searchResult.results.length} relevant results for client ${clientId}`);
@@ -170,12 +170,14 @@ Guidelines:
    * @param {Array} conversationHistory - Previous messages
    * @returns {Object} AI response
    */
-  async generateDirectResponse(userQuery, conversationHistory = []) {
-    const systemPrompt = 'You are a helpful AI assistant. Answer questions to the best of your ability.';
+  async generateDirectResponse(userQuery, conversationHistory = [], clientConfig) {
+    const systemPrompt = `You are a helpful AI assistant for ${clientConfig?.name || 'our service'}. 
     
+Answer questions to the best of your ability. Be friendly, helpful, and professional.
+If you don't know something, say so and offer to help in other ways.`;
+
     const messages = [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: userQuery }
+      { role: 'system', content: systemPrompt }
     ];
 
     // Add conversation history
@@ -183,7 +185,19 @@ Guidelines:
       messages.push({ role: msg.role, content: msg.content });
     });
 
-    const response = await groqService.generateResponse(messages);
+    // Add current user query
+    messages.push({ role: 'user', content: userQuery });
+
+    // Use client's configured LLM
+    const llm = LLMFactory.create(clientConfig.llm.provider, {
+      apiKey: process.env[`${clientConfig.llm.provider.toUpperCase()}_API_KEY`],
+      model: clientConfig.llm.model,
+      temperature: clientConfig.llm.temperature,
+      maxTokens: clientConfig.llm.maxTokens
+    });
+
+    await llm.initialize();
+    const response = await llm.generateResponse(messages);
     
     return {
       success: true,

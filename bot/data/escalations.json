@@ -74,5 +74,62 @@
     ],
     "createdAt": "2025-10-03T20:03:15.118Z",
     "updatedAt": "2025-10-03T20:03:15.151Z"
+  },
+  {
+    "id": "escalation_1759522321890_6t47d62he",
+    "clientId": "supa-chat",
+    "sessionId": "chat_1759522084533_bpdwiekc7",
+    "userId": "chat_1759522084533_bpdwiekc7",
+    "reason": "Customer requested human assistance",
+    "priority": "medium",
+    "status": "assigned",
+    "assignedAgent": "agent_1703123456789_abc123def",
+    "messages": [
+      {
+        "content": "I want alive agent",
+        "sender": "customer",
+        "senderType": "customer"
+      }
+    ],
+    "createdAt": "2025-10-03T20:12:01.890Z",
+    "updatedAt": "2025-10-03T20:12:01.916Z"
+  },
+  {
+    "id": "escalation_1759522661715_qmcqrbk4r",
+    "clientId": "supa-chat",
+    "sessionId": "chat_1759522416961_z4ytkfut0",
+    "userId": "chat_1759522416961_z4ytkfut0",
+    "reason": "Customer requested human assistance",
+    "priority": "medium",
+    "status": "assigned",
+    "assignedAgent": "agent_1703123456789_abc123def",
+    "messages": [
+      {
+        "content": "I need to talk live agent",
+        "sender": "customer",
+        "senderType": "customer"
+      }
+    ],
+    "createdAt": "2025-10-03T20:17:41.715Z",
+    "updatedAt": "2025-10-03T20:17:41.740Z"
+  },
+  {
+    "id": "escalation_1759522707934_rpue6nxeq",
+    "clientId": "supa-chat",
+    "sessionId": "chat_1759522416961_z4ytkfut0",
+    "userId": "chat_1759522416961_z4ytkfut0",
+    "reason": "Customer requested human assistance",
+    "priority": "medium",
+    "status": "assigned",
+    "assignedAgent": "agent_1703123456789_abc123def",
+    "messages": [
+      {
+        "content": "No I want to talk to live agent",
+        "sender": "customer",
+        "senderType": "customer"
+      }
+    ],
+    "createdAt": "2025-10-03T20:18:27.934Z",
+    "updatedAt": "2025-10-03T20:18:27.977Z"
   }
 ]
