@@ -1,19 +1,32 @@
 'use client';
 
+import { useRef, forwardRef, useImperativeHandle } from 'react';
 import { Bot } from 'lucide-react';
 import { Card } from '@/ui';
 import AIPersona from './AIPersona';
 import KnowledgeBase from './KnowledgeBase';
 import Actions from './Actions';
 import TeachYourAgent from './TeachYourAgent';
+import AgentsList from './Deploy/AgentsList';
 
-const ContentArea = ({ 
+const ContentArea = forwardRef(({ 
   activeTab, 
   activeSidebarItem, 
   agentData,
   setAgentData,
+  onAgentCreated,
   children 
-}) => {
+}, ref) => {
+  const knowledgeBaseRef = useRef();
+
+  // Expose crawlAllUrls function to parent component
+  useImperativeHandle(ref, () => ({
+    crawlAllUrls: (agentId) => {
+      if (knowledgeBaseRef.current) {
+        return knowledgeBaseRef.current.crawlAllUrls(agentId);
+      }
+    }
+  }));
   const sidebarItems = [
     { id: 'ai-persona', label: 'AI Persona' },
     { id: 'knowledge-base', label: 'Knowledge Base' },
@@ -39,11 +52,9 @@ const ContentArea = ({
         'teach-agent': 'Provide training examples and monitor learning progress.'
       },
       deploy: {
-        'ai-persona': 'Deploy your agent with the configured personality settings.',
-        'knowledge-base': 'Deploy your agent with the trained knowledge base.',
-        'actions': 'Deploy your agent with configured actions and integrations.',
-        'forms': 'Deploy your agent with form handling capabilities.',
-        'teach-agent': 'Deploy your trained agent and monitor its performance.'
+        'agents': 'View and manage all your deployed AI agents.',
+        'settings': 'Configure deployment settings and preferences.',
+        'analytics': 'Monitor agent performance and usage analytics.'
       }
     };
     
@@ -51,25 +62,46 @@ const ContentArea = ({
   };
 
   const getDynamicContent = (tab, sidebarItem) => {
-          // AI Persona component
-          if (sidebarItem === 'ai-persona') {
-            return <AIPersona agentData={agentData} setAgentData={setAgentData} />;
-          }
+    // Build/Train tab components
+    if (tab === 'build' || tab === 'train') {
+      // AI Persona component
+      if (sidebarItem === 'ai-persona') {
+        return <AIPersona agentData={agentData} setAgentData={setAgentData} onAgentCreated={onAgentCreated} />;
+      }
 
-          // Knowledge Base component
-          if (sidebarItem === 'knowledge-base') {
-            return <KnowledgeBase agentData={agentData} setAgentData={setAgentData} />;
-          }
+      // Knowledge Base component
+      if (sidebarItem === 'knowledge-base') {
+        return <KnowledgeBase ref={knowledgeBaseRef} agentData={agentData} setAgentData={setAgentData} />;
+      }
 
-          // Actions component
-          if (sidebarItem === 'actions') {
-            return <Actions agentData={agentData} setAgentData={setAgentData} />;
-          }
+      // Actions component
+      if (sidebarItem === 'actions') {
+        return <Actions agentData={agentData} setAgentData={setAgentData} />;
+      }
 
-          // Teach Your Agent component
-          if (sidebarItem === 'teach-agent') {
-            return <TeachYourAgent agentData={agentData} setAgentData={setAgentData} />;
-          }
+      // Teach Your Agent component
+      if (sidebarItem === 'teach-agent') {
+        return <TeachYourAgent agentData={agentData} setAgentData={setAgentData} />;
+      }
+    }
+
+    // Deploy tab components
+    if (tab === 'deploy') {
+      // Agents list component
+      if (sidebarItem === 'agents') {
+        return <AgentsList />;
+      }
+
+      // Settings component (placeholder)
+      if (sidebarItem === 'settings') {
+        return getDefaultContent(tab, sidebarItem);
+      }
+
+      // Analytics component (placeholder)
+      if (sidebarItem === 'analytics') {
+        return getDefaultContent(tab, sidebarItem);
+      }
+    }
 
     // Default placeholder content for other sections
     return getDefaultContent(tab, sidebarItem);
@@ -113,6 +145,8 @@ const ContentArea = ({
       </div>
     </main>
   );
-};
+});
+
+ContentArea.displayName = 'ContentArea';
 
 export default ContentArea;

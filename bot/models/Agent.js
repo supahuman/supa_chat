@@ -1,0 +1,67 @@
+import mongoose from 'mongoose';
+
+const agentSchema = new mongoose.Schema({
+  agentId: {
+    type: String,
+    required: true,
+    unique: true
+  },
+  companyId: {
+    type: String,
+    required: true
+  },
+  createdBy: {
+    type: String,
+    required: true
+  },
+  name: {
+    type: String,
+    required: true
+  },
+  description: {
+    type: String,
+    default: ''
+  },
+  personality: {
+    type: String,
+    required: true
+  },
+  knowledgeBase: [{
+    type: {
+      type: String,
+      enum: ['document', 'url', 'text']
+    },
+    content: String,
+    metadata: mongoose.Schema.Types.Mixed
+  }],
+  trainingExamples: [{
+    input: String,
+    output: String,
+    rating: Number
+  }],
+  model: {
+    provider: String,
+    model: String,
+    temperature: Number,
+    maxTokens: Number
+  },
+  status: {
+    type: String,
+    enum: ['active', 'inactive', 'training'],
+    default: 'active'
+  },
+  usage: {
+    totalConversations: { type: Number, default: 0 },
+    totalMessages: { type: Number, default: 0 },
+    lastUsed: Date
+  }
+}, {
+  timestamps: true
+});
+
+// Indexes for efficient queries
+agentSchema.index({ companyId: 1, agentId: 1 });
+agentSchema.index({ companyId: 1, createdBy: 1 });
+agentSchema.index({ companyId: 1, status: 1 });
+
+export default mongoose.model('Agent', agentSchema);

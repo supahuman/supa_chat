@@ -161,7 +161,7 @@ class ClientManagementController {
         name: client.name,
         description: client.description,
         vectorDB: { type: client.vectorDB.type },
-        llm: { provider: client.llm.provider, model: client.llm.model },
+        llm: { provider: 'global', model: 'managed' }, // Using global model now
         status: 'active'
       }));
 

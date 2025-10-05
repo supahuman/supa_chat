@@ -110,5 +110,51 @@
     ],
     "createdAt": "2025-10-05T20:08:51.972Z",
     "updatedAt": "2025-10-05T20:08:51.972Z"
+  },
+  "teach-session-1759691869586": {
+    "sessionId": "teach-session-1759691869586",
+    "agentId": "agent-1759689637571",
+    "messages": [
+      {
+        "role": "user",
+        "content": "hi",
+        "timestamp": "2025-10-05T21:21:11.476Z"
+      },
+      {
+        "role": "assistant",
+        "content": "Good day to you, I do hope this encounter finds you in optimal spirits. I'm delighted to be of assistance. How may I have the pleasure of serving you today?",
+        "timestamp": "2025-10-05T21:21:12.313Z"
+      }
+    ],
+    "createdAt": "2025-10-05T21:21:11.476Z",
+    "updatedAt": "2025-10-05T21:21:11.476Z"
+  },
+  "session-1759703404521": {
+    "sessionId": "session-1759703404521",
+    "agentId": "agent-1759689637571",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Hi",
+        "timestamp": "2025-10-05T22:30:07.203Z"
+      },
+      {
+        "role": "assistant",
+        "content": "Good day to you. It's an absolute pleasure to make your acquaintance. I'm at your service, ready to attend to any queries or concerns you may have. How may I have the privilege of assisting you today?",
+        "timestamp": "2025-10-05T22:30:07.795Z"
+      },
+      {
+        "role": "user",
+        "content": "Hi",
+        "timestamp": "2025-10-05T22:31:07.538Z"
+      },
+      {
+        "role": "assistant",
+        "content": "Good day to you again, I see we're starting anew. I must say, I'm delighted to continue our conversation. It seems I didn't quite finish addressing your initial inquiry, and I'd like to rectify that. However, since you've chosen to greet me once more, I'd be more than happy to explore new topics or revisit the ones we previously discussed. Which avenue would you prefer to take today?",
+        "timestamp": "2025-10-05T22:31:08.225Z"
+      }
+    ],
+    "createdAt": "2025-10-05T22:30:07.203Z",
+    "updatedAt": "2025-10-05T22:31:07.538Z"
   }
 }

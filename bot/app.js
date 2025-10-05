@@ -21,6 +21,9 @@ import clientManagementRoutes from './routes/clientManagementRoutes.js';
 import escalationRoutes from './routes/escalationRoutes.js';
 import modelRoutes from './routes/modelRoutes.js';
 import agentRoutes from './routes/agentRoutes.js';
+import companyRoutes from './routes/companyRoutes.js';
+import companyAgentRoutes from './routes/companyAgentRoutes.js';
+import agentCrawlerRoutes from './routes/agentCrawlerRoutes.js';
 
 async function bootstrap() {
   const port = process.env.PORT || 4000;
@@ -50,6 +53,15 @@ async function bootstrap() {
   
   // Register agent routes
   app.use('/api/agent', agentRoutes);
+  
+  // Register company management routes
+  app.use('/api/company', companyRoutes);
+  
+  // Register company-scoped agent routes
+  app.use('/api/company/agents', companyAgentRoutes);
+  
+  // Register agent crawler routes
+  app.use('/api/company/agents', agentCrawlerRoutes);
 
   try {
     const botRoutes = await initializeBot();

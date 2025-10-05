@@ -441,5 +441,62 @@
     "status": "active",
     "createdAt": "2025-10-05T20:08:46.568Z",
     "updatedAt": "2025-10-05T20:08:46.568Z"
+  },
+  "agent-1759699648654": {
+    "id": "agent-1759699648654",
+    "name": "African Vibes ",
+    "description": "AI Agent created with Agent Builder",
+    "personality": "Warm, approachable, and personable. Uses conversational language with genuine care. Perfect for community-focused brands, customer support, and personal services.",
+    "knowledgeBase": [],
+    "trainingExamples": [],
+    "model": {
+      "provider": "groq",
+      "model": "llama-3.1-8b-instant",
+      "temperature": 0.7,
+      "maxTokens": 1000,
+      "topP": 1,
+      "stream": false
+    },
+    "status": "active",
+    "createdAt": "2025-10-05T21:27:28.654Z",
+    "updatedAt": "2025-10-05T21:27:28.654Z"
+  },
+  "agent-1759701572925": {
+    "id": "agent-1759701572925",
+    "name": "Customer Support TechCorp",
+    "description": "AI Agent created with Agent Builder",
+    "personality": "Sophisticated, elegant, and refined. Uses formal language with a touch of warmth. Perfect for luxury brands, professional services, and high-end customer experiences.",
+    "knowledgeBase": [],
+    "trainingExamples": [],
+    "model": {
+      "provider": "groq",
+      "model": "llama-3.1-8b-instant",
+      "temperature": 0.7,
+      "maxTokens": 1000,
+      "topP": 1,
+      "stream": false
+    },
+    "status": "active",
+    "createdAt": "2025-10-05T21:59:32.925Z",
+    "updatedAt": "2025-10-05T21:59:32.925Z"
+  },
+  "agent-1759701719017": {
+    "id": "agent-1759701719017",
+    "name": "Customer Support TechCorp",
+    "description": "AI Agent created with Agent Builder",
+    "personality": "Sophisticated, elegant, and refined. Uses formal language with a touch of warmth. Perfect for luxury brands, professional services, and high-end customer experiences.",
+    "knowledgeBase": [],
+    "trainingExamples": [],
+    "model": {
+      "provider": "groq",
+      "model": "llama-3.1-8b-instant",
+      "temperature": 0.7,
+      "maxTokens": 1000,
+      "topP": 1,
+      "stream": false
+    },
+    "status": "active",
+    "createdAt": "2025-10-05T22:01:59.017Z",
+    "updatedAt": "2025-10-05T22:01:59.017Z"
   }
 }

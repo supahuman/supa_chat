@@ -9,7 +9,7 @@ import CustomDescription from './CustomDescription';
 import AgentPreview from './AgentPreview';
 import AgentSaveButton from '../AgentSaveButton';
 
-const AIPersona = ({ agentData, setAgentData }) => {
+const AIPersona = ({ agentData, setAgentData, onAgentCreated }) => {
   const [selectedPersona, setSelectedPersona] = useState('classy');
   const [customDescription, setCustomDescription] = useState('');
   const [isEditing, setIsEditing] = useState(false);
@@ -172,6 +172,10 @@ const AIPersona = ({ agentData, setAgentData }) => {
             agentData={agentData}
             onSaveSuccess={(savedAgent) => {
               console.log('Agent saved successfully:', savedAgent);
+              // Call the onAgentCreated callback with the agent ID
+              if (onAgentCreated && savedAgent?.agentId) {
+                onAgentCreated(savedAgent.agentId);
+              }
             }}
           />
         </div>
