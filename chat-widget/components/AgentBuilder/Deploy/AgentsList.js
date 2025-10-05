@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Users, Plus, MoreVertical, Play, Pause, Trash2, Edit, BarChart3 } from 'lucide-react';
+import { useEffect } from 'react';
+import { Users, Plus, MoreVertical, Play, Pause, Trash2, Edit, BarChart3, ExternalLink } from 'lucide-react';
 import { Button } from '@/ui';
 import { Card } from '@/ui';
 import { useGetCompanyAgentsQuery } from '@/store/botApi';
-import { setCompanyCredentials, hasValidCredentials, setupMockCredentials } from '@/utils/auth';
+import { hasValidCredentials, setupMockCredentials } from '@/utils/auth';
 
-const AgentsList = () => {
+const AgentsList = ({ onNavigateToEmbeds }) => {
+
   // Set up mock credentials if none exist
   useEffect(() => {
     if (!hasValidCredentials()) {
@@ -76,6 +77,12 @@ const AgentsList = () => {
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
     }
+  };
+
+  const handleDeployAgent = (agent) => {
+    // Navigate to embeds tab with selected agent
+    console.log('Deploy agent:', agent.name);
+    // TODO: Implement navigation to embeds tab
   };
 
   if (loading) {
@@ -179,35 +186,53 @@ const AgentsList = () => {
               </div>
 
               {/* Actions */}
-              <div className="flex space-x-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  icon={agent.status === 'active' ? Pause : Play}
-                  className="flex-1"
-                >
-                  {agent.status === 'active' ? 'Pause' : 'Activate'}
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  icon={BarChart3}
-                  className="flex-1"
-                >
-                  Analytics
-                </Button>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  icon={Edit}
-                >
-                  Edit
-                </Button>
+              <div className="space-y-2">
+                {/* Primary Actions Row */}
+                <div className="flex space-x-2">
+                  <Button
+                    size="sm"
+                    variant="primary"
+                    icon={ExternalLink}
+                    onClick={() => handleDeployAgent(agent)}
+                    className="flex-1"
+                  >
+                    Deploy
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    icon={Edit}
+                    className="flex-1"
+                  >
+                    Edit
+                  </Button>
+                </div>
+                
+                {/* Secondary Actions Row */}
+                <div className="flex space-x-2">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    icon={agent.status === 'active' ? Pause : Play}
+                    className="flex-1"
+                  >
+                    {agent.status === 'active' ? 'Pause' : 'Activate'}
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    icon={BarChart3}
+                    className="flex-1"
+                  >
+                    Analytics
+                  </Button>
+                </div>
               </div>
             </Card>
           ))}
         </div>
       )}
+
     </div>
   );
 };

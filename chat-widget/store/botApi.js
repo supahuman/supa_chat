@@ -198,6 +198,53 @@ export const botApi = createApi({
           }),
           invalidatesTags: ['CompanyAgents'],
         }),
+
+        // Deployment endpoints
+        getDeploymentConfig: builder.query({
+          query: (agentId) => ({
+            url: `/api/company/agents/${agentId}/deploy`,
+            headers: {
+              'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
+              'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : ''
+            }
+          }),
+          providesTags: (result, error, agentId) => [{ type: 'CompanyAgents', id: agentId }],
+        }),
+
+        generateEmbedCode: builder.mutation({
+          query: ({ agentId, ...config }) => ({
+            url: `/api/company/agents/${agentId}/deploy/embed-code`,
+            method: 'POST',
+            headers: {
+              'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
+              'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : ''
+            },
+            body: config,
+          }),
+        }),
+
+        testDeployment: builder.mutation({
+          query: ({ agentId, testMessage }) => ({
+            url: `/api/company/agents/${agentId}/deploy/test`,
+            method: 'POST',
+            headers: {
+              'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
+              'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : ''
+            },
+            body: { testMessage },
+          }),
+        }),
+
+        getDeploymentAnalytics: builder.query({
+          query: ({ agentId, days = 7 }) => ({
+            url: `/api/company/agents/${agentId}/deploy/analytics?days=${days}`,
+            headers: {
+              'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
+              'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : ''
+            }
+          }),
+          providesTags: (result, error, { agentId }) => [{ type: 'CompanyAgents', id: agentId }],
+        }),
   }),
 });
 
@@ -223,7 +270,11 @@ export const {
   useCrawlAgentUrlsMutation,
   useGetCrawlStatusQuery,
   useTestCrawlUrlMutation,
-  useClearAgentKnowledgeBaseMutation
+  useClearAgentKnowledgeBaseMutation,
+  useGetDeploymentConfigQuery,
+  useGenerateEmbedCodeMutation,
+  useTestDeploymentMutation,
+  useGetDeploymentAnalyticsQuery
 } = botApi;
 
 

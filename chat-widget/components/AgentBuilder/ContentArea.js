@@ -8,6 +8,7 @@ import KnowledgeBase from './KnowledgeBase';
 import Actions from './Actions';
 import TeachYourAgent from './TeachYourAgent';
 import AgentsList from './Deploy/AgentsList';
+import EmbedsList from './Deploy/EmbedsList';
 
 const ContentArea = forwardRef(({ 
   activeTab, 
@@ -90,6 +91,11 @@ const ContentArea = forwardRef(({
       // Agents list component
       if (sidebarItem === 'agents') {
         return <AgentsList />;
+      }
+
+      // Embeds list component
+      if (sidebarItem === 'embeds') {
+        return <EmbedsList />;
       }
 
       // Settings component (placeholder)

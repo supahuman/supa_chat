@@ -31,7 +31,7 @@ const DashboardLayout = ({ children }) => {
 
   // Set default sidebar item when switching tabs
   useEffect(() => {
-    if (activeTab === 'deploy' && !['agents', 'settings', 'analytics'].includes(activeSidebarItem)) {
+    if (activeTab === 'deploy' && !['agents', 'embeds', 'settings', 'analytics'].includes(activeSidebarItem)) {
       setActiveSidebarItem('agents');
     } else if (activeTab === 'build' && !['ai-persona', 'knowledge-base', 'actions', 'forms', 'teach-agent'].includes(activeSidebarItem)) {
       setActiveSidebarItem('ai-persona');
