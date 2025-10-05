@@ -19,6 +19,21 @@ const DashboardLayout = ({ children }) => {
     setSidebarOpen(false);
   };
 
+  const handleSidebarItemClick = (itemId) => {
+    setActiveSidebarItem(itemId);
+    
+    // Auto-switch to Train tab for training-related items
+    const trainingItems = ['knowledge-base', 'actions', 'forms', 'teach-agent'];
+    if (trainingItems.includes(itemId)) {
+      setActiveTab('train');
+    }
+    
+    // Close sidebar on mobile after selection
+    if (window.innerWidth < 768) {
+      setSidebarOpen(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Mobile-style Top Tab Bar */}
@@ -38,6 +53,7 @@ const DashboardLayout = ({ children }) => {
           setActiveSidebarItem={setActiveSidebarItem}
           sidebarOpen={sidebarOpen}
           setSidebarOpen={setSidebarOpen}
+          onItemClick={handleSidebarItemClick}
         />
 
         {/* Main Content */}

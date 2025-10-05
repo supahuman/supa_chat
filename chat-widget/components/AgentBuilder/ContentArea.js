@@ -5,6 +5,7 @@ import { Card } from '@/ui';
 import AIPersona from './AIPersona';
 import KnowledgeBase from './KnowledgeBase';
 import Actions from './Actions';
+import TeachYourAgent from './TeachYourAgent';
 
 const ContentArea = ({ 
   activeTab, 
@@ -61,6 +62,11 @@ const ContentArea = ({
     // Actions component
     if (sidebarItem === 'actions') {
       return <Actions />;
+    }
+
+    // Teach Your Agent component
+    if (sidebarItem === 'teach-agent') {
+      return <TeachYourAgent />;
     }
 
     // Default placeholder content for other sections

@@ -7,7 +7,8 @@ const Sidebar = ({
   activeSidebarItem, 
   setActiveSidebarItem, 
   sidebarOpen, 
-  setSidebarOpen 
+  setSidebarOpen,
+  onItemClick
 }) => {
   const sidebarItems = [
     { id: 'ai-persona', label: 'AI Persona', icon: Bot },
@@ -18,10 +19,14 @@ const Sidebar = ({
   ];
 
   const handleItemClick = (itemId) => {
-    setActiveSidebarItem(itemId);
-    // Close sidebar on mobile after selection
-    if (window.innerWidth < 768) {
-      setSidebarOpen(false);
+    if (onItemClick) {
+      onItemClick(itemId);
+    } else {
+      setActiveSidebarItem(itemId);
+      // Close sidebar on mobile after selection
+      if (window.innerWidth < 768) {
+        setSidebarOpen(false);
+      }
     }
   };
 
