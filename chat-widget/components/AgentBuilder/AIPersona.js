@@ -8,6 +8,24 @@ const AIPersona = () => {
   const [customDescription, setCustomDescription] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [tempDescription, setTempDescription] = useState('');
+  const [agentTitle, setAgentTitle] = useState('Customer Support TechCorp');
+  const [maxCharacters, setMaxCharacters] = useState(500);
+  const [defaultLanguage, setDefaultLanguage] = useState('en');
+
+  const languages = [
+    { code: 'en', name: 'English' },
+    { code: 'es', name: 'Spanish' },
+    { code: 'fr', name: 'French' },
+    { code: 'de', name: 'German' },
+    { code: 'it', name: 'Italian' },
+    { code: 'pt', name: 'Portuguese' },
+    { code: 'ru', name: 'Russian' },
+    { code: 'ja', name: 'Japanese' },
+    { code: 'ko', name: 'Korean' },
+    { code: 'zh', name: 'Chinese' },
+    { code: 'ar', name: 'Arabic' },
+    { code: 'hi', name: 'Hindi' }
+  ];
 
   const personas = [
     {
@@ -80,8 +98,106 @@ const AIPersona = () => {
       {/* Header */}
       <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-          Choose Your AI Persona
+          Configure Your AI Persona
         </h3>
+        <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+          Set up your AI agent's identity, personality, and communication style.
+        </p>
+      </div>
+
+      {/* Agent Configuration */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 mt-6">
+        {/* Agent Title */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Agent Title
+          </label>
+          <input
+            type="text"
+            value={agentTitle}
+            onChange={(e) => setAgentTitle(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+            placeholder="e.g., Customer Support TechCorp"
+          />
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            This will be displayed as your agent's name/role
+          </p>
+        </div>
+
+        {/* Default Language */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Default Language
+          </label>
+          <select
+            value={defaultLanguage}
+            onChange={(e) => setDefaultLanguage(e.target.value)}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+          >
+            {languages.map((lang) => (
+              <option key={lang.code} value={lang.code}>
+                {lang.name}
+              </option>
+            ))}
+          </select>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            Primary language for your AI agent
+          </p>
+        </div>
+      </div>
+
+      {/* Response Length Control */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Max Response Length
+          </label>
+          <span className="text-sm font-semibold text-blue-600 dark:text-blue-300">
+            {maxCharacters} characters
+          </span>
+        </div>
+        <div className="relative">
+          <input
+            type="range"
+            min="100"
+            max="2000"
+            step="50"
+            value={maxCharacters}
+            onChange={(e) => setMaxCharacters(parseInt(e.target.value))}
+            className="w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+          />
+          <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400 mt-1">
+            <span>Brief (100)</span>
+            <span>Medium (500)</span>
+            <span>Detailed (1000)</span>
+            <span>Comprehensive (2000)</span>
+          </div>
+        </div>
+        <div className="mt-2 grid grid-cols-4 gap-2">
+          {[100, 300, 500, 1000].map((chars) => (
+            <button
+              key={chars}
+              onClick={() => setMaxCharacters(chars)}
+              className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                maxCharacters === chars
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+              }`}
+            >
+              {chars} chars
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+          Controls token usage and response length. Lower limits = lower costs.
+        </p>
+      </div>
+
+      {/* Persona Selection Header */}
+      <div className="mb-6">
+        <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+          Choose Your AI Persona
+        </h4>
         <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
           Select a base personality for your AI agent, then customize it to match your brand.
         </p>
@@ -239,7 +355,7 @@ const AIPersona = () => {
       {/* Preview */}
       <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-6">
         <h4 className="text-lg font-semibold text-blue-900 dark:text-blue-100 mb-3">
-          Persona Preview
+          Agent Preview
         </h4>
         <div className="bg-white dark:bg-gray-800 rounded-md p-4 border border-blue-200 dark:border-blue-700">
           <div className="flex items-center space-x-3 mb-3">
@@ -247,21 +363,18 @@ const AIPersona = () => {
               <selectedPersonaData.icon className="w-4 h-4 text-white" />
             </div>
             <div>
-              <p className="font-medium text-gray-900 dark:text-white">AI Agent</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">{selectedPersonaData.name} Persona</p>
-            </div>
-          </div>
-          <p className="text-gray-700 dark:text-gray-300">
-            {selectedPersonaData.example}
-          </p>
-          {customDescription && (
-            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
-              <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Custom instructions:</p>
-              <p className="text-sm text-gray-600 dark:text-gray-300 italic">
-                {customDescription}
+              <p className="font-medium text-gray-900 dark:text-white">{agentTitle}</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {selectedPersonaData.name} • {languages.find(l => l.code === defaultLanguage)?.name} • Max: {maxCharacters} chars
               </p>
             </div>
-          )}
+          </div>
+          <p className="text-gray-700 dark:text-gray-300 text-sm mb-3">
+            {customDescription || selectedPersonaData.description}
+          </p>
+          <div className="text-xs text-gray-500 dark:text-gray-400">
+            <strong>Example Response:</strong> "{selectedPersonaData.example}"
+          </div>
         </div>
       </div>
     </div>
