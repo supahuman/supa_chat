@@ -19,6 +19,8 @@ app.get('/health', (_req, res) => {
 import { initializeBot, registerBotRoutes } from './utils/botUtils.js';
 import clientManagementRoutes from './routes/clientManagementRoutes.js';
 import escalationRoutes from './routes/escalationRoutes.js';
+import modelRoutes from './routes/modelRoutes.js';
+import agentRoutes from './routes/agentRoutes.js';
 
 async function bootstrap() {
   const port = process.env.PORT || 4000;
@@ -42,6 +44,12 @@ async function bootstrap() {
   
   // Register escalation routes
   app.use('/api/escalation', escalationRoutes);
+  
+  // Register model routes
+  app.use('/api/model', modelRoutes);
+  
+  // Register agent routes
+  app.use('/api/agent', agentRoutes);
 
   try {
     const botRoutes = await initializeBot();

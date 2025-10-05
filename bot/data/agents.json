@@ -1,5 +1,5 @@
-[
-  {
+{
+  "0": {
     "id": "agent_1703123456789_abc123def",
     "name": "Sarah Johnson",
     "email": "sarah@supachatbot.com",
@@ -52,7 +52,7 @@
     "createdAt": "2024-01-15T10:30:00.000Z",
     "updatedAt": "2025-10-03T20:18:27.978Z"
   },
-  {
+  "1": {
     "id": "agent_1703123456790_def456ghi",
     "name": "Mike Chen",
     "email": "mike@supachatbot.com",
@@ -104,7 +104,7 @@
     "createdAt": "2024-01-15T10:35:00.000Z",
     "updatedAt": "2024-01-15T10:35:00.000Z"
   },
-  {
+  "2": {
     "id": "agent_1703123456791_ghi789jkl",
     "name": "Emily Davis",
     "email": "emily@supachatbot.com",
@@ -156,5 +156,290 @@
     },
     "createdAt": "2024-01-15T10:40:00.000Z",
     "updatedAt": "2024-01-15T10:40:00.000Z"
+  },
+  "agent-1759689455784": {
+    "id": "agent-1759689455784",
+    "name": "Test Agent",
+    "description": "A test agent",
+    "personality": "friendly",
+    "knowledgeBase": [],
+    "trainingExamples": [],
+    "model": {
+      "provider": "groq",
+      "model": "llama-3.1-8b-instant",
+      "temperature": 0.7,
+      "maxTokens": 1000,
+      "topP": 1,
+      "stream": false
+    },
+    "status": "active",
+    "createdAt": "2025-10-05T18:37:35.784Z",
+    "updatedAt": "2025-10-05T18:37:35.784Z"
+  },
+  "agent-1759689637571": {
+    "id": "agent-1759689637571",
+    "name": "Customer Support TechCorp",
+    "description": "AI Agent created with Agent Builder",
+    "personality": "Sophisticated, elegant, and refined. Uses formal language with a touch of warmth. Perfect for luxury brands, professional services, and high-end customer experiences.",
+    "knowledgeBase": [],
+    "trainingExamples": [],
+    "model": {
+      "provider": "groq",
+      "model": "llama-3.1-8b-instant",
+      "temperature": 0.7,
+      "maxTokens": 1000,
+      "topP": 1,
+      "stream": false
+    },
+    "status": "active",
+    "createdAt": "2025-10-05T18:40:37.571Z",
+    "updatedAt": "2025-10-05T18:40:37.571Z"
+  },
+  "agent-1759690269515": {
+    "id": "agent-1759690269515",
+    "name": "Customer Support TechCorp",
+    "description": "AI Agent created with Agent Builder",
+    "personality": "Sophisticated, elegant, and refined. Uses formal language with a touch of warmth. Perfect for luxury brands, professional services, and high-end customer experiences.",
+    "knowledgeBase": [],
+    "trainingExamples": [],
+    "model": {
+      "provider": "groq",
+      "model": "llama-3.1-8b-instant",
+      "temperature": 0.7,
+      "maxTokens": 1000,
+      "topP": 1,
+      "stream": false
+    },
+    "status": "active",
+    "createdAt": "2025-10-05T18:51:09.515Z",
+    "updatedAt": "2025-10-05T18:51:09.515Z"
+  },
+  "agent-1759690329012": {
+    "id": "agent-1759690329012",
+    "name": "Customer Support TechCorp",
+    "description": "AI Agent created with Agent Builder",
+    "personality": "Sophisticated, elegant, and refined. Uses formal language with a touch of warmth. Perfect for luxury brands, professional services, and high-end customer experiences.",
+    "knowledgeBase": [],
+    "trainingExamples": [],
+    "model": {
+      "provider": "groq",
+      "model": "llama-3.1-8b-instant",
+      "temperature": 0.7,
+      "maxTokens": 1000,
+      "topP": 1,
+      "stream": false
+    },
+    "status": "active",
+    "createdAt": "2025-10-05T18:52:09.012Z",
+    "updatedAt": "2025-10-05T18:52:09.012Z"
+  },
+  "agent-1759690422188": {
+    "id": "agent-1759690422188",
+    "name": "Customer Support TechCorp",
+    "description": "AI Agent created with Agent Builder",
+    "personality": "Sophisticated, elegant, and refined. Uses formal language with a touch of warmth. Perfect for luxury brands, professional services, and high-end customer experiences.",
+    "knowledgeBase": [],
+    "trainingExamples": [],
+    "model": {
+      "provider": "groq",
+      "model": "llama-3.1-8b-instant",
+      "temperature": 0.7,
+      "maxTokens": 1000,
+      "topP": 1,
+      "stream": false
+    },
+    "status": "active",
+    "createdAt": "2025-10-05T18:53:42.188Z",
+    "updatedAt": "2025-10-05T18:53:42.188Z"
+  },
+  "agent-1759690766272": {
+    "id": "agent-1759690766272",
+    "name": "Customer Support TechCorp",
+    "description": "AI Agent created with Agent Builder",
+    "personality": "Sophisticated, elegant, and refined. Uses formal language with a touch of warmth. Perfect for luxury brands, professional services, and high-end customer experiences.",
+    "knowledgeBase": [],
+    "trainingExamples": [],
+    "model": {
+      "provider": "groq",
+      "model": "llama-3.1-8b-instant",
+      "temperature": 0.7,
+      "maxTokens": 1000,
+      "topP": 1,
+      "stream": false
+    },
+    "status": "active",
+    "createdAt": "2025-10-05T18:59:26.272Z",
+    "updatedAt": "2025-10-05T18:59:26.272Z"
+  },
+  "agent-1759690776755": {
+    "id": "agent-1759690776755",
+    "name": "Customer Support TechCorp",
+    "description": "AI Agent created with Agent Builder",
+    "personality": "Sophisticated, elegant, and refined. Uses formal language with a touch of warmth. Perfect for luxury brands, professional services, and high-end customer experiences.",
+    "knowledgeBase": [],
+    "trainingExamples": [],
+    "model": {
+      "provider": "groq",
+      "model": "llama-3.1-8b-instant",
+      "temperature": 0.7,
+      "maxTokens": 1000,
+      "topP": 1,
+      "stream": false
+    },
+    "status": "active",
+    "createdAt": "2025-10-05T18:59:36.755Z",
+    "updatedAt": "2025-10-05T18:59:36.755Z"
+  },
+  "agent-1759691181569": {
+    "id": "agent-1759691181569",
+    "name": "Customer Support TechCorp",
+    "description": "AI Agent created with Agent Builder",
+    "personality": "Sophisticated, elegant, and refined. Uses formal language with a touch of warmth. Perfect for luxury brands, professional services, and high-end customer experiences.",
+    "knowledgeBase": [],
+    "trainingExamples": [],
+    "model": {
+      "provider": "groq",
+      "model": "llama-3.1-8b-instant",
+      "temperature": 0.7,
+      "maxTokens": 1000,
+      "topP": 1,
+      "stream": false
+    },
+    "status": "active",
+    "createdAt": "2025-10-05T19:06:21.569Z",
+    "updatedAt": "2025-10-05T19:06:21.569Z"
+  },
+  "agent-1759691265699": {
+    "id": "agent-1759691265699",
+    "name": "Customer Support TechCorp",
+    "description": "AI Agent created with Agent Builder",
+    "personality": "Sophisticated, elegant, and refined. Uses formal language with a touch of warmth. Perfect for luxury brands, professional services, and high-end customer experiences.",
+    "knowledgeBase": [],
+    "trainingExamples": [],
+    "model": {
+      "provider": "groq",
+      "model": "llama-3.1-8b-instant",
+      "temperature": 0.7,
+      "maxTokens": 1000,
+      "topP": 1,
+      "stream": false
+    },
+    "status": "active",
+    "createdAt": "2025-10-05T19:07:45.699Z",
+    "updatedAt": "2025-10-05T19:07:45.699Z"
+  },
+  "agent-1759691867821": {
+    "id": "agent-1759691867821",
+    "name": "Customer Support TechCorp",
+    "description": "AI Agent created with Agent Builder",
+    "personality": "Sophisticated, elegant, and refined. Uses formal language with a touch of warmth. Perfect for luxury brands, professional services, and high-end customer experiences.",
+    "knowledgeBase": [],
+    "trainingExamples": [],
+    "model": {
+      "provider": "groq",
+      "model": "llama-3.1-8b-instant",
+      "temperature": 0.7,
+      "maxTokens": 1000,
+      "topP": 1,
+      "stream": false
+    },
+    "status": "active",
+    "createdAt": "2025-10-05T19:17:47.821Z",
+    "updatedAt": "2025-10-05T19:17:47.821Z"
+  },
+  "agent-1759694838889": {
+    "id": "agent-1759694838889",
+    "name": "Customer Support TechCorp",
+    "description": "AI Agent created with Agent Builder",
+    "personality": "Warm, approachable, and personable. Uses conversational language with genuine care. Perfect for community-focused brands, customer support, and personal services.",
+    "knowledgeBase": [],
+    "trainingExamples": [],
+    "model": {
+      "provider": "groq",
+      "model": "llama-3.1-8b-instant",
+      "temperature": 0.7,
+      "maxTokens": 1000,
+      "topP": 1,
+      "stream": false
+    },
+    "status": "active",
+    "createdAt": "2025-10-05T20:07:18.889Z",
+    "updatedAt": "2025-10-05T20:07:18.889Z"
+  },
+  "agent-1759694854807": {
+    "id": "agent-1759694854807",
+    "name": "Customer Support TechCorp",
+    "description": "AI Agent created with Agent Builder",
+    "personality": "Warm, approachable, and personable. Uses conversational language with genuine care. Perfect for community-focused brands, customer support, and personal services.",
+    "knowledgeBase": [],
+    "trainingExamples": [],
+    "model": {
+      "provider": "groq",
+      "model": "llama-3.1-8b-instant",
+      "temperature": 0.7,
+      "maxTokens": 1000,
+      "topP": 1,
+      "stream": false
+    },
+    "status": "active",
+    "createdAt": "2025-10-05T20:07:34.807Z",
+    "updatedAt": "2025-10-05T20:07:34.807Z"
+  },
+  "agent-1759694874916": {
+    "id": "agent-1759694874916",
+    "name": "Customer Support TechCorp",
+    "description": "AI Agent created with Agent Builder",
+    "personality": "Competent, reliable, and efficient. Uses clear, direct language focused on solutions. Perfect for business services, technical support, and corporate environments.",
+    "knowledgeBase": [],
+    "trainingExamples": [],
+    "model": {
+      "provider": "groq",
+      "model": "llama-3.1-8b-instant",
+      "temperature": 0.7,
+      "maxTokens": 1000,
+      "topP": 1,
+      "stream": false
+    },
+    "status": "active",
+    "createdAt": "2025-10-05T20:07:54.916Z",
+    "updatedAt": "2025-10-05T20:07:54.916Z"
+  },
+  "agent-1759694906497": {
+    "id": "agent-1759694906497",
+    "name": "African Vibes ",
+    "description": "AI Agent created with Agent Builder",
+    "personality": "Warm, approachable, and personable. Uses conversational language with genuine care. Perfect for community-focused brands, customer support, and personal services.",
+    "knowledgeBase": [],
+    "trainingExamples": [],
+    "model": {
+      "provider": "groq",
+      "model": "llama-3.1-8b-instant",
+      "temperature": 0.7,
+      "maxTokens": 1000,
+      "topP": 1,
+      "stream": false
+    },
+    "status": "active",
+    "createdAt": "2025-10-05T20:08:26.497Z",
+    "updatedAt": "2025-10-05T20:08:26.497Z"
+  },
+  "agent-1759694926568": {
+    "id": "agent-1759694926568",
+    "name": "African Vibes",
+    "description": "AI Agent created with Agent Builder",
+    "personality": "Warm, approachable, and personable. Uses conversational language with genuine care. Perfect for community-focused brands, customer support, and personal services.",
+    "knowledgeBase": [],
+    "trainingExamples": [],
+    "model": {
+      "provider": "groq",
+      "model": "llama-3.1-8b-instant",
+      "temperature": 0.7,
+      "maxTokens": 1000,
+      "topP": 1,
+      "stream": false
+    },
+    "status": "active",
+    "createdAt": "2025-10-05T20:08:46.568Z",
+    "updatedAt": "2025-10-05T20:08:46.568Z"
   }
-]
+}

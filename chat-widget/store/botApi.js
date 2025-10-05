@@ -10,7 +10,7 @@ export const botApi = createApi({
       return headers;
     },
   }),
-  tagTypes: ['Conversation', 'Clients', 'Client'],
+  tagTypes: ['Conversation', 'Clients', 'Client', 'Model', 'Agents', 'Agent'],
   endpoints: (builder) => ({
     sendMessage: builder.mutation({
       query: ({ message, sessionId, clientId = 'supa-chat' }) => ({
@@ -71,6 +71,59 @@ export const botApi = createApi({
         method: 'POST',
       }),
     }),
+    // Global model information
+    getModelInfo: builder.query({
+      query: () => '/api/model/info',
+      providesTags: ['Model'],
+    }),
+    // Agent Builder endpoints
+    createAgent: builder.mutation({
+      query: (agentData) => ({
+        url: '/api/agent',
+        method: 'POST',
+        body: agentData,
+      }),
+      invalidatesTags: ['Agents'],
+    }),
+    getAgents: builder.query({
+      query: () => '/api/agent',
+      providesTags: ['Agents'],
+    }),
+    getAgent: builder.query({
+      query: (agentId) => `/api/agent/${agentId}`,
+      providesTags: (result, error, agentId) => [{ type: 'Agent', id: agentId }],
+    }),
+    updateAgent: builder.mutation({
+      query: ({ agentId, ...agentData }) => ({
+        url: `/api/agent/${agentId}`,
+        method: 'PUT',
+        body: agentData,
+      }),
+      invalidatesTags: (result, error, { agentId }) => [
+        { type: 'Agent', id: agentId },
+        'Agents'
+      ],
+    }),
+          deleteAgent: builder.mutation({
+            query: (agentId) => ({
+              url: `/api/agent/${agentId}`,
+              method: 'DELETE',
+            }),
+            invalidatesTags: ['Agents'],
+          }),
+          // Chat with an agent
+          chatWithAgent: builder.mutation({
+            query: ({ message, sessionId, agentId, personality, conversationHistory }) => ({
+              url: '/api/agent/chat',
+              method: 'POST',
+              body: { message, sessionId, agentId, personality, conversationHistory },
+            }),
+          }),
+          // Get conversation history
+          getConversation: builder.query({
+            query: (sessionId) => `/api/agent/conversation/${sessionId}`,
+            providesTags: (result, error, sessionId) => [{ type: 'Conversation', id: sessionId }],
+          }),
   }),
 });
 
@@ -83,7 +136,14 @@ export const {
   useUpdateClientMutation,
   useDeleteClientMutation,
   useTestDatabaseConnectionMutation,
-  useTestLLMConnectionMutation
+  useTestLLMConnectionMutation,
+  useGetModelInfoQuery,
+  useCreateAgentMutation,
+  useGetAgentsQuery,
+  useGetAgentQuery,
+  useUpdateAgentMutation,
+  useDeleteAgentMutation,
+  useChatWithAgentMutation
 } = botApi;
 
 

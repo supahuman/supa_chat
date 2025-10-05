@@ -10,6 +10,8 @@ import TeachYourAgent from './TeachYourAgent';
 const ContentArea = ({ 
   activeTab, 
   activeSidebarItem, 
+  agentData,
+  setAgentData,
   children 
 }) => {
   const sidebarItems = [
@@ -49,25 +51,25 @@ const ContentArea = ({
   };
 
   const getDynamicContent = (tab, sidebarItem) => {
-    // AI Persona component
-    if (sidebarItem === 'ai-persona') {
-      return <AIPersona />;
-    }
+          // AI Persona component
+          if (sidebarItem === 'ai-persona') {
+            return <AIPersona agentData={agentData} setAgentData={setAgentData} />;
+          }
 
-    // Knowledge Base component
-    if (sidebarItem === 'knowledge-base') {
-      return <KnowledgeBase />;
-    }
+          // Knowledge Base component
+          if (sidebarItem === 'knowledge-base') {
+            return <KnowledgeBase agentData={agentData} setAgentData={setAgentData} />;
+          }
 
-    // Actions component
-    if (sidebarItem === 'actions') {
-      return <Actions />;
-    }
+          // Actions component
+          if (sidebarItem === 'actions') {
+            return <Actions agentData={agentData} setAgentData={setAgentData} />;
+          }
 
-    // Teach Your Agent component
-    if (sidebarItem === 'teach-agent') {
-      return <TeachYourAgent />;
-    }
+          // Teach Your Agent component
+          if (sidebarItem === 'teach-agent') {
+            return <TeachYourAgent agentData={agentData} setAgentData={setAgentData} />;
+          }
 
     // Default placeholder content for other sections
     return getDefaultContent(tab, sidebarItem);

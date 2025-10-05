@@ -1,14 +1,15 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Crown, Heart, Briefcase } from 'lucide-react';
 import PersonaConfig from './PersonaConfig';
 import PersonaSelector from './PersonaSelector';
 import PersonaDetails from './PersonaDetails';
 import CustomDescription from './CustomDescription';
 import AgentPreview from './AgentPreview';
+import AgentSaveButton from '../AgentSaveButton';
 
-const AIPersona = () => {
+const AIPersona = ({ agentData, setAgentData }) => {
   const [selectedPersona, setSelectedPersona] = useState('classy');
   const [customDescription, setCustomDescription] = useState('');
   const [isEditing, setIsEditing] = useState(false);
@@ -16,6 +17,52 @@ const AIPersona = () => {
   const [agentTitle, setAgentTitle] = useState('Customer Support TechCorp');
   const [maxCharacters, setMaxCharacters] = useState(500);
   const [defaultLanguage, setDefaultLanguage] = useState('en');
+
+  // Update agent data when fields change
+  const updateAgentData = (field, value) => {
+    setAgentData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // Initialize agent data with default values
+  useEffect(() => {
+    // Initialize with default values if agent data is empty
+    if (!agentData.name) {
+      updateAgentData('name', agentTitle);
+    }
+    if (!agentData.description) {
+      updateAgentData('description', customDescription);
+    }
+    if (!agentData.personality) {
+      const persona = personas.find(p => p.id === selectedPersona);
+      if (persona) {
+        updateAgentData('personality', persona.description);
+      }
+    }
+  }, []); // Run once on mount
+
+  // Handle agent title change
+  const handleTitleChange = (title) => {
+    setAgentTitle(title);
+    updateAgentData('name', title);
+  };
+
+  // Handle description change
+  const handleDescriptionChange = (description) => {
+    setCustomDescription(description);
+    updateAgentData('description', description);
+  };
+
+  // Handle persona change
+  const handlePersonaChange = (personaId) => {
+    setSelectedPersona(personaId);
+    const persona = personas.find(p => p.id === personaId);
+    if (persona) {
+      updateAgentData('personality', persona.description);
+    }
+  };
 
   const personas = [
     {
@@ -83,7 +130,7 @@ const AIPersona = () => {
       {/* Agent Configuration */}
       <PersonaConfig
         agentTitle={agentTitle}
-        setAgentTitle={setAgentTitle}
+        setAgentTitle={handleTitleChange}
         defaultLanguage={defaultLanguage}
         setDefaultLanguage={setDefaultLanguage}
         maxCharacters={maxCharacters}
@@ -93,7 +140,7 @@ const AIPersona = () => {
       {/* Persona Selection */}
       <PersonaSelector
         selectedPersona={selectedPersona}
-        onPersonaSelect={handlePersonaSelect}
+        onPersonaSelect={handlePersonaChange}
       />
 
       {/* Selected Persona Details */}
@@ -102,7 +149,7 @@ const AIPersona = () => {
       {/* Custom Description */}
       <CustomDescription
         customDescription={customDescription}
-        setCustomDescription={setCustomDescription}
+        setCustomDescription={handleDescriptionChange}
         isEditing={isEditing}
         setIsEditing={setIsEditing}
         tempDescription={tempDescription}
@@ -117,6 +164,18 @@ const AIPersona = () => {
         maxCharacters={maxCharacters}
         customDescription={customDescription}
       />
+
+      {/* Save Button */}
+      <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+        <div className="flex justify-center">
+          <AgentSaveButton 
+            agentData={agentData}
+            onSaveSuccess={(savedAgent) => {
+              console.log('Agent saved successfully:', savedAgent);
+            }}
+          />
+        </div>
+      </div>
     </div>
   );
 };

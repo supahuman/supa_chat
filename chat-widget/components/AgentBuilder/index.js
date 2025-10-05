@@ -10,6 +10,15 @@ const DashboardLayout = ({ children }) => {
   const [activeTab, setActiveTab] = useState('build');
   const [activeSidebarItem, setActiveSidebarItem] = useState('ai-persona');
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  
+  // Agent data collection
+  const [agentData, setAgentData] = useState({
+    name: '',
+    description: '',
+    personality: '',
+    knowledgeBase: [],
+    trainingExamples: []
+  });
 
   const handleToggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -60,6 +69,8 @@ const DashboardLayout = ({ children }) => {
         <ContentArea
           activeTab={activeTab}
           activeSidebarItem={activeSidebarItem}
+          agentData={agentData}
+          setAgentData={setAgentData}
         >
           {children}
         </ContentArea>
