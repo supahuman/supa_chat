@@ -1,6 +1,7 @@
 import DatabaseFactory from '../database/DatabaseFactory.js';
 import LLMFactory from '../llm/LLMFactory.js';
 import ClientConfigService from './ClientConfigService.js';
+import { getGlobalModel } from '../../config/globalModel.js';
 
 /**
  * Client-specific RAG service that uses client's database
@@ -188,12 +189,13 @@ If you don't know something, say so and offer to help in other ways.`;
     // Add current user query
     messages.push({ role: 'user', content: userQuery });
 
-    // Use client's configured LLM
-    const llm = LLMFactory.create(clientConfig.llm.provider, {
-      apiKey: process.env[`${clientConfig.llm.provider.toUpperCase()}_API_KEY`],
-      model: clientConfig.llm.model,
-      temperature: clientConfig.llm.temperature,
-      maxTokens: clientConfig.llm.maxTokens
+    // Use global model configuration
+    const globalModel = getGlobalModel();
+    const llm = LLMFactory.create(globalModel.provider, {
+      apiKey: process.env[`${globalModel.provider.toUpperCase()}_API_KEY`],
+      model: globalModel.model,
+      temperature: globalModel.temperature,
+      maxTokens: globalModel.maxTokens
     });
 
     await llm.initialize();

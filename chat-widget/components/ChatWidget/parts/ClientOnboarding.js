@@ -16,14 +16,8 @@ export default function ClientOnboarding({ isOpen, onClose, onClientCreated }) {
       database: '',
       collection: '',
       vectorIndex: ''
-    },
-    llm: {
-      provider: '',
-      model: '',
-      temperature: 0.7,
-      maxTokens: 1000
-    },
-    apiKey: ''
+    }
+    // ✅ Removed llm and apiKey - we use global model now
   });
   const [success, setSuccess] = useState(false);
 
@@ -58,14 +52,8 @@ export default function ClientOnboarding({ isOpen, onClose, onClientCreated }) {
             database: formData.vectorDB.database,
             collection: formData.vectorDB.collection,
             vectorIndex: formData.vectorDB.vectorIndex
-          },
-          llm: {
-            provider: formData.llm.provider,
-            model: formData.llm.model,
-            temperature: formData.llm.temperature,
-            maxTokens: formData.llm.maxTokens
-          },
-          [`${formData.llm.provider}ApiKey`]: formData.apiKey
+          }
+          // ✅ LLM configuration removed - we use global model
         }
       };
 
@@ -93,14 +81,8 @@ export default function ClientOnboarding({ isOpen, onClose, onClientCreated }) {
         database: '',
         collection: '',
         vectorIndex: ''
-      },
-      llm: {
-        provider: '',
-        model: '',
-        temperature: 0.7,
-        maxTokens: 1000
-      },
-      apiKey: ''
+      }
+      // ✅ LLM fields removed - we use global model
     });
     setStep(1);
     setSuccess(false);
@@ -160,8 +142,6 @@ export default function ClientOnboarding({ isOpen, onClose, onClientCreated }) {
             <StepIndicator step={1} currentStep={step} label="Basic Info" />
             <div className="w-8 h-0.5 bg-gray-300 dark:bg-gray-600"></div>
             <StepIndicator step={2} currentStep={step} label="Database" />
-            <div className="w-8 h-0.5 bg-gray-300 dark:bg-gray-600"></div>
-            <StepIndicator step={3} currentStep={step} label="LLM" />
           </div>
         </div>
 
@@ -185,10 +165,6 @@ export default function ClientOnboarding({ isOpen, onClose, onClientCreated }) {
           {step === 2 && (
             <DatabaseStep formData={formData} onInputChange={handleInputChange} />
           )}
-
-          {step === 3 && (
-            <LLMStep formData={formData} onInputChange={handleInputChange} />
-          )}
         </div>
 
         {/* Footer */}
@@ -202,7 +178,7 @@ export default function ClientOnboarding({ isOpen, onClose, onClientCreated }) {
               Previous
             </button>
             
-            {step < 3 ? (
+            {step < 2 ? (
               <button
                 onClick={() => setStep(step + 1)}
                 className="btn-primary"
@@ -399,106 +375,4 @@ function DatabaseStep({ formData, onInputChange }) {
   );
 }
 
-function LLMStep({ formData, onInputChange }) {
-  return (
-    <div className="space-y-4">
-      <h4 className="font-medium text-gray-900 dark:text-gray-100">LLM Configuration</h4>
-      
-      <div>
-        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          LLM Provider *
-        </label>
-        <select
-          value={formData.llm.provider}
-          onChange={(e) => onInputChange('llm.provider', e.target.value)}
-          className="input-base"
-        >
-          <option value="">Select LLM provider</option>
-          <option value="groq">Groq (Fast & Cost-effective)</option>
-          <option value="openai">OpenAI (GPT models)</option>
-          <option value="anthropic">Anthropic (Claude)</option>
-        </select>
-      </div>
-
-      {formData.llm.provider && (
-        <>
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              Model *
-            </label>
-            <select
-              value={formData.llm.model}
-              onChange={(e) => onInputChange('llm.model', e.target.value)}
-              className="input-base"
-            >
-              <option value="">Select model</option>
-              {formData.llm.provider === 'groq' && (
-                <>
-                  <option value="llama-3.1-8b-instant">Llama 3.1 8B Instant</option>
-                  <option value="llama-3.1-70b-versatile">Llama 3.1 70B Versatile</option>
-                </>
-              )}
-              {formData.llm.provider === 'openai' && (
-                <>
-                  <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-                  <option value="gpt-4">GPT-4</option>
-                  <option value="gpt-4-turbo">GPT-4 Turbo</option>
-                </>
-              )}
-              {formData.llm.provider === 'anthropic' && (
-                <>
-                  <option value="claude-3-haiku-20240307">Claude 3 Haiku</option>
-                  <option value="claude-3-sonnet-20240229">Claude 3 Sonnet</option>
-                  <option value="claude-3-opus-20240229">Claude 3 Opus</option>
-                </>
-              )}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              API Key *
-            </label>
-            <input
-              type="password"
-              value={formData.apiKey}
-              onChange={(e) => onInputChange('apiKey', e.target.value)}
-              placeholder={`Enter your ${formData.llm.provider} API key`}
-              className="input-base"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Temperature (0.0 - 1.0)
-              </label>
-              <input
-                type="number"
-                min="0"
-                max="1"
-                step="0.1"
-                value={formData.llm.temperature}
-                onChange={(e) => onInputChange('llm.temperature', parseFloat(e.target.value))}
-                className="input-base"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                Max Tokens
-              </label>
-              <input
-                type="number"
-                min="100"
-                max="4000"
-                value={formData.llm.maxTokens}
-                onChange={(e) => onInputChange('llm.maxTokens', parseInt(e.target.value))}
-                className="input-base"
-              />
-            </div>
-          </div>
-        </>
-      )}
-    </div>
-  );
-}
+// ✅ LLMStep component removed - we use global model now

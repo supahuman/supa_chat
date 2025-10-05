@@ -11,12 +11,6 @@
       "numCandidates": 20,
       "similarity": 0.7
     },
-    "llm": {
-      "provider": "groq",
-      "model": "llama-3.1-8b-instant",
-      "temperature": 0.7,
-      "maxTokens": 1000
-    },
     "chunking": {
       "strategy": "langchain",
       "chunkSize": 1000,
@@ -43,13 +37,6 @@
       "numCandidates": 25,
       "similarity": 0.8
     },
-    "llm": {
-      "provider": "openai",
-      "model": "gpt-4",
-      "temperature": 0.7,
-      "maxTokens": 1500
-    },
-    "openaiApiKey": "sk-techcorp-openai-key-here",
     "chunking": {
       "strategy": "langchain",
       "chunkSize": 1200,

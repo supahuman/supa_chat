@@ -74,11 +74,6 @@
     "messages": [
       {
         "role": "user",
-        "content": "Hello",
-        "timestamp": "2025-10-03T20:35:42.938Z"
-      },
-      {
-        "role": "user",
         "content": "test",
         "timestamp": "2025-10-03T20:39:46.673Z"
       },
@@ -86,10 +81,20 @@
         "role": "user",
         "content": "Hello test",
         "timestamp": "2025-10-03T20:41:34.398Z"
+      },
+      {
+        "role": "user",
+        "content": "Hello, how are you?",
+        "timestamp": "2025-10-05T18:24:03.601Z"
+      },
+      {
+        "role": "user",
+        "content": "Hello, how are you?",
+        "timestamp": "2025-10-05T18:26:30.650Z"
       }
     ],
     "createdAt": "2025-10-03T20:35:42.937Z",
-    "updatedAt": "2025-10-03T20:41:34.400Z"
+    "updatedAt": "2025-10-05T18:26:30.650Z"
   },
   {
     "sessionId": "chat_1759523887606_vpsnbxflz",
@@ -147,5 +152,18 @@
     ],
     "createdAt": "2025-10-05T16:20:07.823Z",
     "updatedAt": "2025-10-05T16:20:07.823Z"
+  },
+  {
+    "sessionId": "chat_1759688841350_67qvv6ard",
+    "clientId": "supa-chat",
+    "messages": [
+      {
+        "role": "user",
+        "content": "hi",
+        "timestamp": "2025-10-05T18:27:23.457Z"
+      }
+    ],
+    "createdAt": "2025-10-05T18:27:23.457Z",
+    "updatedAt": "2025-10-05T18:27:23.457Z"
   }
 ]

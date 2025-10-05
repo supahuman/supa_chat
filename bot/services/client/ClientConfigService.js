@@ -1,6 +1,7 @@
 import fs from 'fs/promises';
 import fsSync from 'fs';
 import path from 'path';
+import { getGlobalModel } from '../../config/globalModel.js';
 
 /**
  * Service for managing client database configurations
@@ -73,12 +74,17 @@ class ClientConfigService {
     const config = this.configs.get(clientId);
     if (!config) return null;
     
-    // Add API keys from environment variables or client config
+    // Use global model configuration for all clients
+    const globalModel = getGlobalModel();
+    
     return {
       ...config,
-      openaiApiKey: config.openaiApiKey || process.env.OPENAI_API_KEY,
-      groqApiKey: config.groqApiKey || process.env.GROQ_API_KEY,
-      anthropicApiKey: config.anthropicApiKey || process.env.ANTHROPIC_API_KEY,
+      // Use global model instead of client-specific model
+      llm: globalModel,
+      // Use our API keys from environment variables
+      openaiApiKey: process.env.OPENAI_API_KEY,
+      groqApiKey: process.env.GROQ_API_KEY,
+      anthropicApiKey: process.env.ANTHROPIC_API_KEY,
       mongodbUri: process.env.MONGODB_URI
     };
   }
