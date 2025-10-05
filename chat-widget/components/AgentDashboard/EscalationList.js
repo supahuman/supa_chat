@@ -1,5 +1,7 @@
 'use client';
 
+import { Button, Card } from '@/ui';
+
 const EscalationList = ({ 
   escalations, 
   agents, 
@@ -28,14 +30,14 @@ const EscalationList = ({
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+    <Card>
       <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Escalations</h3>
       </div>
       <div className="p-6">
         <div className="space-y-4">
           {escalations.map((escalation) => (
-            <div key={escalation.id} className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+            <Card key={escalation.id} variant="outlined" padding="md">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center space-x-3">
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPriorityColor(escalation.priority)}`}>
@@ -47,46 +49,51 @@ const EscalationList = ({
                 </div>
                 <div className="flex space-x-2">
                   {escalation.status === 'pending' && (
-                    <button
+                    <Button
                       onClick={() => onAssignEscalation(escalation.id, agents[0]?.id)}
-                      className="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+                      variant="primary"
+                      size="xs"
                     >
                       Assign
-                    </button>
+                    </Button>
                   )}
                   {escalation.status === 'assigned' && (
-                    <button
+                    <Button
                       onClick={() => onUpdateEscalationStatus(escalation.id, 'in_progress')}
-                      className="text-xs bg-orange-600 text-white px-3 py-1 rounded hover:bg-orange-700"
+                      variant="primary"
+                      size="xs"
+                      className="bg-orange-600 hover:bg-orange-700"
                     >
                       Start
-                    </button>
+                    </Button>
                   )}
                   {escalation.status === 'in_progress' && (
-                    <button
+                    <Button
                       onClick={() => onUpdateEscalationStatus(escalation.id, 'resolved')}
-                      className="text-xs bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+                      variant="success"
+                      size="xs"
                     >
                       Resolve
-                    </button>
+                    </Button>
                   )}
-                  <button
+                  <Button
                     onClick={() => onSelectEscalation(escalation)}
-                    className="text-xs bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-700"
+                    variant="secondary"
+                    size="xs"
                   >
                     Chat
-                  </button>
+                  </Button>
                 </div>
               </div>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{escalation.reason}</p>
               <p className="text-xs text-gray-500 dark:text-gray-500">
                 Session: {escalation.sessionId} • {new Date(escalation.createdAt).toLocaleString()}
               </p>
-            </div>
+            </Card>
           ))}
         </div>
       </div>
-    </div>
+    </Card>
   );
 };
 
