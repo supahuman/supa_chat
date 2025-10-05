@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { Bot, Database, Zap, Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { Bot, Database, Zap, CheckCircle, XCircle } from 'lucide-react';
+import { Button, LoadingSpinner } from '@/ui';
 
 const ClientCard = ({ 
   client, 
@@ -51,50 +52,35 @@ const ClientCard = ({
         </div>
 
         <div className="flex items-center space-x-3">
-          <button
+          <Button
             onClick={() => handleTest('database')}
             disabled={testing}
-            className="px-3 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 disabled:opacity-50"
+            variant="secondary"
+            size="xs"
             title="Test Database Connection"
+            icon={testing ? LoadingSpinner : testResult === 'success' ? CheckCircle : testResult === 'error' ? XCircle : null}
           >
-            {testing ? (
-              <Loader2 className="w-3 h-3 animate-spin" />
-            ) : testResult === 'success' ? (
-              <CheckCircle className="w-3 h-3 text-green-600" />
-            ) : testResult === 'error' ? (
-              <XCircle className="w-3 h-3 text-red-600" />
-            ) : (
-              'Test DB'
-            )}
-          </button>
+            {testing ? '' : testResult === 'success' ? '' : testResult === 'error' ? '' : 'Test DB'}
+          </Button>
 
-          <button
+          <Button
             onClick={() => handleTest('llm')}
             disabled={testing}
-            className="px-3 py-1 text-xs bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200 disabled:opacity-50"
+            variant="secondary"
+            size="xs"
             title="Test LLM Connection"
+            icon={testing ? LoadingSpinner : testResult === 'success' ? CheckCircle : testResult === 'error' ? XCircle : null}
           >
-            {testing ? (
-              <Loader2 className="w-3 h-3 animate-spin" />
-            ) : testResult === 'success' ? (
-              <CheckCircle className="w-3 h-3 text-green-600" />
-            ) : testResult === 'error' ? (
-              <XCircle className="w-3 h-3 text-red-600" />
-            ) : (
-              'Test LLM'
-            )}
-          </button>
+            {testing ? '' : testResult === 'success' ? '' : testResult === 'error' ? '' : 'Test LLM'}
+          </Button>
 
-          <button
+          <Button
             onClick={onSelect}
-            className={`px-4 py-2 text-sm rounded-lg transition-colors duration-200 ${
-              isActive
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600'
-            }`}
+            variant={isActive ? 'primary' : 'secondary'}
+            size="sm"
           >
             {isActive ? 'Active' : 'Select'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

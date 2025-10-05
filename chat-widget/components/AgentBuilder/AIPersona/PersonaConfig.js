@@ -1,5 +1,7 @@
 'use client';
 
+import { Input, Select, Button } from '@/ui';
+
 const PersonaConfig = ({ 
   agentTitle, 
   setAgentTitle, 
@@ -9,18 +11,18 @@ const PersonaConfig = ({
   setMaxCharacters 
 }) => {
   const languages = [
-    { code: 'en', name: 'English' },
-    { code: 'es', name: 'Spanish' },
-    { code: 'fr', name: 'French' },
-    { code: 'de', name: 'German' },
-    { code: 'it', name: 'Italian' },
-    { code: 'pt', name: 'Portuguese' },
-    { code: 'ru', name: 'Russian' },
-    { code: 'ja', name: 'Japanese' },
-    { code: 'ko', name: 'Korean' },
-    { code: 'zh', name: 'Chinese' },
-    { code: 'ar', name: 'Arabic' },
-    { code: 'hi', name: 'Hindi' }
+    { value: 'en', label: 'English' },
+    { value: 'es', label: 'Spanish' },
+    { value: 'fr', label: 'French' },
+    { value: 'de', label: 'German' },
+    { value: 'it', label: 'Italian' },
+    { value: 'pt', label: 'Portuguese' },
+    { value: 'ru', label: 'Russian' },
+    { value: 'ja', label: 'Japanese' },
+    { value: 'ko', label: 'Korean' },
+    { value: 'zh', label: 'Chinese' },
+    { value: 'ar', label: 'Arabic' },
+    { value: 'hi', label: 'Hindi' }
   ];
 
   return (
@@ -32,11 +34,10 @@ const PersonaConfig = ({
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Agent Title
           </label>
-          <input
+          <Input
             type="text"
             value={agentTitle}
             onChange={(e) => setAgentTitle(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
             placeholder="e.g., Customer Support TechCorp"
           />
           <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -49,17 +50,12 @@ const PersonaConfig = ({
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
             Default Language
           </label>
-          <select
+          <Select
             value={defaultLanguage}
             onChange={(e) => setDefaultLanguage(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
-          >
-            {languages.map((lang) => (
-              <option key={lang.code} value={lang.code}>
-                {lang.name}
-              </option>
-            ))}
-          </select>
+            options={languages}
+            placeholder="Select language"
+          />
           <p className="text-xs text-gray-500 dark:text-gray-400">
             Primary language for your AI agent
           </p>
@@ -95,17 +91,14 @@ const PersonaConfig = ({
         </div>
         <div className="mt-2 grid grid-cols-4 gap-2">
           {[100, 300, 500, 1000].map((chars) => (
-            <button
+            <Button
               key={chars}
               onClick={() => setMaxCharacters(chars)}
-              className={`px-3 py-1 text-xs rounded-md transition-colors ${
-                maxCharacters === chars
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
-              }`}
+              variant={maxCharacters === chars ? 'primary' : 'secondary'}
+              size="xs"
             >
               {chars} chars
-            </button>
+            </Button>
           ))}
         </div>
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">

@@ -1,6 +1,7 @@
 'use client';
 
 import { Edit3, Save, X, Plus } from 'lucide-react';
+import { Button, Card } from '@/ui';
 
 const CustomDescription = ({ 
   customDescription, 
@@ -26,19 +27,20 @@ const CustomDescription = ({
   };
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-6">
+    <Card>
       <div className="flex items-center justify-between mb-4">
         <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
           Custom Description
         </h4>
         {!isEditing && (
-          <button
+          <Button
             onClick={handleEditDescription}
-            className="flex items-center space-x-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
+            variant="ghost"
+            size="sm"
+            icon={Edit3}
           >
-            <Edit3 className="w-4 h-4" />
-            <span>{customDescription ? 'Edit' : 'Add Custom Description'}</span>
-          </button>
+            {customDescription ? 'Edit' : 'Add Custom Description'}
+          </Button>
         )}
       </div>
 
@@ -51,20 +53,21 @@ const CustomDescription = ({
             className="w-full h-32 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white resize-none"
           />
           <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
-            <button
+            <Button
               onClick={handleSaveDescription}
-              className="flex items-center justify-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors w-full sm:w-auto"
+              icon={Save}
+              className="w-full sm:w-auto"
             >
-              <Save className="w-4 h-4" />
-              <span>Save</span>
-            </button>
-            <button
+              Save
+            </Button>
+            <Button
               onClick={handleCancelEdit}
-              className="flex items-center justify-center space-x-2 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 px-4 py-2 rounded-md hover:bg-gray-300 dark:hover:bg-gray-500 transition-colors w-full sm:w-auto"
+              variant="secondary"
+              icon={X}
+              className="w-full sm:w-auto"
             >
-              <X className="w-4 h-4" />
-              <span>Cancel</span>
-            </button>
+              Cancel
+            </Button>
           </div>
         </div>
       ) : (
@@ -90,7 +93,7 @@ const CustomDescription = ({
           )}
         </div>
       )}
-    </div>
+    </Card>
   );
 };
 
