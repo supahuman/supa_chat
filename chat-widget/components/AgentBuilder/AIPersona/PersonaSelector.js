@@ -108,7 +108,7 @@ const PersonaSelector = ({ selectedPersona, onPersonaSelect }) => {
               <div className="bg-gray-50 dark:bg-gray-800 rounded-md p-3">
                 <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Example:</p>
                 <p className="text-sm text-gray-700 dark:text-gray-300 italic">
-                  "{persona.example}"
+                  &ldquo;{persona.example}&rdquo;
                 </p>
               </div>
             </div>
