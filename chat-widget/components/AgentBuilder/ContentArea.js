@@ -67,10 +67,10 @@ const ContentArea = ({
         <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
           <Bot className="w-8 h-8 text-gray-400 dark:text-gray-500" />
         </div>
-        <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+        <h3 className="heading-lg mb-2">
           {tab.charAt(0).toUpperCase() + tab.slice(1)} - {sidebarItem.replace('-', ' ').replace(/\b\w/g, l => l.toUpperCase())}
         </h3>
-        <p className="text-gray-600 dark:text-gray-300 max-w-md mx-auto">
+        <p className="text-secondary max-w-md mx-auto">
           This section is under development. You'll be able to configure your AI agent's {sidebarItem.replace('-', ' ')} here.
         </p>
       </div>
@@ -84,10 +84,10 @@ const ContentArea = ({
       <div className="max-w-6xl mx-auto">
         {/* Content Header */}
         <div className="mb-4 md:mb-6">
-          <h2 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white capitalize">
+          <h2 className="text-xl md:text-2xl font-bold text-primary capitalize">
             {activeTab} - {currentItem?.label}
           </h2>
-          <p className="text-sm md:text-base text-gray-600 dark:text-gray-300 mt-1">
+          <p className="text-sm md:text-base text-secondary mt-1">
             {getContentDescription(activeTab, activeSidebarItem)}
           </p>
         </div>

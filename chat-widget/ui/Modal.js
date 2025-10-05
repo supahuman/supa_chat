@@ -19,23 +19,23 @@ const Modal = ({
   };
   
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className={`bg-white dark:bg-gray-800 rounded-lg w-full ${sizeClasses[size]} h-96 flex flex-col ${className}`}>
+    <div className="modal-backdrop">
+      <div className={`modal-content ${sizeClasses[size]} h-96 ${className}`}>
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <div className="modal-header">
+          <h3 className="heading-lg">
             {title}
           </h3>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-2xl leading-none"
+            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 text-2xl leading-none transition-smooth"
           >
             ×
           </button>
         </div>
         
         {/* Content */}
-        <div className="flex-1 p-6 overflow-y-auto">
+        <div className="modal-body">
           {children}
         </div>
       </div>

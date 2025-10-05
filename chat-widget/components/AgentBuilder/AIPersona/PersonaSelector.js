@@ -52,10 +52,10 @@ const PersonaSelector = ({ selectedPersona, onPersonaSelect }) => {
     <>
       {/* Persona Selection Header */}
       <div className="mb-6">
-        <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <h4 className="heading-lg">
           Choose Your AI Persona
         </h4>
-        <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+        <p className="text-sm text-secondary mt-1">
           Select a base personality for your AI agent, then customize it to match your brand.
         </p>
       </div>
@@ -93,21 +93,21 @@ const PersonaSelector = ({ selectedPersona, onPersonaSelect }) => {
               </div>
 
               {/* Name */}
-              <h4 className={`text-lg font-semibold mb-2 ${
-                isSelected ? 'text-blue-600 dark:text-blue-300' : 'text-gray-900 dark:text-white'
+              <h4 className={`heading-md mb-2 ${
+                isSelected ? 'text-blue-600 dark:text-blue-300' : 'text-primary'
               }`}>
                 {persona.name}
               </h4>
 
               {/* Description */}
-              <p className="text-sm text-gray-600 dark:text-gray-300 mb-3">
+              <p className="text-sm text-secondary mb-3">
                 {persona.description}
               </p>
 
               {/* Example */}
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-md p-3">
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Example:</p>
-                <p className="text-sm text-gray-700 dark:text-gray-300 italic">
+              <div className="bg-surface rounded-md p-3">
+                <p className="text-xs text-muted mb-1">Example:</p>
+                <p className="text-sm text-secondary italic">
                   &ldquo;{persona.example}&rdquo;
                 </p>
               </div>

@@ -8,13 +8,13 @@ const Card = ({
   className = '',
   ...props 
 }) => {
-  const baseClasses = 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700';
+  const baseClasses = 'bg-card border-card';
   
   const variants = {
-    default: 'rounded-lg shadow-sm',
-    elevated: 'rounded-lg shadow-md',
-    outlined: 'rounded-lg border-2',
-    dashed: 'rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600'
+    default: 'card-container',
+    elevated: 'card-elevated',
+    outlined: 'card-outlined',
+    dashed: 'card-dashed'
   };
   
   const paddings = {
@@ -24,7 +24,7 @@ const Card = ({
     lg: 'p-8'
   };
   
-  const hoverClasses = hover ? 'hover:bg-gray-50 dark:hover:bg-gray-700/50 cursor-pointer transition-all duration-200' : '';
+  const hoverClasses = hover ? 'hover-lift' : '';
   
   const classes = `${baseClasses} ${variants[variant]} ${paddings[padding]} ${hoverClasses} ${className}`;
   

@@ -29,7 +29,7 @@ const CustomDescription = ({
   return (
     <Card>
       <div className="flex items-center justify-between mb-4">
-        <h4 className="text-lg font-semibold text-gray-900 dark:text-white">
+        <h4 className="heading-lg">
           Custom Description
         </h4>
         {!isEditing && (
@@ -50,7 +50,7 @@ const CustomDescription = ({
             value={tempDescription}
             onChange={(e) => setTempDescription(e.target.value)}
             placeholder="Add specific instructions for your AI agent's personality, tone, or behavior. For example: 'Always use our company's signature phrases' or 'Be extra patient with elderly customers'..."
-            className="w-full h-32 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:text-white resize-none"
+            className="w-full h-32 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white resize-none"
           />
           <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
             <Button
@@ -73,8 +73,8 @@ const CustomDescription = ({
       ) : (
         <div className="min-h-[100px]">
           {customDescription ? (
-            <div className="bg-gray-50 dark:bg-gray-700 rounded-md p-4">
-              <p className="text-gray-700 dark:text-gray-300 whitespace-pre-wrap">
+            <div className="bg-surface rounded-md p-4">
+              <p className="text-secondary whitespace-pre-wrap">
                 {customDescription}
               </p>
             </div>
@@ -85,7 +85,7 @@ const CustomDescription = ({
             >
               <div className="text-center">
                 <Plus className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <p className="text-sm text-muted">
                   Click to add custom description
                 </p>
               </div>
