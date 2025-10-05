@@ -50,14 +50,14 @@ const KnowledgeList = ({
 
   if (data.length === 0) {
     return (
-      <div className="text-center py-12 bg-gray-50 dark:bg-gray-800 rounded-lg">
+      <div className="text-center py-12 bg-surface rounded-lg">
         <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
           <span className="text-2xl">{getTabIcon()}</span>
         </div>
-        <h4 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+        <h4 className="heading-lg mb-2">
           No {getTabLabel()} Added Yet
         </h4>
-        <p className="text-gray-600 dark:text-gray-300 max-w-md mx-auto">
+        <p className="text-secondary max-w-md mx-auto">
           Click "Add {getTabLabel()}" to start building your knowledge base.
         </p>
       </div>
@@ -67,16 +67,16 @@ const KnowledgeList = ({
   return (
     <div className="space-y-3">
       {data.map((item) => (
-        <div key={item.id} className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
+        <div key={item.id} className="bg-card rounded-lg border-card p-4">
           <div className="flex items-start justify-between">
             <div className="flex-1">
               <div className="flex items-center space-x-3 mb-2">
-                <h5 className="font-medium text-gray-900 dark:text-white">{item.title}</h5>
+                <h5 className="font-medium text-primary">{item.title}</h5>
                 {getStatusIcon(item.status)}
               </div>
               
               {activeTab === 'text' && (
-                <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-2">
+                <p className="text-sm text-secondary line-clamp-2">
                   {item.content}
                 </p>
               )}
@@ -98,7 +98,7 @@ const KnowledgeList = ({
               {activeTab === 'files' && (
                 <div className="flex items-center space-x-2">
                   <File className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm text-gray-600 dark:text-gray-300">
+                  <span className="text-sm text-secondary">
                     {item.fileName} ({formatFileSize(item.fileSize)})
                   </span>
                 </div>
@@ -106,16 +106,16 @@ const KnowledgeList = ({
               
               {activeTab === 'qa' && (
                 <div className="space-y-1">
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                  <p className="text-sm text-secondary">
                     <span className="font-medium">Q:</span> {item.question}
                   </p>
-                  <p className="text-sm text-gray-600 dark:text-gray-300">
+                  <p className="text-sm text-secondary">
                     <span className="font-medium">A:</span> {item.answer}
                   </p>
                 </div>
               )}
               
-              <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+              <p className="text-xs text-muted mt-2">
                 Added {new Date(item.createdAt).toLocaleDateString()}
               </p>
             </div>

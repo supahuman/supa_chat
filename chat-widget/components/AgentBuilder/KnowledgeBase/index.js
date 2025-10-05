@@ -115,11 +115,11 @@ const KnowledgeBase = () => {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+      <div className="border-divider pb-4">
+        <h3 className="heading-lg">
           Knowledge Base
         </h3>
-        <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+        <p className="text-sm text-secondary mt-1">
           Add different types of knowledge to train your AI agent. Choose from text, websites, files, or Q&A pairs.
         </p>
       </div>

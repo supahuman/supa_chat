@@ -1,26 +1,123 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+@theme {
+  --color-background: #ffffff;
+  --color-foreground: #171717;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  @theme {
+    --color-background: #0a0a0a;
+    --color-foreground: #ededed;
   }
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--color-background);
+  color: var(--color-foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* ========================================
+   CUSTOM UTILITY CLASSES
+   ======================================== */
+
+/* Background utilities */
+.bg-card { 
+  @apply bg-white dark:bg-gray-800; 
+}
+
+.bg-card-elevated { 
+  @apply bg-white dark:bg-gray-900; 
+}
+
+.bg-surface { 
+  @apply bg-gray-50 dark:bg-gray-800; 
+}
+
+/* Text utilities */
+.text-primary { 
+  @apply text-gray-900 dark:text-white; 
+}
+
+.text-secondary { 
+  @apply text-gray-600 dark:text-gray-300; 
+}
+
+.text-muted { 
+  @apply text-gray-500 dark:text-gray-400; 
+}
+
+/* Border utilities */
+.border-card { 
+  @apply border border-gray-200 dark:border-gray-700; 
+}
+
+.border-divider { 
+  @apply border-b border-gray-200 dark:border-gray-700; 
+}
+
+/* Layout utilities */
+.card-container { 
+  @apply rounded-lg shadow-sm; 
+}
+
+.card-elevated { 
+  @apply rounded-xl shadow-md; 
+}
+
+/* Input utilities */
+.input-base { 
+  @apply w-full px-3 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:border-blue-500 transition-colors duration-200;
+}
+
+/* Button utilities */
+.btn-primary { 
+  @apply inline-flex items-center justify-center font-medium px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200;
+}
+
+.btn-secondary { 
+  @apply inline-flex items-center justify-center font-medium px-3 py-1 text-sm bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200;
+}
+
+.btn-outline { 
+  @apply inline-flex items-center justify-center font-medium px-4 py-2 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200;
+}
+
+.btn-ghost { 
+  @apply inline-flex items-center justify-center font-medium px-3 py-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200;
+}
+
+.btn-danger { 
+  @apply inline-flex items-center justify-center font-medium px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200;
+}
+
+.btn-success { 
+  @apply inline-flex items-center justify-center font-medium px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200;
+}
+
+/* Button sizes */
+.btn-xs { @apply px-2 py-1 text-xs rounded; }
+.btn-sm { @apply px-3 py-1 text-xs rounded; }
+.btn-md { @apply px-4 py-2 text-sm rounded-lg; }
+.btn-lg { @apply px-6 py-3 text-base rounded-lg; }
+.btn-xl { @apply px-8 py-4 text-lg rounded-lg; }
+
+/* Typography utilities */
+.heading-xl { @apply text-xl font-bold text-gray-900 dark:text-white; }
+.heading-lg { @apply text-lg font-semibold text-gray-900 dark:text-white; }
+.heading-md { @apply text-base font-medium text-gray-900 dark:text-white; }
+.heading-sm { @apply text-sm font-medium text-gray-900 dark:text-white; }
+
+/* Modal utilities */
+.modal-backdrop { @apply fixed inset-0 bg-black/50 flex items-center justify-center z-50; }
+.modal-content { @apply bg-white dark:bg-gray-800 rounded-lg w-full flex flex-col; }
+.modal-header { @apply px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between; }
+.modal-body { @apply flex-1 p-6 overflow-y-auto; }
+
+/* Card utilities */
+.card-header { @apply px-6 py-4 border-b border-gray-200 dark:border-gray-700; }
+.card-body { @apply p-6; }
+.card-footer { @apply px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800; }

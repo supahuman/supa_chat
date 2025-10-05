@@ -127,7 +127,7 @@ export default function ClientOnboarding({ isOpen, onClose, onClientCreated }) {
             </p>
             <button
               onClick={handleClose}
-              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+              className="btn-primary"
             >
               Continue
             </button>
@@ -197,7 +197,7 @@ export default function ClientOnboarding({ isOpen, onClose, onClientCreated }) {
             <button
               onClick={() => setStep(Math.max(1, step - 1))}
               disabled={step === 1}
-              className="px-4 py-2 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+              className="btn-ghost"
             >
               Previous
             </button>
@@ -205,7 +205,7 @@ export default function ClientOnboarding({ isOpen, onClose, onClientCreated }) {
             {step < 3 ? (
               <button
                 onClick={() => setStep(step + 1)}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                className="btn-primary"
               >
                 Next
               </button>
@@ -213,7 +213,7 @@ export default function ClientOnboarding({ isOpen, onClose, onClientCreated }) {
               <button
                 onClick={handleSubmit}
                 disabled={isLoading}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                className="btn-success flex items-center space-x-2"
               >
                 {isLoading ? (
                   <>
@@ -271,7 +271,7 @@ function BasicInfoStep({ formData, onInputChange }) {
           value={formData.clientId}
           onChange={(e) => onInputChange('clientId', e.target.value)}
           placeholder="e.g., mycompany, support-bot"
-          className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 transition-colors duration-200"
+          className="input-base"
         />
       </div>
 
@@ -284,7 +284,7 @@ function BasicInfoStep({ formData, onInputChange }) {
           value={formData.name}
           onChange={(e) => onInputChange('name', e.target.value)}
           placeholder="e.g., My Company Support"
-          className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 transition-colors duration-200"
+          className="input-base"
         />
       </div>
 
@@ -297,7 +297,7 @@ function BasicInfoStep({ formData, onInputChange }) {
           onChange={(e) => onInputChange('description', e.target.value)}
           placeholder="Brief description of your chatbot's purpose"
           rows={3}
-          className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 transition-colors duration-200"
+          className="input-base"
         />
       </div>
     </div>
@@ -316,7 +316,7 @@ function DatabaseStep({ formData, onInputChange }) {
         <select
           value={formData.vectorDB.type}
           onChange={(e) => onInputChange('vectorDB.type', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 transition-colors duration-200"
+          className="input-base"
         >
           <option value="">Select database type</option>
           <option value="mongodb">MongoDB Atlas</option>
@@ -335,7 +335,7 @@ function DatabaseStep({ formData, onInputChange }) {
               value={formData.vectorDB.connectionString}
               onChange={(e) => onInputChange('vectorDB.connectionString', e.target.value)}
               placeholder="mongodb+srv://username:password@cluster.mongodb.net/database"
-              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 transition-colors duration-200"
+              className="input-base"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -348,7 +348,7 @@ function DatabaseStep({ formData, onInputChange }) {
                 value={formData.vectorDB.database}
                 onChange={(e) => onInputChange('vectorDB.database', e.target.value)}
                 placeholder="e.g., mycompany_knowledge"
-                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 transition-colors duration-200"
+                className="input-base"
               />
             </div>
             <div>
@@ -360,7 +360,7 @@ function DatabaseStep({ formData, onInputChange }) {
                 value={formData.vectorDB.collection}
                 onChange={(e) => onInputChange('vectorDB.collection', e.target.value)}
                 placeholder="e.g., documents"
-                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 transition-colors duration-200"
+                className="input-base"
               />
             </div>
           </div>
@@ -378,7 +378,7 @@ function DatabaseStep({ formData, onInputChange }) {
               value={formData.vectorDB.connectionString}
               onChange={(e) => onInputChange('vectorDB.connectionString', e.target.value)}
               placeholder="https://your-project.supabase.co"
-              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 transition-colors duration-200"
+              className="input-base"
             />
           </div>
           <div>
@@ -390,7 +390,7 @@ function DatabaseStep({ formData, onInputChange }) {
               value={formData.vectorDB.database}
               onChange={(e) => onInputChange('vectorDB.database', e.target.value)}
               placeholder="e.g., mycompany_knowledge"
-              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 transition-colors duration-200"
+              className="input-base"
             />
           </div>
         </>
@@ -411,7 +411,7 @@ function LLMStep({ formData, onInputChange }) {
         <select
           value={formData.llm.provider}
           onChange={(e) => onInputChange('llm.provider', e.target.value)}
-          className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 transition-colors duration-200"
+          className="input-base"
         >
           <option value="">Select LLM provider</option>
           <option value="groq">Groq (Fast & Cost-effective)</option>
@@ -429,7 +429,7 @@ function LLMStep({ formData, onInputChange }) {
             <select
               value={formData.llm.model}
               onChange={(e) => onInputChange('llm.model', e.target.value)}
-              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 transition-colors duration-200"
+              className="input-base"
             >
               <option value="">Select model</option>
               {formData.llm.provider === 'groq' && (
@@ -464,7 +464,7 @@ function LLMStep({ formData, onInputChange }) {
               value={formData.apiKey}
               onChange={(e) => onInputChange('apiKey', e.target.value)}
               placeholder={`Enter your ${formData.llm.provider} API key`}
-              className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 transition-colors duration-200"
+              className="input-base"
             />
           </div>
 
@@ -480,7 +480,7 @@ function LLMStep({ formData, onInputChange }) {
                 step="0.1"
                 value={formData.llm.temperature}
                 onChange={(e) => onInputChange('llm.temperature', parseFloat(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 transition-colors duration-200"
+                className="input-base"
               />
             </div>
             <div>
@@ -493,7 +493,7 @@ function LLMStep({ formData, onInputChange }) {
                 max="4000"
                 value={formData.llm.maxTokens}
                 onChange={(e) => onInputChange('llm.maxTokens', parseInt(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:border-blue-500 transition-colors duration-200"
+                className="input-base"
               />
             </div>
           </div>

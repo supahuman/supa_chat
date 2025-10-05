@@ -11,7 +11,7 @@ const TopTabBar = ({ activeTab, setActiveTab, onToggleSidebar }) => {
   ];
 
   return (
-    <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 sticky top-16 z-20">
+    <div className="bg-card border-divider sticky top-16 z-20">
       <div className="px-4 py-3">
         <div className="flex items-center space-x-3">
           {/* Mobile menu button */}
@@ -34,7 +34,7 @@ const TopTabBar = ({ activeTab, setActiveTab, onToggleSidebar }) => {
                   className={`flex items-center justify-center space-x-2 px-4 py-3 rounded-md text-sm font-medium transition-all flex-1 ${
                     activeTab === tab.id
                       ? 'bg-white dark:bg-gray-600 text-blue-600 dark:text-blue-300 shadow-sm'
-                      : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-gray-600'
+                      : 'text-secondary hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-600'
                   }`}
                 >
                   <Icon className="w-4 h-4" />

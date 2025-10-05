@@ -23,24 +23,24 @@ const QuickActions = ({
 
       {/* Current Client Status */}
       {currentClient && (
-        <div className="p-6 rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
+        <div className="p-6 rounded-xl border-card bg-card">
           <div className="flex items-center space-x-3 mb-4">
             <div className="w-10 h-10 bg-green-100 dark:bg-green-900/20 rounded-lg flex items-center justify-center">
               <Bot className="w-5 h-5 text-green-600 dark:text-green-400" />
             </div>
             <div>
-              <h3 className="font-semibold text-gray-900 dark:text-white">{currentClient.name}</h3>
+              <h3 className="font-semibold text-primary">{currentClient.name}</h3>
               <p className="text-sm text-gray-600 dark:text-gray-400">Active Client</p>
             </div>
           </div>
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
               <span className="text-gray-600 dark:text-gray-400">Database:</span>
-              <span className="font-medium text-gray-900 dark:text-white">{currentClient.vectorDB?.type || 'Unknown'}</span>
+              <span className="font-medium text-primary">{currentClient.vectorDB?.type || 'Unknown'}</span>
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-gray-600 dark:text-gray-400">LLM:</span>
-              <span className="font-medium text-gray-900 dark:text-white">{currentClient.llm?.provider || 'Unknown'}</span>
+              <span className="font-medium text-primary">{currentClient.llm?.provider || 'Unknown'}</span>
             </div>
           </div>
         </div>

@@ -51,15 +51,15 @@ const ClientManagementPage = () => {
 
         {/* Widget Code Generator */}
         {currentClient && (
-          <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-8">
+          <div className="bg-card rounded-xl border-card p-6 mb-8">
             <WidgetCodeGenerator client={currentClient} />
           </div>
         )}
 
         {/* Client List */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">All Clients</h3>
+        <div className="bg-card rounded-xl border-card overflow-hidden">
+          <div className="card-header">
+            <h3 className="heading-lg">All Clients</h3>
             <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
               Manage your client configurations and test connections
             </p>

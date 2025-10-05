@@ -65,7 +65,7 @@ export default function WidgetCodeGenerator({ client }) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <h3 className="heading-lg">
             Widget Code Generator
           </h3>
           <p className="text-sm text-gray-600 dark:text-gray-400">
@@ -74,7 +74,7 @@ export default function WidgetCodeGenerator({ client }) {
         </div>
         <button
           onClick={copyToClipboard}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center space-x-2"
+          className="btn-primary flex items-center space-x-2"
         >
           {copied ? (
             <>
@@ -94,7 +94,7 @@ export default function WidgetCodeGenerator({ client }) {
       <div className="grid md:grid-cols-2 gap-6">
         {/* Basic Settings */}
         <div className="space-y-4">
-          <h4 className="font-medium text-gray-900 dark:text-white flex items-center space-x-2">
+          <h4 className="heading-sm flex items-center space-x-2">
             <Settings className="w-4 h-4" />
             <span>Basic Settings</span>
           </h4>
@@ -106,7 +106,7 @@ export default function WidgetCodeGenerator({ client }) {
             <select
               value={config.theme}
               onChange={(e) => setConfig({...config, theme: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              className="input-base"
             >
               <option value="light">Light</option>
               <option value="dark">Dark</option>
@@ -120,7 +120,7 @@ export default function WidgetCodeGenerator({ client }) {
             <select
               value={config.position}
               onChange={(e) => setConfig({...config, position: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              className="input-base"
             >
               <option value="bottom-right">Bottom Right</option>
               <option value="bottom-left">Bottom Left</option>
@@ -136,7 +136,7 @@ export default function WidgetCodeGenerator({ client }) {
             <select
               value={config.borderRadius}
               onChange={(e) => setConfig({...config, borderRadius: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              className="input-base"
             >
               <option value="4px">Small (4px)</option>
               <option value="8px">Medium (8px)</option>
@@ -174,7 +174,7 @@ export default function WidgetCodeGenerator({ client }) {
 
         {/* Color Settings */}
         <div className="space-y-4">
-          <h4 className="font-medium text-gray-900 dark:text-white flex items-center space-x-2">
+          <h4 className="heading-sm flex items-center space-x-2">
             <Palette className="w-4 h-4" />
             <span>Colors & Styling</span>
           </h4>
@@ -194,7 +194,7 @@ export default function WidgetCodeGenerator({ client }) {
                 type="text"
                 value={config.primaryColor}
                 onChange={(e) => setConfig({...config, primaryColor: e.target.value})}
-                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                className="flex-1 input-base"
                 placeholder="#3B82F6"
               />
             </div>
@@ -215,7 +215,7 @@ export default function WidgetCodeGenerator({ client }) {
                 type="text"
                 value={config.secondaryColor}
                 onChange={(e) => setConfig({...config, secondaryColor: e.target.value})}
-                className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+                className="flex-1 input-base"
                 placeholder="#1E40AF"
               />
             </div>
@@ -228,7 +228,7 @@ export default function WidgetCodeGenerator({ client }) {
             <select
               value={config.fontFamily}
               onChange={(e) => setConfig({...config, fontFamily: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              className="input-base"
             >
               <option value="Inter, sans-serif">Inter</option>
               <option value="Roboto, sans-serif">Roboto</option>
@@ -247,7 +247,7 @@ export default function WidgetCodeGenerator({ client }) {
               type="text"
               value={config.greetingMessage}
               onChange={(e) => setConfig({...config, greetingMessage: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              className="input-base"
               placeholder="Hi! How can I help you today?"
             />
           </div>
@@ -260,7 +260,7 @@ export default function WidgetCodeGenerator({ client }) {
               type="text"
               value={config.placeholder}
               onChange={(e) => setConfig({...config, placeholder: e.target.value})}
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white"
+              className="input-base"
               placeholder="Type your message..."
             />
           </div>
@@ -269,7 +269,7 @@ export default function WidgetCodeGenerator({ client }) {
 
       {/* Generated Code */}
       <div>
-        <h4 className="font-medium text-gray-900 dark:text-white mb-2">Generated Code</h4>
+        <h4 className="heading-sm mb-2">Generated Code</h4>
         <div className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto">
           <pre className="text-sm whitespace-pre-wrap">{generateCode()}</pre>
         </div>
