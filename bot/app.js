@@ -8,7 +8,18 @@ dotenv.config({ path: process.env.ENV_PATH || '.env' });
 
 const app = express();
 
-app.use(cors());
+// CORS configuration
+const corsOptions = {
+  origin: [
+    'http://localhost:3000', // Local development
+    'https://*.vercel.app', // Vercel deployments
+    process.env.CORS_ORIGIN // Custom domain if set
+  ].filter(Boolean),
+  credentials: true,
+  optionsSuccessStatus: 200
+};
+
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '1mb' }));
 app.use(morgan('dev'));
 
