@@ -54,17 +54,48 @@ const KnowledgeBase = forwardRef(({ agentData }, ref) => {
 
     switch (activeTab) {
       case 'text':
-        setTextKnowledge([...textKnowledge, { ...newItem, content: formData.content }]);
+        const newTextItem = { ...newItem, content: formData.content };
+        setTextKnowledge([...textKnowledge, newTextItem]);
+        // Update agentData with new knowledge
+        if (agentData?.setAgentData) {
+          agentData.setAgentData(prev => ({
+            ...prev,
+            knowledgeBase: [...(prev.knowledgeBase || []), newTextItem]
+          }));
+        }
         break;
       case 'links':
-        // Add to local state - crawling will happen after agent is saved
-        setLinks([...links, { ...newItem, url: formData.url, status: 'saved' }]);
+        const newLinkItem = { ...newItem, url: formData.url, status: 'saved' };
+        setLinks([...links, newLinkItem]);
+        // Update agentData with new knowledge
+        if (agentData?.setAgentData) {
+          agentData.setAgentData(prev => ({
+            ...prev,
+            knowledgeBase: [...(prev.knowledgeBase || []), newLinkItem]
+          }));
+        }
         break;
       case 'files':
-        setFiles([...files, { ...newItem, fileName: formData.file?.name, fileSize: formData.file?.size }]);
+        const newFileItem = { ...newItem, fileName: formData.file?.name, fileSize: formData.file?.size };
+        setFiles([...files, newFileItem]);
+        // Update agentData with new knowledge
+        if (agentData?.setAgentData) {
+          agentData.setAgentData(prev => ({
+            ...prev,
+            knowledgeBase: [...(prev.knowledgeBase || []), newFileItem]
+          }));
+        }
         break;
       case 'qa':
-        setQaPairs([...qaPairs, { ...newItem, question: formData.question, answer: formData.answer }]);
+        const newQAItem = { ...newItem, question: formData.question, answer: formData.answer };
+        setQaPairs([...qaPairs, newQAItem]);
+        // Update agentData with new knowledge
+        if (agentData?.setAgentData) {
+          agentData.setAgentData(prev => ({
+            ...prev,
+            knowledgeBase: [...(prev.knowledgeBase || []), newQAItem]
+          }));
+        }
         break;
     }
 
