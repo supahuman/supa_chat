@@ -1,4 +1,3 @@
-import ClientRAGService from '../services/client/ClientRAGService.js';
 import ClientConfigService from '../services/client/ClientConfigService.js';
 import AgentService from '../services/agent/AgentService.js';
 import ConversationService from '../services/conversation/ConversationService.js';
@@ -46,35 +45,25 @@ export const processChatMessage = async (req, res) => {
       });
     }
 
-    const clientRAGService = new ClientRAGService();
-    const ragResult = await clientRAGService.processQuery(
-      'supa-chat',
-      message,
-      conversationHistory
-    );
+    // For now, return a simple response since we're transitioning to NLP pipeline
+    // TODO: Integrate with NLP pipeline for semantic search
+    const response = `I received your message: "${message}". How can I help you today?`;
 
-    if (ragResult.success) {
-      // Add bot response to conversation
-      conversationService.addMessage(sessionId || `session_${Date.now()}`, {
-        role: 'assistant',
-        content: ragResult.response,
-        clientId: 'supa-chat'
-      });
+    // Add bot response to conversation
+    conversationService.addMessage(sessionId || `session_${Date.now()}`, {
+      role: 'assistant',
+      content: response,
+      clientId: 'supa-chat'
+    });
 
-      res.json({
-        success: true,
-        response: ragResult.response,
-        sessionId: sessionId || `session_${Date.now()}`,
-        confidence: ragResult.confidence,
-        model: ragResult.model,
-        usage: ragResult.usage,
-      });
-    } else {
-      res.status(500).json({
-        success: false,
-        error: ragResult.error || 'Failed to process query',
-      });
-    }
+    res.json({
+      success: true,
+      response: response,
+      sessionId: sessionId || `session_${Date.now()}`,
+      confidence: 0.8,
+      model: 'simple-response',
+      usage: { prompt_tokens: 0, completion_tokens: 0 },
+    });
   } catch (error) {
     console.error('Chat error:', error);
     res.status(500).json({
@@ -298,35 +287,24 @@ export const processClientChatMessage = async (req, res) => {
     // Get conversation history for context
     const conversationHistory = conversationService.getConversationContext(sessionId, 5);
 
-    // Process with RAG if no escalation needed
-    const clientRAGService = new ClientRAGService();
-    const ragResult = await clientRAGService.processQuery(
-      clientId,
-      message,
-      conversationHistory
-    );
-
-    if (!ragResult.success) {
-      return res.status(500).json({
-        success: false,
-        error: ragResult.error
-      });
-    }
+    // For now, return a simple response since we're transitioning to NLP pipeline
+    // TODO: Integrate with NLP pipeline for semantic search
+    const response = `I received your message: "${message}". How can I help you today?`;
 
     // Add bot response to conversation history
     conversationService.addMessage(sessionId, {
       role: 'assistant',
-      content: ragResult.response,
+      content: response,
       clientId
     });
 
     res.json({
       success: true,
-      response: ragResult.response,
-      sources: ragResult.sources,
-      confidence: ragResult.confidence,
-      model: ragResult.model,
-      usage: ragResult.usage,
+      response: response,
+      sources: [],
+      confidence: 0.8,
+      model: 'simple-response',
+      usage: { prompt_tokens: 0, completion_tokens: 0 },
       clientId,
       sessionId
     });

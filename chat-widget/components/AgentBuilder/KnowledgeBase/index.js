@@ -1,13 +1,14 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, forwardRef, useImperativeHandle } from 'react';
+import { useCrawlAgentUrlsMutation, useTestCrawlUrlMutation } from '@/store/botApi';
 import KnowledgeTabs from './KnowledgeTabs';
 import KnowledgeHeader from './KnowledgeHeader';
 import KnowledgeForm from './KnowledgeForm';
 import KnowledgeList from './KnowledgeList';
 import KnowledgeSummary from './KnowledgeSummary';
 
-const KnowledgeBase = () => {
+const KnowledgeBase = forwardRef(({ agentData }, ref) => {
   const [activeTab, setActiveTab] = useState('text');
   const [textKnowledge, setTextKnowledge] = useState([]);
   const [links, setLinks] = useState([]);
@@ -15,6 +16,11 @@ const KnowledgeBase = () => {
   const [qaPairs, setQaPairs] = useState([]);
   const [isAdding, setIsAdding] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const [isCrawling, setIsCrawling] = useState(false);
+
+  // RTK Query hooks for crawling
+  const [crawlAgentUrls] = useCrawlAgentUrlsMutation();
+  const [testCrawlUrl] = useTestCrawlUrlMutation();
 
   const [formData, setFormData] = useState({
     title: '',
@@ -38,12 +44,12 @@ const KnowledgeBase = () => {
     });
   };
 
-  const handleSaveKnowledge = () => {
+  const handleSaveKnowledge = async () => {
     const newItem = {
       id: Date.now().toString(),
       title: formData.title,
       createdAt: new Date().toISOString(),
-      status: 'processing'
+      status: 'saved'
     };
 
     switch (activeTab) {
@@ -51,7 +57,8 @@ const KnowledgeBase = () => {
         setTextKnowledge([...textKnowledge, { ...newItem, content: formData.content }]);
         break;
       case 'links':
-        setLinks([...links, { ...newItem, url: formData.url }]);
+        // Add to local state - crawling will happen after agent is saved
+        setLinks([...links, { ...newItem, url: formData.url, status: 'saved' }]);
         break;
       case 'files':
         setFiles([...files, { ...newItem, fileName: formData.file?.name, fileSize: formData.file?.size }]);
@@ -71,6 +78,55 @@ const KnowledgeBase = () => {
       answer: ''
     });
   };
+
+  // Function to crawl all saved URLs after agent is created
+  const crawlAllUrls = async (agentId) => {
+    const urlsToCrawl = links.filter(link => link.status === 'saved' && link.url);
+    
+    if (urlsToCrawl.length === 0) {
+      console.log('📝 No URLs to crawl');
+      return;
+    }
+
+    try {
+      setIsCrawling(true);
+      console.log(`🕷️ Starting crawl for ${urlsToCrawl.length} URLs for agent ${agentId}`);
+
+      const urls = urlsToCrawl.map(link => link.url);
+      
+      const result = await crawlAgentUrls({
+        agentId: agentId,
+        urls: urls
+      }).unwrap();
+
+      if (result.success) {
+        console.log(`✅ Successfully crawled ${result.data.crawledCount} pages`);
+        // Update all link statuses to completed
+        setLinks(prev => prev.map(link => 
+          urls.includes(link.url) ? { ...link, status: 'completed' } : link
+        ));
+      } else {
+        console.error('❌ Crawling failed:', result.message);
+        // Update all link statuses to failed
+        setLinks(prev => prev.map(link => 
+          urls.includes(link.url) ? { ...link, status: 'failed' } : link
+        ));
+      }
+    } catch (error) {
+      console.error('❌ Error crawling URLs:', error.message || error);
+      // Update all link statuses to failed
+      setLinks(prev => prev.map(link => 
+        urlsToCrawl.some(urlLink => urlLink.url === link.url) ? { ...link, status: 'failed' } : link
+      ));
+    } finally {
+      setIsCrawling(false);
+    }
+  };
+
+  // Expose crawlAllUrls function to parent component
+  useImperativeHandle(ref, () => ({
+    crawlAllUrls
+  }));
 
   const handleCancel = () => {
     setIsAdding(false);
@@ -142,6 +198,7 @@ const KnowledgeBase = () => {
           setFormData={setFormData}
           onSave={handleSaveKnowledge}
           onCancel={handleCancel}
+          isCrawling={isCrawling}
         />
       )}
 
@@ -161,6 +218,8 @@ const KnowledgeBase = () => {
       />
     </div>
   );
-};
+});
+
+KnowledgeBase.displayName = 'KnowledgeBase';
 
 export default KnowledgeBase;

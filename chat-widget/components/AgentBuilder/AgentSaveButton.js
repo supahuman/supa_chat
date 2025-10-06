@@ -3,13 +3,13 @@
 import { useState } from 'react';
 import { Save, Check, Loader2 } from 'lucide-react';
 import { Button } from '@/ui';
-import { useCreateAgentMutation } from '@/store/botApi';
+import { useCreateCompanyAgentMutation } from '@/store/botApi';
 
 const AgentSaveButton = ({ 
   agentData, 
   onSaveSuccess 
 }) => {
-  const [createAgent, { isLoading, error }] = useCreateAgentMutation();
+  const [createAgent, { isLoading, error }] = useCreateCompanyAgentMutation();
   const [saved, setSaved] = useState(false);
 
   // Debug: Log agent data to see what we're working with

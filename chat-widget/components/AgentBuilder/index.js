@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import TopTabBar from './TopTabBar';
 import Sidebar from './Sidebar';
 import ContentArea from './ContentArea';
@@ -10,6 +10,7 @@ const DashboardLayout = ({ children }) => {
   const [activeTab, setActiveTab] = useState('build');
   const [activeSidebarItem, setActiveSidebarItem] = useState('ai-persona');
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const contentAreaRef = useRef();
   
   // Agent data collection
   const [agentData, setAgentData] = useState({
@@ -28,6 +29,15 @@ const DashboardLayout = ({ children }) => {
     setSidebarOpen(false);
   };
 
+  // Set default sidebar item when switching tabs
+  useEffect(() => {
+    if (activeTab === 'deploy' && !['agents', 'embeds', 'settings', 'analytics'].includes(activeSidebarItem)) {
+      setActiveSidebarItem('agents');
+    } else if (activeTab === 'build' && !['ai-persona', 'knowledge-base', 'actions', 'forms', 'teach-agent'].includes(activeSidebarItem)) {
+      setActiveSidebarItem('ai-persona');
+    }
+  }, [activeTab, activeSidebarItem]);
+
   const handleSidebarItemClick = (itemId) => {
     setActiveSidebarItem(itemId);
     
@@ -40,6 +50,21 @@ const DashboardLayout = ({ children }) => {
     // Close sidebar on mobile after selection
     if (window.innerWidth < 768) {
       setSidebarOpen(false);
+    }
+  };
+
+  // Function to handle agent creation success and trigger crawling
+  const handleAgentCreated = async (agentId) => {
+    console.log(`🎉 Agent created with ID: ${agentId}`);
+    
+    // Trigger crawling of any saved URLs
+    if (contentAreaRef.current) {
+      try {
+        await contentAreaRef.current.crawlAllUrls(agentId);
+        console.log('✅ Crawling completed for new agent');
+      } catch (error) {
+        console.error('❌ Error crawling URLs for new agent:', error);
+      }
     }
   };
 
@@ -58,6 +83,7 @@ const DashboardLayout = ({ children }) => {
       <div className="flex h-[calc(100vh-200px)]">
         {/* Sidebar */}
         <Sidebar
+          activeTab={activeTab}
           activeSidebarItem={activeSidebarItem}
           setActiveSidebarItem={setActiveSidebarItem}
           sidebarOpen={sidebarOpen}
@@ -67,10 +93,12 @@ const DashboardLayout = ({ children }) => {
 
         {/* Main Content */}
         <ContentArea
+          ref={contentAreaRef}
           activeTab={activeTab}
           activeSidebarItem={activeSidebarItem}
           agentData={agentData}
           setAgentData={setAgentData}
+          onAgentCreated={handleAgentCreated}
         >
           {children}
         </ContentArea>

@@ -1,5 +1,4 @@
 import ClientConfigService from '../services/client/ClientConfigService.js';
-import DatabaseFactory from '../services/database/DatabaseFactory.js';
 import LLMFactory from '../services/llm/LLMFactory.js';
 
 /**
@@ -161,7 +160,7 @@ class ClientManagementController {
         name: client.name,
         description: client.description,
         vectorDB: { type: client.vectorDB.type },
-        llm: { provider: client.llm.provider, model: client.llm.model },
+        llm: { provider: 'global', model: 'managed' }, // Using global model now
         status: 'active'
       }));
 
@@ -381,14 +380,21 @@ class ClientManagementController {
    */
   async testDatabaseConnection(vectorDBConfig) {
     try {
-      const vectorDB = DatabaseFactory.create(vectorDBConfig.type, vectorDBConfig);
-      await vectorDB.connect();
-      await vectorDB.disconnect();
+      // Since we're using MongoDB directly, we can test the connection
+      // by checking if we can access the database
+      const mongoose = require('mongoose');
       
-      return {
-        success: true,
-        message: 'Database connection successful'
-      };
+      if (mongoose.connection.readyState === 1) {
+        return {
+          success: true,
+          message: 'MongoDB connection successful'
+        };
+      } else {
+        return {
+          success: false,
+          error: 'MongoDB not connected'
+        };
+      }
     } catch (error) {
       return {
         success: false,

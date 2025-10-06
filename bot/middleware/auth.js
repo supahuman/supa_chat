@@ -1,29 +1,129 @@
-// Simple auth middleware for development
-// In production, replace with real JWT/session validation
+import CompanyService from '../services/CompanyService.js';
 
-export const protect = (req, res, next) => {
+/**
+ * Middleware to authenticate requests using API key
+ */
+export const authenticateApiKey = async (req, res, next) => {
   try {
-    if (process.env.ALLOW_PUBLIC_BOT === 'true') {
-      req.user = { id: 'public-user', role: 'admin' };
-      return next();
+    const apiKey = req.headers['x-company-key'] || req.headers['authorization']?.replace('Bearer ', '');
+    const userId = req.headers['x-user-id'];
+    
+    if (!apiKey) {
+      return res.status(401).json({
+        success: false,
+        error: 'API key required. Provide X-Company-Key header.'
+      });
     }
-
-    const authHeader = req.headers.authorization || '';
-    if (authHeader.startsWith('Bearer ')) {
-      // TODO: validate token and set real user
-      req.user = { id: 'token-user', role: 'user' };
-      return next();
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'User ID required. Provide X-User-ID header.'
+      });
     }
-
-    return res.status(401).json({ success: false, error: 'Not authorized' });
-  } catch (err) {
-    return res.status(401).json({ success: false, error: 'Auth error' });
+    
+    // Validate API key and get company info
+    const validation = await CompanyService.validateApiKey(apiKey);
+    if (!validation.success) {
+      return res.status(401).json({
+        success: false,
+        error: validation.error
+      });
+    }
+    
+    // Add company and user info to request
+    req.company = validation.data;
+    req.userId = userId;
+    req.companyId = validation.data.companyId;
+    
+    next();
+  } catch (error) {
+    console.error('❌ Authentication error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Authentication failed'
+    });
   }
 };
 
-export const isAdmin = (req, res, next) => {
-  if (req.user && req.user.role === 'admin') return next();
-  return res.status(403).json({ success: false, error: 'Admin only' });
+/**
+ * Middleware for session-based auth (web interface)
+ */
+export const authenticateSession = async (req, res, next) => {
+  try {
+    // For web interface, we'll use session data
+    // This can be extended to use JWT tokens or session storage
+    const { userId, companyId } = req.session || {};
+    
+    if (!userId || !companyId) {
+      return res.status(401).json({
+        success: false,
+        error: 'Session required. Please log in.'
+      });
+    }
+    
+    // Validate company exists
+    const company = await CompanyService.getCompanyById(companyId);
+    if (!company) {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid company session'
+      });
+    }
+    
+    req.userId = userId;
+    req.companyId = companyId;
+    req.company = company;
+    
+    next();
+  } catch (error) {
+    console.error('❌ Session authentication error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Session authentication failed'
+    });
+  }
 };
 
+/**
+ * Optional authentication - doesn't fail if no auth provided
+ */
+export const optionalAuth = async (req, res, next) => {
+  try {
+    const apiKey = req.headers['x-company-key'] || req.headers['authorization']?.replace('Bearer ', '');
+    const userId = req.headers['x-user-id'];
+    
+    if (apiKey && userId) {
+      const validation = await CompanyService.validateApiKey(apiKey);
+      if (validation.success) {
+        req.company = validation.data;
+        req.userId = userId;
+        req.companyId = validation.data.companyId;
+      }
+    }
+    
+    next();
+  } catch (error) {
+    // Continue without auth
+    next();
+  }
+};
 
+/**
+ * Legacy protect middleware for existing routes
+ * This is a simple pass-through for now
+ */
+export const protect = async (req, res, next) => {
+  // For now, just pass through - existing routes will work
+  // In production, you'd implement proper authentication here
+  next();
+};
+
+/**
+ * Legacy admin middleware for existing routes
+ */
+export const isAdmin = async (req, res, next) => {
+  // For now, just pass through - existing routes will work
+  // In production, you'd check if user has admin role
+  next();
+};

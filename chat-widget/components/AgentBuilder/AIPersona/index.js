@@ -9,7 +9,7 @@ import CustomDescription from './CustomDescription';
 import AgentPreview from './AgentPreview';
 import AgentSaveButton from '../AgentSaveButton';
 
-const AIPersona = ({ agentData, setAgentData }) => {
+const AIPersona = ({ agentData, setAgentData, onAgentCreated }) => {
   const [selectedPersona, setSelectedPersona] = useState('classy');
   const [customDescription, setCustomDescription] = useState('');
   const [isEditing, setIsEditing] = useState(false);
@@ -17,6 +17,52 @@ const AIPersona = ({ agentData, setAgentData }) => {
   const [agentTitle, setAgentTitle] = useState('Customer Support TechCorp');
   const [maxCharacters, setMaxCharacters] = useState(500);
   const [defaultLanguage, setDefaultLanguage] = useState('en');
+
+  // Define personas array
+  const personas = [
+    {
+      id: 'classy',
+      name: 'Classy',
+      icon: Crown,
+      description: 'Sophisticated, elegant, and refined. Uses formal language with a touch of warmth. Perfect for luxury brands, professional services, and high-end customer experiences.',
+      characteristics: [
+        'Formal yet approachable tone',
+        'Uses sophisticated vocabulary',
+        'Maintains professional boundaries',
+        'Demonstrates expertise and knowledge',
+        'Polished and refined communication style'
+      ],
+      example: "Good day! I'm delighted to assist you with your inquiry. How may I provide you with the most exceptional service today?"
+    },
+    {
+      id: 'friendly',
+      name: 'Friendly',
+      icon: Heart,
+      description: 'Warm, approachable, and personable. Uses conversational language with genuine care. Perfect for community-focused brands, customer support, and personal services.',
+      characteristics: [
+        'Warm and welcoming tone',
+        'Uses conversational language',
+        'Shows genuine care and empathy',
+        'Encourages open communication',
+        'Makes customers feel valued'
+      ],
+      example: "Hi there! I'm so happy to help you today. What can I do to make your experience better? I'm here to support you every step of the way!"
+    },
+    {
+      id: 'professional',
+      name: 'Professional',
+      icon: Briefcase,
+      description: 'Efficient, knowledgeable, and results-oriented. Uses clear, direct language focused on solutions. Perfect for B2B services, technical support, and business applications.',
+      characteristics: [
+        'Clear and direct communication',
+        'Focuses on solutions and results',
+        'Demonstrates technical expertise',
+        'Maintains business-appropriate tone',
+        'Efficient and goal-oriented'
+      ],
+      example: "Hello! I'm here to help you resolve this issue efficiently. Let me gather some information and provide you with the best solution."
+    }
+  ];
 
   // Update agent data when fields change
   const updateAgentData = (field, value) => {
@@ -64,50 +110,6 @@ const AIPersona = ({ agentData, setAgentData }) => {
     }
   };
 
-  const personas = [
-    {
-      id: 'classy',
-      name: 'Classy',
-      icon: Crown,
-      description: 'Sophisticated, elegant, and refined. Uses formal language with a touch of warmth. Perfect for luxury brands, professional services, and high-end customer experiences.',
-      characteristics: [
-        'Formal yet approachable tone',
-        'Uses sophisticated vocabulary',
-        'Maintains professional boundaries',
-        'Demonstrates expertise and knowledge',
-        'Polished and refined communication style'
-      ],
-      example: "Good day! I'm delighted to assist you with your inquiry. How may I provide you with the most exceptional service today?"
-    },
-    {
-      id: 'friendly',
-      name: 'Friendly',
-      icon: Heart,
-      description: 'Warm, approachable, and personable. Uses conversational language with genuine care. Perfect for community-focused brands, customer support, and personal services.',
-      characteristics: [
-        'Warm and welcoming tone',
-        'Uses conversational language',
-        'Shows genuine care and empathy',
-        'Encourages open communication',
-        'Makes customers feel valued'
-      ],
-      example: "Hi there! I'm so happy to help you today. What can I do to make your experience better? I'm here to support you every step of the way!"
-    },
-    {
-      id: 'professional',
-      name: 'Professional',
-      icon: Briefcase,
-      description: 'Competent, reliable, and efficient. Uses clear, direct language focused on solutions. Perfect for business services, technical support, and corporate environments.',
-      characteristics: [
-        'Clear and direct communication',
-        'Focuses on solutions and results',
-        'Maintains efficiency and accuracy',
-        'Demonstrates expertise and reliability',
-        'Structured and organized approach'
-      ],
-      example: "Hello, I'm here to help resolve your issue efficiently. Let me gather some information to provide you with the best solution."
-    }
-  ];
 
   const handlePersonaSelect = (personaId) => {
     setSelectedPersona(personaId);
@@ -172,6 +174,10 @@ const AIPersona = ({ agentData, setAgentData }) => {
             agentData={agentData}
             onSaveSuccess={(savedAgent) => {
               console.log('Agent saved successfully:', savedAgent);
+              // Call the onAgentCreated callback with the agent ID
+              if (onAgentCreated && savedAgent?.agentId) {
+                onAgentCreated(savedAgent.agentId);
+              }
             }}
           />
         </div>

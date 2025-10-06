@@ -1,22 +1,41 @@
 'use client';
 
-import { Bot, Database, Zap, FileText, GraduationCap, X } from 'lucide-react';
+import { Bot, Database, Zap, FileText, GraduationCap, X, Users, Settings, BarChart3, ExternalLink } from 'lucide-react';
 import { Button } from '@/ui';
 
 const Sidebar = ({ 
+  activeTab,
   activeSidebarItem, 
   setActiveSidebarItem, 
   sidebarOpen, 
   setSidebarOpen,
   onItemClick
 }) => {
-  const sidebarItems = [
-    { id: 'ai-persona', label: 'AI Persona', icon: Bot },
-    { id: 'knowledge-base', label: 'Knowledge Base', icon: Database },
-    { id: 'actions', label: 'Actions', icon: Zap },
-    { id: 'forms', label: 'Forms', icon: FileText },
-    { id: 'teach-agent', label: 'Teach Your Agent', icon: GraduationCap }
-  ];
+  // Different sidebar items based on active tab
+  const getSidebarItems = (tab) => {
+    switch (tab) {
+      case 'build':
+      case 'train':
+        return [
+          { id: 'ai-persona', label: 'AI Persona', icon: Bot },
+          { id: 'knowledge-base', label: 'Knowledge Base', icon: Database },
+          { id: 'actions', label: 'Actions', icon: Zap },
+          { id: 'forms', label: 'Forms', icon: FileText },
+          { id: 'teach-agent', label: 'Teach Your Agent', icon: GraduationCap }
+        ];
+             case 'deploy':
+               return [
+                 { id: 'agents', label: 'Agents', icon: Users },
+                 { id: 'embeds', label: 'Embeds', icon: ExternalLink },
+                 { id: 'settings', label: 'Settings', icon: Settings },
+                 { id: 'analytics', label: 'Analytics', icon: BarChart3 }
+               ];
+      default:
+        return [];
+    }
+  };
+
+  const sidebarItems = getSidebarItems(activeTab);
 
   const handleItemClick = (itemId) => {
     if (onItemClick) {
