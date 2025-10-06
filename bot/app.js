@@ -12,7 +12,8 @@ const app = express();
 const corsOptions = {
   origin: [
     'http://localhost:3000', // Local development
-    'https://*.vercel.app', // Vercel deployments
+    'https://supa-chat-mu.vercel.app', // Your specific Vercel domain
+    'https://*.vercel.app', // All Vercel deployments
     process.env.CORS_ORIGIN // Custom domain if set
   ].filter(Boolean),
   credentials: true,
