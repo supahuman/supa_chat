@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Crown, Heart, Briefcase } from 'lucide-react';
 import PersonaConfig from './PersonaConfig';
 import PersonaSelector from './PersonaSelector';
@@ -8,15 +8,72 @@ import PersonaDetails from './PersonaDetails';
 import CustomDescription from './CustomDescription';
 import AgentPreview from './AgentPreview';
 import AgentSaveButton from '../AgentSaveButton';
+import { useGetCompanyAgentQuery } from '@/store/botApi';
 
-const AIPersona = ({ agentData, setAgentData, onAgentCreated }) => {
+const AIPersona = ({ currentAgentId, onAgentCreated }) => {
+  // Local agent data state
+  const [agentData, setAgentData] = useState({
+    name: '',
+    description: '',
+    personality: '',
+    knowledgeBase: [],
+    trainingExamples: []
+  });
+  
   const [selectedPersona, setSelectedPersona] = useState('classy');
   const [customDescription, setCustomDescription] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [tempDescription, setTempDescription] = useState('');
-  const [agentTitle, setAgentTitle] = useState(agentData?.name || '');
+  const [agentTitle, setAgentTitle] = useState('');
   const [maxCharacters, setMaxCharacters] = useState(500);
   const [defaultLanguage, setDefaultLanguage] = useState('en');
+
+  // Load existing agent data when currentAgentId changes
+  const { data: agentResponse, isLoading: isLoadingAgent } = useGetCompanyAgentQuery(currentAgentId, {
+    skip: !currentAgentId
+  });
+
+  useEffect(() => {
+    if (currentAgentId && agentResponse?.success) {
+      // Load agent data from API response
+      const agent = agentResponse.data;
+      console.log('Loading agent data for ID:', currentAgentId, agent);
+      
+      setAgentData({
+        name: agent.name || '',
+        description: agent.description || '',
+        personality: agent.personality || '',
+        knowledgeBase: agent.knowledgeBase || [],
+        trainingExamples: agent.trainingExamples || []
+      });
+      
+      // Set form fields
+      setAgentTitle(agent.name || '');
+      setCustomDescription(agent.description || '');
+      
+      // Set personality based on agent data
+      if (agent.personality) {
+        const matchingPersona = personas.find(p => 
+          agent.personality.includes(p.description.substring(0, 50))
+        );
+        if (matchingPersona) {
+          setSelectedPersona(matchingPersona.id);
+        }
+      }
+    } else if (!currentAgentId) {
+      // Reset to new agent state
+      setAgentData({
+        name: '',
+        description: '',
+        personality: '',
+        knowledgeBase: [],
+        trainingExamples: []
+      });
+      setAgentTitle('');
+      setCustomDescription('');
+      setSelectedPersona('classy');
+    }
+  }, [currentAgentId, agentResponse]);
 
   // Update local state when agentData changes (for editing)
   useEffect(() => {
@@ -84,31 +141,43 @@ const AIPersona = ({ agentData, setAgentData, onAgentCreated }) => {
   ];
 
   // Update agent data when fields change
-  const updateAgentData = (field, value) => {
+  const updateAgentData = useCallback((field, value) => {
     setAgentData(prev => ({
       ...prev,
       [field]: value
     }));
-  };
+  }, [setAgentData]);
 
-  // Initialize agent data with default values only for new agents
+  // Initialize agent data with default values
   useEffect(() => {
-    // Only set defaults if this is a completely new agent (no agentId)
-    if (!agentData.agentId) {
-      if (!agentData.name && agentTitle) {
-        updateAgentData('name', agentTitle);
-      }
-      if (!agentData.description && customDescription) {
-        updateAgentData('description', customDescription);
-      }
-      if (!agentData.personality) {
-        const persona = personas.find(p => p.id === selectedPersona);
-        if (persona) {
-          updateAgentData('personality', persona.description);
-        }
+    // Set default personality if not set
+    if (!agentData.personality) {
+      const persona = personas.find(p => p.id === selectedPersona);
+      if (persona) {
+        updateAgentData('personality', persona.description);
       }
     }
-  }, []); // Run once on mount
+  }, [selectedPersona, agentData.personality]);
+
+  // Update agent data when local state changes
+  useEffect(() => {
+    if (agentTitle && agentTitle !== agentData.name) {
+      console.log('🔄 Updating agent name:', agentTitle);
+      updateAgentData('name', agentTitle);
+    }
+  }, [agentTitle, agentData.name]);
+
+  useEffect(() => {
+    if (customDescription && customDescription !== agentData.description) {
+      console.log('🔄 Updating agent description:', customDescription);
+      updateAgentData('description', customDescription);
+    }
+  }, [customDescription, agentData.description]);
+
+  // Debug: Log agentData changes
+  useEffect(() => {
+    console.log('📊 AIPersona - agentData updated:', agentData);
+  }, [agentData]);
 
   // Handle agent title change
   const handleTitleChange = (title) => {

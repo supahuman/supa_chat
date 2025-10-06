@@ -9,7 +9,7 @@ class VectorStoreService {
     this.options = {
       // Search configuration
       defaultLimit: options.defaultLimit || 10,
-      similarityThreshold: options.similarityThreshold || 0.7,
+      similarityThreshold: options.similarityThreshold || 0.3, // Lowered from 0.7 to 0.3
       
       ...options
     };
@@ -61,21 +61,56 @@ class VectorStoreService {
         }
       }));
 
-      // Store vectors using MongoDB adapter
-      const result = await this.vectorAdapter.storeVectors(vectors);
+      // Store vectors directly using AgentVector model
+      const result = await this.VectorModel.insertMany(vectors);
 
-      console.log(`✅ Successfully stored ${result.storedCount} vectors for agent ${agentId}`);
+      console.log(`✅ Successfully stored ${result.length} vectors for agent ${agentId}`);
       
       return {
         success: true,
-        storedCount: result.storedCount,
+        storedCount: result.length,
         agentId,
         companyId,
-        message: `Stored ${result.storedCount} vectors successfully`
+        message: `Stored ${result.length} vectors successfully`
       };
 
     } catch (error) {
       console.error('❌ Error storing vectors:', error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Search for similar content using text query (generates embeddings automatically)
+   * @param {string} agentId - Agent ID
+   * @param {string} companyId - Company ID
+   * @param {string} queryText - Text query to search for
+   * @param {Object} options - Search options
+   * @returns {Array} Array of similar vectors with scores
+   */
+  async searchSimilarContent(agentId, companyId, queryText, options = {}) {
+    try {
+      if (!agentId || !companyId || !queryText) {
+        throw new Error('Agent ID, Company ID, and query text are required');
+      }
+
+      console.log(`🔍 Searching for similar content: "${queryText}"`);
+
+             // Generate embedding for the query text
+             const EmbeddingService = (await import('./EmbeddingService.js')).default;
+             const embeddingService = new EmbeddingService();
+             
+             const queryEmbedding = await embeddingService.generateEmbedding(queryText);
+      
+      if (!queryEmbedding || !Array.isArray(queryEmbedding)) {
+        throw new Error('Failed to generate query embedding');
+      }
+
+      // Use the existing searchSimilar method with the generated embedding
+      return await this.searchSimilar(agentId, companyId, queryEmbedding, options);
+
+    } catch (error) {
+      console.error('❌ Error searching similar content:', error.message);
       throw error;
     }
   }
@@ -142,6 +177,13 @@ class VectorStoreService {
       const results = await this.VectorModel.aggregate(pipeline);
 
       console.log(`✅ Found ${results.length} similar vectors using Atlas Vector Search`);
+      
+      // If Atlas Vector Search returns no results, fall back to manual search
+      if (results.length === 0) {
+        console.log('🔄 Atlas Vector Search returned 0 results, falling back to manual cosine similarity...');
+        return await this.searchSimilarFallback(agentId, companyId, queryEmbedding, options);
+      }
+      
       return results;
 
     } catch (error) {
@@ -165,7 +207,7 @@ class VectorStoreService {
     try {
       const {
         limit = this.options.defaultLimit,
-        threshold = this.options.similarityThreshold,
+        threshold = Math.min(options.threshold || 0.3, 0.3), // Force max threshold of 0.3 for fallback
         sourceType = null,
         category = null
       } = options;
@@ -195,11 +237,18 @@ class VectorStoreService {
         };
       });
 
-      // Filter by threshold and sort by similarity
-      const filteredResults = similarities
-        .filter(item => item.similarity >= threshold)
+      // Sort by similarity (highest first) and get top results
+      const sortedResults = similarities
         .sort((a, b) => b.similarity - a.similarity)
         .slice(0, limit);
+
+      // Filter by threshold after sorting
+      const filteredResults = sortedResults.filter(item => item.similarity >= threshold);
+
+      // Log similarity scores for debugging
+      if (sortedResults.length > 0) {
+        console.log(`📊 Top similarity scores: ${sortedResults.slice(0, 3).map(r => r.similarity.toFixed(4)).join(', ')}`);
+      }
 
       console.log(`✅ Found ${filteredResults.length} similar vectors (fallback)`);
       return filteredResults;

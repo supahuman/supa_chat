@@ -20,18 +20,19 @@ const AgentSaveButton = ({
   console.log('AgentSaveButton - agentData:', agentData);
   console.log('AgentSaveButton - name:', agentData.name, 'description:', agentData.description);
   console.log('AgentSaveButton - name trim:', agentData.name?.trim(), 'description trim:', agentData.description?.trim());
-  console.log('AgentSaveButton - disabled condition:', !agentData.name?.trim() || !agentData.description?.trim());
+  console.log('AgentSaveButton - disabled condition:', !agentData.name?.trim());
 
   const handleSave = async () => {
     try {
-      console.log('Attempting to save agent with data:', agentData);
+      console.log('💾 Attempting to save agent with data:', agentData);
+      console.log('📚 Knowledge base data:', agentData.knowledgeBase);
       
       let result;
       if (isEditing) {
-        console.log('Updating existing agent:', agentData.agentId);
+        console.log('🔄 Updating existing agent:', agentData.agentId);
         result = await updateAgent({ agentId: agentData.agentId, ...agentData }).unwrap();
       } else {
-        console.log('Creating new agent');
+        console.log('🆕 Creating new agent');
         result = await createAgent(agentData).unwrap();
       }
       

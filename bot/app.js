@@ -44,12 +44,12 @@ import { initializeBot, registerBotRoutes } from './utils/botUtils.js';
 import clientManagementRoutes from './routes/clientManagementRoutes.js';
 import escalationRoutes from './routes/escalationRoutes.js';
 import modelRoutes from './routes/modelRoutes.js';
-import agentRoutes from './routes/agentRoutes.js';
 import companyRoutes from './routes/companyRoutes.js';
 import companyAgentRoutes from './routes/companyAgentRoutes.js';
 import agentCrawlerRoutes from './routes/agentCrawlerRoutes.js';
 import deploymentRoutes from './routes/deploymentRoutes.js';
 import toolRoutes from './routes/toolRoutes.js';
+import agentChatRoutes from './routes/agentChatRoutes.js';
 
 async function bootstrap() {
   const port = process.env.PORT || 4000;
@@ -77,8 +77,6 @@ async function bootstrap() {
   // Register model routes
   app.use('/api/model', modelRoutes);
   
-  // Register agent routes
-  app.use('/api/agent', agentRoutes);
   
   // Register company management routes
   app.use('/api/company', companyRoutes);
@@ -94,6 +92,9 @@ async function bootstrap() {
   
   // Register tool routes
   app.use('/api/company', toolRoutes);
+  
+  // Register agent chat routes
+  app.use('/api/company', agentChatRoutes);
 
   try {
     const botRoutes = await initializeBot();

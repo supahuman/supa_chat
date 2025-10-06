@@ -4,9 +4,9 @@ import { useState, useEffect } from 'react';
 import ChatHeader from './ChatHeader';
 import ChatMessages from './ChatMessages';
 import ChatInput from './ChatInput';
-import { useCreateAgentMutation, useChatWithAgentMutation, useGetConversationQuery } from '@/store/botApi';
+import { useChatWithAgentMutation, useGetConversationQuery } from '@/store/botApi';
 
-const ChatInterface = ({ currentChat, setCurrentChat, currentAgent, agentData }) => {
+const ChatInterface = ({ currentChat, setCurrentChat, currentAgent }) => {
   const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId] = useState(() => {
@@ -17,7 +17,6 @@ const ChatInterface = ({ currentChat, setCurrentChat, currentAgent, agentData })
     return newSessionId;
   });
 
-  const [createAgent] = useCreateAgentMutation();
   const [chatWithAgent] = useChatWithAgentMutation();
   const { data: conversationData } = useGetConversationQuery(sessionId);
 
@@ -34,23 +33,29 @@ const ChatInterface = ({ currentChat, setCurrentChat, currentAgent, agentData })
   const handleSend = async () => {
     if (!message.trim()) return;
 
-    const newChat = [...currentChat, { type: 'customer', message: message.trim() }];
+    // Check if we have an agent to chat with
+    if (!currentAgent) {
+      setCurrentChat(prev => [...prev, { 
+        type: 'agent', 
+        message: 'Please save your agent first in the Build tab before chatting.' 
+      }]);
+      return;
+    }
+
+    const userMessage = message.trim();
+    const newChat = [...currentChat, { type: 'customer', message: userMessage }];
     setCurrentChat(newChat);
-    setMessage('');
+    setMessage(''); // Clear input but keep focus
     setIsLoading(true);
     
     try {
-      let agentToUse = currentAgent;
-      if (!agentToUse && agentData.name) {
-        const result = await createAgent(agentData).unwrap();
-        if (result.success) agentToUse = result.data;
-      }
-
+      console.log('💬 Chatting with agent:', currentAgent);
+      
       const data = await chatWithAgent({
-        message: message.trim(),
+        message: userMessage,
         sessionId,
-        agentId: agentToUse?.id,
-        personality: agentToUse?.personality || agentData.personality,
+        agentId: currentAgent.agentId || currentAgent.id,
+        personality: currentAgent.personality,
         conversationHistory: currentChat.slice(-5)
       }).unwrap();
       
@@ -58,7 +63,11 @@ const ChatInterface = ({ currentChat, setCurrentChat, currentAgent, agentData })
         setCurrentChat(prev => [...prev, { type: 'agent', message: data.response }]);
       }
     } catch (error) {
-      setCurrentChat(prev => [...prev, { type: 'agent', message: 'Sorry, I had trouble responding. Please try again.' }]);
+      console.error('❌ Chat error:', error);
+      setCurrentChat(prev => [...prev, { 
+        type: 'agent', 
+        message: 'Sorry, I had trouble responding. Please try again.' 
+      }]);
     } finally {
       setIsLoading(false);
     }
@@ -71,7 +80,7 @@ const ChatInterface = ({ currentChat, setCurrentChat, currentAgent, agentData })
     window.location.reload();
   };
 
-  const agentName = currentAgent?.name || agentData.name || 'Your Agent';
+  const agentName = currentAgent?.name || 'Your Agent';
 
   return (
     <div className="h-full flex flex-col bg-white dark:bg-gray-900 overflow-hidden">
