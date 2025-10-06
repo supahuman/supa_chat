@@ -21,14 +21,14 @@ export const processChatMessage = async (req, res) => {
     const conversationService = new ConversationService();
     
     // Add user message to conversation
-    conversationService.addMessage(sessionId || `session_${Date.now()}`, {
+    await conversationService.addMessage(sessionId || `session_${Date.now()}`, {
       role: 'user',
       content: message,
       clientId: 'supa-chat'
-    });
+    }, null, null, null);
 
     // Get conversation history for context
-    const conversationHistory = conversationService.getConversationContext(sessionId || `session_${Date.now()}`, 5);
+    const conversationHistory = await conversationService.getConversationContext(sessionId || `session_${Date.now()}`, 5);
 
     console.log(
       `📝 Processing with ${conversationHistory.length} previous messages`
@@ -49,12 +49,12 @@ export const processChatMessage = async (req, res) => {
     // TODO: Integrate with NLP pipeline for semantic search
     const response = `I received your message: "${message}". How can I help you today?`;
 
-    // Add bot response to conversation
-    conversationService.addMessage(sessionId || `session_${Date.now()}`, {
-      role: 'assistant',
-      content: response,
-      clientId: 'supa-chat'
-    });
+        // Add bot response to conversation
+        await conversationService.addMessage(sessionId || `session_${Date.now()}`, {
+          role: 'assistant',
+          content: response,
+          clientId: 'supa-chat'
+        }, null, null, null);
 
     res.json({
       success: true,
@@ -227,7 +227,7 @@ export const processClientChatMessage = async (req, res) => {
       
       // Generate conversation summary for agents
       const conversationService = new ConversationService();
-      const summary = conversationService.generateSummary(sessionId, escalationCheck.reason);
+      const summary = await conversationService.generateSummary(sessionId, escalationCheck.reason);
       console.log('📋 Generated conversation summary:', summary?.summary);
       
       const escalation = agentService.createEscalation({
@@ -278,25 +278,25 @@ export const processClientChatMessage = async (req, res) => {
 
     // Add user message to conversation history
     const conversationService = new ConversationService();
-    conversationService.addMessage(sessionId, {
+    await conversationService.addMessage(sessionId, {
       role: 'user',
       content: message,
       clientId
-    });
+    }, null, null, null);
 
     // Get conversation history for context
-    const conversationHistory = conversationService.getConversationContext(sessionId, 5);
+    const conversationHistory = await conversationService.getConversationContext(sessionId, 5);
 
     // For now, return a simple response since we're transitioning to NLP pipeline
     // TODO: Integrate with NLP pipeline for semantic search
     const response = `I received your message: "${message}". How can I help you today?`;
 
     // Add bot response to conversation history
-    conversationService.addMessage(sessionId, {
+    await conversationService.addMessage(sessionId, {
       role: 'assistant',
       content: response,
       clientId
-    });
+    }, null, null, null);
 
     res.json({
       success: true,
