@@ -10,12 +10,24 @@ const app = express();
 
 // CORS configuration
 const corsOptions = {
-  origin: [
-    'http://localhost:3000', // Local development
-    'https://supa-chat-mu.vercel.app', // Your specific Vercel domain
-    'https://*.vercel.app', // All Vercel deployments
-    process.env.CORS_ORIGIN // Custom domain if set
-  ].filter(Boolean),
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'https://supa-chat-mu.vercel.app',
+      'https://supa-chat-mu.vercel.app/',
+      process.env.CORS_ORIGIN
+    ].filter(Boolean);
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
   optionsSuccessStatus: 200
 };
