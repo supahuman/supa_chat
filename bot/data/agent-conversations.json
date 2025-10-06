@@ -16,5 +16,23 @@
     ],
     "createdAt": "2025-10-06T13:38:59.508Z",
     "updatedAt": "2025-10-06T13:38:59.508Z"
+  },
+  "session-1759705866627": {
+    "sessionId": "session-1759705866627",
+    "agentId": "agent-1759689637571",
+    "messages": [
+      {
+        "role": "user",
+        "content": "hi",
+        "timestamp": "2025-10-06T18:05:16.036Z"
+      },
+      {
+        "role": "assistant",
+        "content": "Good day to you, sir or madam. It's a pleasure to make your acquaintance. How may I have the privilege of assisting you today?",
+        "timestamp": "2025-10-06T18:05:16.770Z"
+      }
+    ],
+    "createdAt": "2025-10-06T18:05:16.036Z",
+    "updatedAt": "2025-10-06T18:05:16.036Z"
   }
 }
