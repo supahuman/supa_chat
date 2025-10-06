@@ -22,15 +22,15 @@ const agentVectorSchema = new mongoose.Schema({
     maxlength: 50000 // Reasonable limit for content
   },
   
-  // Vector embedding
+  // Vector embedding - optimized for MongoDB Atlas Vector Search
   embedding: {
     type: [Number],
     required: true,
     validate: {
       validator: function(v) {
-        return Array.isArray(v) && v.length > 0 && v.every(n => typeof n === 'number');
+        return Array.isArray(v) && v.length === 1536 && v.every(n => typeof n === 'number');
       },
-      message: 'Embedding must be an array of numbers'
+      message: 'Embedding must be an array of 1536 numbers for OpenAI embeddings'
     }
   },
   
@@ -86,6 +86,21 @@ agentVectorSchema.index(
     name: 'contentHash_unique_sparse'
   }
 );
+
+// Atlas Vector Search index configuration
+// This will be created via MongoDB Atlas UI or CLI with the following mapping:
+/*
+{
+  "fields": [
+    {
+      "numDimensions": 1536,
+      "path": "embedding",
+      "similarity": "cosine",
+      "type": "vector"
+    }
+  ]
+}
+*/
 
 // Update the updatedAt field before saving
 agentVectorSchema.pre('save', function(next) {

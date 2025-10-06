@@ -81,7 +81,7 @@ class VectorStoreService {
   }
 
   /**
-   * Search for similar vectors using cosine similarity
+   * Search for similar vectors using MongoDB Atlas Vector Search
    * @param {string} agentId - Agent ID
    * @param {string} companyId - Company ID
    * @param {Array} queryEmbedding - Query embedding vector
@@ -101,14 +101,83 @@ class VectorStoreService {
         category = null
       } = options;
 
-      console.log(`🔍 Searching for similar vectors (limit: ${limit}, threshold: ${threshold})`);
+      console.log(`🔍 Searching for similar vectors using Atlas Vector Search (limit: ${limit})`);
+
+      // Build aggregation pipeline for Atlas Vector Search
+      const pipeline = [
+        {
+          $vectorSearch: {
+            index: "vector_index", // Atlas Vector Search index name
+            path: "embedding",
+            queryVector: queryEmbedding,
+            numCandidates: limit * 10, // Get more candidates for filtering
+            limit: limit
+          }
+        },
+        {
+          $match: {
+            agentId: agentId,
+            companyId: companyId,
+            ...(sourceType && { 'source.type': sourceType }),
+            ...(category && { 'source.category': category })
+          }
+        },
+        {
+          $addFields: {
+            similarity: { $meta: "vectorSearchScore" },
+            score: { $meta: "vectorSearchScore" }
+          }
+        },
+        {
+          $match: {
+            similarity: { $gte: threshold }
+          }
+        },
+        {
+          $limit: limit
+        }
+      ];
+
+      // Execute Atlas Vector Search
+      const results = await this.VectorModel.aggregate(pipeline);
+
+      console.log(`✅ Found ${results.length} similar vectors using Atlas Vector Search`);
+      return results;
+
+    } catch (error) {
+      console.error('❌ Error searching similar vectors with Atlas Vector Search:', error.message);
+      
+      // Fallback to manual cosine similarity if Atlas Vector Search fails
+      console.log('🔄 Falling back to manual cosine similarity search...');
+      return await this.searchSimilarFallback(agentId, companyId, queryEmbedding, options);
+    }
+  }
+
+  /**
+   * Fallback search using manual cosine similarity
+   * @param {string} agentId - Agent ID
+   * @param {string} companyId - Company ID
+   * @param {Array} queryEmbedding - Query embedding vector
+   * @param {Object} options - Search options
+   * @returns {Array} Array of similar vectors with scores
+   */
+  async searchSimilarFallback(agentId, companyId, queryEmbedding, options = {}) {
+    try {
+      const {
+        limit = this.options.defaultLimit,
+        threshold = this.options.similarityThreshold,
+        sourceType = null,
+        category = null
+      } = options;
+
+      console.log(`🔍 Fallback: Searching for similar vectors (limit: ${limit}, threshold: ${threshold})`);
 
       // Build query filter
       const filter = { agentId, companyId };
       if (sourceType) filter['source.type'] = sourceType;
       if (category) filter['source.category'] = category;
 
-      // Get all vectors for the agent (MongoDB doesn't have native vector similarity search)
+      // Get all vectors for the agent
       const vectors = await this.VectorModel.find(filter).lean();
 
       if (vectors.length === 0) {
@@ -132,11 +201,11 @@ class VectorStoreService {
         .sort((a, b) => b.similarity - a.similarity)
         .slice(0, limit);
 
-      console.log(`✅ Found ${filteredResults.length} similar vectors`);
+      console.log(`✅ Found ${filteredResults.length} similar vectors (fallback)`);
       return filteredResults;
 
     } catch (error) {
-      console.error('❌ Error searching similar vectors:', error.message);
+      console.error('❌ Error in fallback search:', error.message);
       throw error;
     }
   }

@@ -1,0 +1,22 @@
+{
+  "agentVectors": {
+    "fields": [
+      {
+        "numDimensions": 1536,
+        "path": "embedding",
+        "similarity": "cosine",
+        "type": "vector"
+      }
+    ]
+  },
+  "conversations": {
+    "fields": [
+      {
+        "numDimensions": 1536,
+        "path": "messages.embedding",
+        "similarity": "cosine",
+        "type": "vector"
+      }
+    ]
+  }
+}

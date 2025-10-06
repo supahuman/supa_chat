@@ -28,7 +28,17 @@ const conversationSchema = new mongoose.Schema({
       type: Date,
       default: Date.now
     },
-    metadata: mongoose.Schema.Types.Mixed
+    metadata: mongoose.Schema.Types.Mixed,
+    // Vector embedding for semantic search (optional)
+    embedding: {
+      type: [Number],
+      validate: {
+        validator: function(v) {
+          return !v || (Array.isArray(v) && v.length === 1536 && v.every(n => typeof n === 'number'));
+        },
+        message: 'Embedding must be an array of 1536 numbers for OpenAI embeddings'
+      }
+    }
   }],
   summary: {
     type: String,
@@ -53,5 +63,20 @@ conversationSchema.index({ companyId: 1, userId: 1 });
 conversationSchema.index({ companyId: 1, agentId: 1 });
 // sessionId already has unique: true which creates an index automatically
 conversationSchema.index({ companyId: 1, createdAt: -1 });
+
+// Atlas Vector Search index configuration for conversation messages
+// This will be created via MongoDB Atlas UI or CLI with the following mapping:
+/*
+{
+  "fields": [
+    {
+      "numDimensions": 1536,
+      "path": "messages.embedding",
+      "similarity": "cosine",
+      "type": "vector"
+    }
+  ]
+}
+*/
 
 export default mongoose.model('Conversation', conversationSchema);
