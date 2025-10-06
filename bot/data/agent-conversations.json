@@ -1,0 +1,20 @@
+{
+  "session-1759694928049": {
+    "sessionId": "session-1759694928049",
+    "agentId": "agent-1759689637571",
+    "messages": [
+      {
+        "role": "user",
+        "content": "hi",
+        "timestamp": "2025-10-06T13:38:59.508Z"
+      },
+      {
+        "role": "assistant",
+        "content": "Good day to you. I'm delighted to make your acquaintance and assist you in any way I can. How may I have the pleasure of serving you today?",
+        "timestamp": "2025-10-06T13:39:00.354Z"
+      }
+    ],
+    "createdAt": "2025-10-06T13:38:59.508Z",
+    "updatedAt": "2025-10-06T13:38:59.508Z"
+  }
+}

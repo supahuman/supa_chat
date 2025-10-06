@@ -54,6 +54,26 @@ const agentSchema = new mongoose.Schema({
     totalConversations: { type: Number, default: 0 },
     totalMessages: { type: Number, default: 0 },
     lastUsed: Date
+  },
+  tools: {
+    enabled: [{
+      type: String,
+      enum: ['onedrive', 'slack', 'email', 'ticket', 'callback', 'docs', 'update', 'refund', 'escalate', 'survey']
+    }],
+    configurations: {
+      type: Map,
+      of: mongoose.Schema.Types.Mixed,
+      default: new Map()
+    },
+    permissions: {
+      type: Map,
+      of: {
+        read: { type: Boolean, default: true },
+        write: { type: Boolean, default: false },
+        admin: { type: Boolean, default: false }
+      },
+      default: new Map()
+    }
   }
 }, {
   timestamps: true

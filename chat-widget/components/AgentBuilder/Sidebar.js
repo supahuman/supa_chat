@@ -1,6 +1,6 @@
 'use client';
 
-import { Bot, Database, Zap, FileText, GraduationCap, X, Users, Settings, BarChart3, ExternalLink } from 'lucide-react';
+import { Bot, Database, Zap, FileText, GraduationCap, X, Users, Settings, BarChart3, ExternalLink, Wrench } from 'lucide-react';
 import { Button } from '@/ui';
 
 const Sidebar = ({ 
@@ -21,6 +21,7 @@ const Sidebar = ({
           { id: 'knowledge-base', label: 'Knowledge Base', icon: Database },
           { id: 'actions', label: 'Actions', icon: Zap },
           { id: 'forms', label: 'Forms', icon: FileText },
+          { id: 'tools', label: 'Tools', icon: Wrench },
           { id: 'teach-agent', label: 'Teach Your Agent', icon: GraduationCap }
         ];
              case 'deploy':
