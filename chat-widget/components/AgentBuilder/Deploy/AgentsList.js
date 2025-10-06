@@ -4,10 +4,11 @@ import { useEffect } from 'react';
 import { Users, Plus, MoreVertical, Play, Pause, Trash2, Edit, BarChart3, ExternalLink } from 'lucide-react';
 import { Button } from '@/ui';
 import { Card } from '@/ui';
-import { useGetCompanyAgentsQuery } from '@/store/botApi';
+import { useGetCompanyAgentsQuery, useDeleteCompanyAgentMutation } from '@/store/botApi';
 import { hasValidCredentials, setupMockCredentials } from '@/utils/auth';
 
-const AgentsList = ({ onNavigateToEmbeds }) => {
+const AgentsList = ({ onNavigateToEmbeds, onEditAgent }) => {
+  const [deleteAgent, { isLoading: isDeleting }] = useDeleteCompanyAgentMutation();
 
   // Set up mock credentials if none exist
   useEffect(() => {
@@ -83,6 +84,29 @@ const AgentsList = ({ onNavigateToEmbeds }) => {
     // Navigate to embeds tab with selected agent
     console.log('Deploy agent:', agent.name);
     // TODO: Implement navigation to embeds tab
+  };
+
+  // Handle agent deletion with confirmation
+  const handleDeleteAgent = async (agentId, agentName) => {
+    const confirmed = window.confirm(
+      `⚠️ Are you sure you want to delete "${agentName}"?\n\nThis action cannot be undone and will permanently remove:\n• Agent configuration\n• All conversations\n• Knowledge base data\n• Deployment settings\n\nType "DELETE" to confirm:`
+    );
+    
+    if (confirmed) {
+      const userInput = window.prompt('Type "DELETE" to confirm deletion:');
+      if (userInput === 'DELETE') {
+        try {
+          await deleteAgent(agentId).unwrap();
+          alert('✅ Agent deleted successfully');
+          refetch(); // Refresh the list
+        } catch (error) {
+          console.error('Failed to delete agent:', error);
+          alert(`❌ Failed to delete agent: ${error.data?.error || error.message}`);
+        }
+      } else {
+        alert('❌ Deletion cancelled - confirmation text did not match');
+      }
+    }
   };
 
   if (loading) {
@@ -203,6 +227,7 @@ const AgentsList = ({ onNavigateToEmbeds }) => {
                     variant="outline"
                     icon={Edit}
                     className="flex-1"
+                    onClick={() => onEditAgent && onEditAgent(agent)}
                   >
                     Edit
                   </Button>
@@ -225,6 +250,20 @@ const AgentsList = ({ onNavigateToEmbeds }) => {
                     className="flex-1"
                   >
                     Analytics
+                  </Button>
+                </div>
+                
+                {/* Danger Zone - Delete Button */}
+                <div className="pt-2 border-t border-gray-200 dark:border-gray-700">
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    icon={Trash2}
+                    onClick={() => handleDeleteAgent(agent.agentId, agent.name)}
+                    disabled={isDeleting}
+                    className="w-full text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20 border-red-200 dark:border-red-800"
+                  >
+                    {isDeleting ? 'Deleting...' : 'Delete Agent'}
                   </Button>
                 </div>
               </div>

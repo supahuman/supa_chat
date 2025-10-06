@@ -3,14 +3,18 @@
 import { useState } from 'react';
 import { Save, Check, Loader2 } from 'lucide-react';
 import { Button } from '@/ui';
-import { useCreateCompanyAgentMutation } from '@/store/botApi';
+import { useCreateCompanyAgentMutation, useUpdateCompanyAgentMutation } from '@/store/botApi';
 
 const AgentSaveButton = ({ 
   agentData, 
   onSaveSuccess 
 }) => {
-  const [createAgent, { isLoading, error }] = useCreateCompanyAgentMutation();
+  const [createAgent, { isLoading: isCreating, error: createError }] = useCreateCompanyAgentMutation();
+  const [updateAgent, { isLoading: isUpdating, error: updateError }] = useUpdateCompanyAgentMutation();
   const [saved, setSaved] = useState(false);
+  
+  const isLoading = isCreating || isUpdating;
+  const isEditing = !!agentData.agentId;
 
   // Debug: Log agent data to see what we're working with
   console.log('AgentSaveButton - agentData:', agentData);
@@ -21,7 +25,16 @@ const AgentSaveButton = ({
   const handleSave = async () => {
     try {
       console.log('Attempting to save agent with data:', agentData);
-      const result = await createAgent(agentData).unwrap();
+      
+      let result;
+      if (isEditing) {
+        console.log('Updating existing agent:', agentData.agentId);
+        result = await updateAgent({ agentId: agentData.agentId, ...agentData }).unwrap();
+      } else {
+        console.log('Creating new agent');
+        result = await createAgent(agentData).unwrap();
+      }
+      
       console.log('Agent save result:', result);
       
       if (result.success) {
@@ -64,7 +77,7 @@ const AgentSaveButton = ({
       loading={isLoading}
       disabled={!agentData.name?.trim()}
     >
-      {isLoading ? 'Saving Agent...' : 'Save Agent'}
+      {isLoading ? 'Saving Agent...' : (isEditing ? 'Update Agent' : 'Save Agent')}
     </Button>
   );
 };

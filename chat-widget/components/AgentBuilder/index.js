@@ -20,6 +20,7 @@ const DashboardLayout = ({ children }) => {
     knowledgeBase: [],
     trainingExamples: []
   });
+  const [isEditing, setIsEditing] = useState(false);
 
   const handleToggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -68,6 +69,29 @@ const DashboardLayout = ({ children }) => {
     }
   };
 
+  // Function to handle editing an existing agent
+  const handleEditAgent = (agent) => {
+    console.log('Editing agent:', agent);
+    
+    // Load agent data into the form
+    setAgentData({
+      agentId: agent.agentId,
+      name: agent.name,
+      description: agent.description,
+      personality: agent.personality,
+      knowledgeBase: agent.knowledgeBase || [],
+      trainingExamples: agent.trainingExamples || [],
+      tools: agent.tools || {}
+    });
+    
+    // Set editing mode
+    setIsEditing(true);
+    
+    // Switch to Build tab and AI Persona
+    setActiveTab('build');
+    setActiveSidebarItem('ai-persona');
+  };
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Mobile-style Top Tab Bar */}
@@ -99,6 +123,7 @@ const DashboardLayout = ({ children }) => {
           agentData={agentData}
           setAgentData={setAgentData}
           onAgentCreated={handleAgentCreated}
+          onEditAgent={handleEditAgent}
         >
           {children}
         </ContentArea>

@@ -27,6 +27,16 @@ class ToolController {
         });
       }
 
+      // Handle agents created before tools field was added
+      if (!agent.tools) {
+        agent.tools = {
+          enabled: [],
+          configurations: new Map(),
+          permissions: new Map()
+        };
+        await agent.save();
+      }
+
       const availableTools = this.toolExecutionService.getAvailableTools(agent.tools?.enabled || []);
 
       res.json({
@@ -189,6 +199,56 @@ class ToolController {
       res.status(500).json({
         success: false,
         error: 'Failed to get available tools'
+      });
+    }
+  }
+
+  /**
+   * Delete an agent (Admin only)
+   * DELETE /api/company/agents/:agentId
+   */
+  async deleteAgent(req, res) {
+    try {
+      const { agentId } = req.params;
+      const { companyId } = req.company;
+      const { userId } = req.user;
+
+      // Check if user is admin (for now, we'll implement basic admin check)
+      // In production, you'd check against a proper admin role system
+      const isAdmin = req.headers['x-admin-key'] === 'admin_secret_key'; // Temporary admin check
+      
+      if (!isAdmin) {
+        return res.status(403).json({
+          success: false,
+          error: 'Admin access required to delete agents'
+        });
+      }
+
+      const agent = await Agent.findOne({ agentId, companyId });
+      if (!agent) {
+        return res.status(404).json({
+          success: false,
+          error: 'Agent not found'
+        });
+      }
+
+      // Delete the agent
+      await Agent.deleteOne({ agentId, companyId });
+
+      // TODO: Also delete related data (conversations, vectors, etc.)
+      console.log(`🗑️ Agent deleted: ${agentId} by admin: ${userId}`);
+
+      res.json({
+        success: true,
+        message: 'Agent deleted successfully',
+        data: { agentId }
+      });
+
+    } catch (error) {
+      console.error('❌ Error deleting agent:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to delete agent'
       });
     }
   }
