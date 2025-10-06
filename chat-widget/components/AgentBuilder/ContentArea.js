@@ -17,6 +17,7 @@ const ContentArea = forwardRef(({
   agentData,
   setAgentData,
   onAgentCreated,
+  onEditAgent,
   children 
 }, ref) => {
   const knowledgeBaseRef = useRef();
@@ -99,7 +100,7 @@ const ContentArea = forwardRef(({
     if (tab === 'deploy') {
       // Agents list component
       if (sidebarItem === 'agents') {
-        return <AgentsList />;
+        return <AgentsList onEditAgent={onEditAgent} />;
       }
 
       // Embeds list component

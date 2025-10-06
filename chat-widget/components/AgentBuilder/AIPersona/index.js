@@ -14,9 +14,28 @@ const AIPersona = ({ agentData, setAgentData, onAgentCreated }) => {
   const [customDescription, setCustomDescription] = useState('');
   const [isEditing, setIsEditing] = useState(false);
   const [tempDescription, setTempDescription] = useState('');
-  const [agentTitle, setAgentTitle] = useState('Customer Support TechCorp');
+  const [agentTitle, setAgentTitle] = useState(agentData?.name || '');
   const [maxCharacters, setMaxCharacters] = useState(500);
   const [defaultLanguage, setDefaultLanguage] = useState('en');
+
+  // Update local state when agentData changes (for editing)
+  useEffect(() => {
+    if (agentData?.name) {
+      setAgentTitle(agentData.name);
+    }
+    if (agentData?.description) {
+      setCustomDescription(agentData.description);
+    }
+    if (agentData?.personality) {
+      // Find matching persona based on personality text
+      const matchingPersona = personas.find(p => 
+        agentData.personality.includes(p.description.substring(0, 50))
+      );
+      if (matchingPersona) {
+        setSelectedPersona(matchingPersona.id);
+      }
+    }
+  }, [agentData]);
 
   // Define personas array
   const personas = [
@@ -72,19 +91,21 @@ const AIPersona = ({ agentData, setAgentData, onAgentCreated }) => {
     }));
   };
 
-  // Initialize agent data with default values
+  // Initialize agent data with default values only for new agents
   useEffect(() => {
-    // Initialize with default values if agent data is empty
-    if (!agentData.name) {
-      updateAgentData('name', agentTitle);
-    }
-    if (!agentData.description) {
-      updateAgentData('description', customDescription);
-    }
-    if (!agentData.personality) {
-      const persona = personas.find(p => p.id === selectedPersona);
-      if (persona) {
-        updateAgentData('personality', persona.description);
+    // Only set defaults if this is a completely new agent (no agentId)
+    if (!agentData.agentId) {
+      if (!agentData.name && agentTitle) {
+        updateAgentData('name', agentTitle);
+      }
+      if (!agentData.description && customDescription) {
+        updateAgentData('description', customDescription);
+      }
+      if (!agentData.personality) {
+        const persona = personas.find(p => p.id === selectedPersona);
+        if (persona) {
+          updateAgentData('personality', persona.description);
+        }
       }
     }
   }, []); // Run once on mount

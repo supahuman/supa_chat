@@ -44,10 +44,15 @@ const Tools = ({ agentData, onUpdate }) => {
           const data = await response.json();
           console.log('🔧 Tools: Response data:', data);
           const toolsState = {};
-          data.data.enabled.forEach(toolId => {
-            toolsState[toolId] = true;
-          });
+          if (data.data?.enabled) {
+            data.data.enabled.forEach(toolId => {
+              toolsState[toolId] = true;
+            });
+          }
           setEnabledTools(toolsState);
+        } else if (response.status === 404) {
+          console.log('🔧 Tools: Agent has no tools data yet, starting with empty tools');
+          setEnabledTools({});
         } else {
           console.error('🔧 Tools: API error:', response.status, response.statusText);
         }

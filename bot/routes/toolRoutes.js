@@ -36,6 +36,13 @@ router.post('/agents/:agentId/tools/execute', toolController.executeTool);
 router.post('/agents/:agentId/tools/test', toolController.testTool);
 
 /**
+ * @route   DELETE /api/company/agents/:agentId
+ * @desc    Delete an agent (Admin only)
+ * @access  Admin
+ */
+router.delete('/agents/:agentId', toolController.deleteAgent);
+
+/**
  * @route   GET /api/tools/available
  * @desc    Get all available tools
  * @access  Public

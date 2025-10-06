@@ -150,6 +150,32 @@ export const botApi = createApi({
           invalidatesTags: ['CompanyAgents'],
         }),
 
+        updateCompanyAgent: builder.mutation({
+          query: ({ agentId, ...agentData }) => ({
+            url: `/api/company/agents/${agentId}`,
+            method: 'PUT',
+            headers: {
+              'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
+              'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : ''
+            },
+            body: agentData,
+          }),
+          invalidatesTags: ['CompanyAgents'],
+        }),
+
+        deleteCompanyAgent: builder.mutation({
+          query: (agentId) => ({
+            url: `/api/company/agents/${agentId}`,
+            method: 'DELETE',
+            headers: {
+              'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
+              'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : '',
+              'X-Admin-Key': 'admin_secret_key' // Temporary admin key
+            },
+          }),
+          invalidatesTags: ['CompanyAgents'],
+        }),
+
         // Agent crawler endpoints
         crawlAgentUrls: builder.mutation({
           query: ({ agentId, urls }) => ({
@@ -267,6 +293,8 @@ export const {
   useChatWithAgentMutation,
   useGetCompanyAgentsQuery,
   useCreateCompanyAgentMutation,
+  useUpdateCompanyAgentMutation,
+  useDeleteCompanyAgentMutation,
   useCrawlAgentUrlsMutation,
   useGetCrawlStatusQuery,
   useTestCrawlUrlMutation,
