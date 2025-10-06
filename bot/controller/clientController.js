@@ -1,5 +1,4 @@
 import ClientConfigService from '../services/client/ClientConfigService.js';
-import DatabaseFactory from '../services/database/DatabaseFactory.js';
 
 /**
  * Controller for client management operations
@@ -64,18 +63,8 @@ class ClientController {
         });
       }
       
-      // Validate database configuration
-      const dbValidation = DatabaseFactory.validateConfig(
-        config.vectorDB.type, 
-        config.vectorDB
-      );
-      if (!dbValidation.valid) {
-        return res.status(400).json({
-          success: false,
-          error: 'Invalid database configuration',
-          details: dbValidation.errors
-        });
-      }
+      // Since we're using MongoDB directly, we can skip database validation
+      // MongoDB connection is handled at the application level
       
       await this.clientConfigService.setClientConfig(clientId, config);
       
@@ -108,13 +97,14 @@ class ClientController {
         });
       }
       
-      const vectorDB = DatabaseFactory.create(config.vectorDB.type, config.vectorDB);
-      const isConnected = await vectorDB.testConnection();
+      // Since we're using MongoDB directly, check connection status
+      const mongoose = require('mongoose');
+      const isConnected = mongoose.connection.readyState === 1;
       
       res.json({
         success: true,
         connected: isConnected,
-        databaseType: config.vectorDB.type
+        databaseType: 'mongodb'
       });
     } catch (error) {
       res.status(500).json({

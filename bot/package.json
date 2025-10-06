@@ -24,6 +24,9 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.65.0",
+    "@huggingface/inference": "^4.11.0",
+    "@langchain/cohere": "^0.3.4",
+    "@langchain/community": "^0.3.57",
     "@langchain/core": "^0.3.58",
     "@langchain/openai": "^0.1.0",
     "@langchain/textsplitters": "^0.0.0",

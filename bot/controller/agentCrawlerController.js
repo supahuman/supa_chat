@@ -1,4 +1,4 @@
-import AgentCrawlerService from '../services/AgentCrawlerService.js';
+import AgentCrawlerService from '../services/nlp/AgentCrawlerService.js';
 import Agent from '../models/Agent.js';
 
 class AgentCrawlerController {
