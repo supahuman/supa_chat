@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Copy, Check, ExternalLink, Settings, Code, BarChart3, Play } from 'lucide-react';
 import { Button } from '@/ui';
 import { Card } from '@/ui';
@@ -42,9 +42,32 @@ const DeploymentSettings = ({ selectedAgent }) => {
     if (selectedAgent?.agentId) {
       handleGenerateCode();
     }
-  }, [selectedAgent, embedConfig]);
+  }, [selectedAgent, embedConfig, handleGenerateCode]);
 
-  const handleGenerateCode = async () => {
+  const generateFallbackEmbedCode = useCallback(() => {
+    const fallbackCode = `<!-- SupaChatbot Widget -->
+<script>
+  window.SupaChatbotConfig = {
+    apiUrl: '${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}',
+    agentId: '${selectedAgent?.agentId}',
+    companyApiKey: '${typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : 'your_company_key'}',
+    userId: 'embed_user_${Date.now()}',
+    name: '${selectedAgent?.name || 'AI Assistant'}',
+    description: '${selectedAgent?.description || 'How can I help you today?'}',
+    position: '${embedConfig.position}',
+    theme: '${embedConfig.theme}',
+    showWelcomeMessage: ${embedConfig.showWelcomeMessage},
+    autoOpen: ${embedConfig.autoOpen}
+  };
+</script>
+<script src="${process.env.NEXT_PUBLIC_EMBED_URL || 'http://localhost:3000'}/embed.js"></script>
+<!-- End SupaChatbot Widget -->`;
+    
+    setEmbedCode(fallbackCode);
+    console.log('🔄 Using fallback embed code');
+  }, [selectedAgent?.agentId, embedConfig]);
+
+  const handleGenerateCode = useCallback(async () => {
     if (!selectedAgent?.agentId) return;
 
     console.log('🔄 Generating embed code for agent:', selectedAgent.agentId);
@@ -71,30 +94,7 @@ const DeploymentSettings = ({ selectedAgent }) => {
       // Generate fallback embed code
       generateFallbackEmbedCode();
     }
-  };
-
-  const generateFallbackEmbedCode = () => {
-    const fallbackCode = `<!-- SupaChatbot Widget -->
-<script>
-  window.SupaChatbotConfig = {
-    apiUrl: '${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}',
-    agentId: '${selectedAgent?.agentId}',
-    companyApiKey: '${typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : 'your_company_key'}',
-    userId: 'embed_user_${Date.now()}',
-    name: '${selectedAgent?.name || 'AI Assistant'}',
-    description: '${selectedAgent?.description || 'How can I help you today?'}',
-    position: '${embedConfig.position}',
-    theme: '${embedConfig.theme}',
-    showWelcomeMessage: ${embedConfig.showWelcomeMessage},
-    autoOpen: ${embedConfig.autoOpen}
-  };
-</script>
-<script src="${process.env.NEXT_PUBLIC_EMBED_URL || 'http://localhost:3000'}/embed.js"></script>
-<!-- End SupaChatbot Widget -->`;
-    
-    setEmbedCode(fallbackCode);
-    console.log('🔄 Using fallback embed code');
-  };
+  }, [selectedAgent?.agentId, embedConfig, generateEmbedCode, generateFallbackEmbedCode]);
 
   const handleCopyCode = async () => {
     try {

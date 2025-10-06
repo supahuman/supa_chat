@@ -89,11 +89,11 @@ const AgentsList = ({ onNavigateToEmbeds, onEditAgent }) => {
   // Handle agent deletion with confirmation
   const handleDeleteAgent = async (agentId, agentName) => {
     const confirmed = window.confirm(
-      `⚠️ Are you sure you want to delete "${agentName}"?\n\nThis action cannot be undone and will permanently remove:\n• Agent configuration\n• All conversations\n• Knowledge base data\n• Deployment settings\n\nType "DELETE" to confirm:`
+      `⚠️ Are you sure you want to delete &quot;${agentName}&quot;?\n\nThis action cannot be undone and will permanently remove:\n• Agent configuration\n• All conversations\n• Knowledge base data\n• Deployment settings\n\nType &quot;DELETE&quot; to confirm:`
     );
     
     if (confirmed) {
-      const userInput = window.prompt('Type "DELETE" to confirm deletion:');
+      const userInput = window.prompt('Type &quot;DELETE&quot; to confirm deletion:');
       if (userInput === 'DELETE') {
         try {
           await deleteAgent(agentId).unwrap();
