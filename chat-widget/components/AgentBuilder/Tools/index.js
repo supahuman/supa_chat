@@ -5,7 +5,7 @@ import { SUPPORT_TOOLS } from './toolsData';
 import ToolCard from './ToolCard';
 import { getCompanyCredentials } from '@/utils/auth';
 
-const Tools = ({ agentData, onUpdate }) => {
+const Tools = ({ currentAgentId }) => {
   const [enabledTools, setEnabledTools] = useState({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -14,9 +14,9 @@ const Tools = ({ agentData, onUpdate }) => {
   // Load agent tools from backend
   useEffect(() => {
     const loadAgentTools = async () => {
-      console.log('🔧 Tools: Loading agent tools for agentId:', agentData?.agentId);
+      console.log('🔧 Tools: Loading agent tools for agentId:', currentAgentId);
       
-      if (!agentData?.agentId) {
+      if (!currentAgentId) {
         console.log('🔧 Tools: No agentId, showing empty tools for new agent');
         setEnabledTools({});
         setLoading(false);
@@ -31,10 +31,10 @@ const Tools = ({ agentData, onUpdate }) => {
           'X-User-ID': userId || 'user_mock_12345'
         };
         
-        console.log('🔧 Tools: Making API call to:', `/api/company/agents/${agentData.agentId}/tools`);
+        console.log('🔧 Tools: Making API call to:', `/api/company/agents/${currentAgentId}/tools`);
         console.log('🔧 Tools: Headers:', headers);
         
-        const response = await fetch(`/api/company/agents/${agentData.agentId}/tools`, {
+        const response = await fetch(`/api/company/agents/${currentAgentId}/tools`, {
           headers
         });
         
@@ -64,7 +64,7 @@ const Tools = ({ agentData, onUpdate }) => {
     };
 
     loadAgentTools();
-  }, [agentData?.agentId]);
+  }, [currentAgentId]);
 
   const handleToolToggle = async (toolId) => {
     console.log('🔧 Tool toggle clicked:', toolId);
@@ -79,7 +79,7 @@ const Tools = ({ agentData, onUpdate }) => {
     setEnabledTools(newEnabledTools);
     
     // Save to backend
-    if (agentData?.agentId) {
+    if (currentAgentId) {
       try {
         setSaving(true);
         const enabledToolIds = Object.keys(newEnabledTools).filter(id => newEnabledTools[id]);
@@ -91,7 +91,7 @@ const Tools = ({ agentData, onUpdate }) => {
           'X-User-ID': userId || 'user_mock_12345'
         };
         
-        const response = await fetch(`/api/company/agents/${agentData.agentId}/tools`, {
+        const response = await fetch(`/api/company/agents/${currentAgentId}/tools`, {
           method: 'PUT',
           headers,
           body: JSON.stringify({
@@ -103,10 +103,8 @@ const Tools = ({ agentData, onUpdate }) => {
           throw new Error('Failed to save tools');
         }
         
-        // Update parent component
-        if (onUpdate) {
-          onUpdate({ tools: newEnabledTools });
-        }
+        // Tools saved successfully
+        console.log('✅ Tools saved successfully');
         
       } catch (error) {
         console.error('Failed to save tools:', error);
@@ -123,10 +121,10 @@ const Tools = ({ agentData, onUpdate }) => {
   // Test enabled tools
   const testTools = async () => {
     console.log('🧪 Test button clicked!');
-    console.log('🧪 Agent data:', agentData);
+    console.log('🧪 Current agent ID:', currentAgentId);
     console.log('🧪 Enabled tools:', enabledTools);
     
-    if (!agentData?.agentId) {
+    if (!currentAgentId) {
       console.log('🧪 No agentId found, cannot test tools');
       alert('❌ No agent selected. Please create and save an agent first.');
       return;
@@ -158,7 +156,7 @@ const Tools = ({ agentData, onUpdate }) => {
         
         console.log(`🧪 Testing ${toolId} with params:`, testParams);
         
-        const response = await fetch(`/api/company/agents/${agentData.agentId}/tools/execute`, {
+        const response = await fetch(`/api/company/agents/${currentAgentId}/tools/execute`, {
           method: 'POST',
           headers,
           body: JSON.stringify({
@@ -187,7 +185,7 @@ const Tools = ({ agentData, onUpdate }) => {
     return (
       <div className="flex items-center justify-center h-64 bg-card card-container p-6">
         <div className="text-muted">
-          {agentData?.agentId ? 'Loading tools...' : 'No agent selected. Create an agent first.'}
+          {currentAgentId ? 'Loading tools...' : 'No agent selected. Create an agent first.'}
         </div>
       </div>
     );
@@ -239,7 +237,7 @@ const Tools = ({ agentData, onUpdate }) => {
           </div>
           
           {/* Test Tools Button */}
-          {agentData?.agentId && (
+          {currentAgentId && (
             <button
               onClick={testTools}
               className="btn-primary btn-sm"

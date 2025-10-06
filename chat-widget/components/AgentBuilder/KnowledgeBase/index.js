@@ -1,14 +1,14 @@
 'use client';
 
-import { useState, forwardRef, useImperativeHandle } from 'react';
-import { useCrawlAgentUrlsMutation, useTestCrawlUrlMutation } from '@/store/botApi';
+import { useState, useEffect } from 'react';
+import { useAddKnowledgeItemMutation, useGetCompanyAgentQuery } from '@/store/botApi';
 import KnowledgeTabs from './KnowledgeTabs';
 import KnowledgeHeader from './KnowledgeHeader';
 import KnowledgeForm from './KnowledgeForm';
 import KnowledgeList from './KnowledgeList';
 import KnowledgeSummary from './KnowledgeSummary';
 
-const KnowledgeBase = forwardRef(({ agentData }, ref) => {
+const KnowledgeBase = ({ currentAgentId }) => {
   const [activeTab, setActiveTab] = useState('text');
   const [textKnowledge, setTextKnowledge] = useState([]);
   const [links, setLinks] = useState([]);
@@ -16,11 +16,58 @@ const KnowledgeBase = forwardRef(({ agentData }, ref) => {
   const [qaPairs, setQaPairs] = useState([]);
   const [isAdding, setIsAdding] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
-  const [isCrawling, setIsCrawling] = useState(false);
+  
+  // API mutation for adding knowledge items
+  const [addKnowledgeItem, { isLoading: isSaving }] = useAddKnowledgeItemMutation();
 
-  // RTK Query hooks for crawling
-  const [crawlAgentUrls] = useCrawlAgentUrlsMutation();
-  const [testCrawlUrl] = useTestCrawlUrlMutation();
+  // Load existing knowledge base data when currentAgentId changes
+  const { data: agentResponse } = useGetCompanyAgentQuery(currentAgentId, {
+    skip: !currentAgentId
+  });
+
+  useEffect(() => {
+    if (currentAgentId && agentResponse?.success) {
+      // Load agent data from API response
+      const agent = agentResponse.data;
+      console.log('Loading knowledge base for agent ID:', currentAgentId, agent.knowledgeBase);
+      
+      // Categorize knowledge base items by type
+      const textItems = [];
+      const linkItems = [];
+      const fileItems = [];
+      const qaItems = [];
+      
+      if (agent.knowledgeBase && Array.isArray(agent.knowledgeBase)) {
+        agent.knowledgeBase.forEach(item => {
+          switch (item.type) {
+            case 'text':
+              textItems.push(item);
+              break;
+            case 'url':
+              linkItems.push(item);
+              break;
+            case 'file':
+              fileItems.push(item);
+              break;
+            case 'qa':
+              qaItems.push(item);
+              break;
+          }
+        });
+      }
+      
+      setTextKnowledge(textItems);
+      setLinks(linkItems);
+      setFiles(fileItems);
+      setQaPairs(qaItems);
+    } else if (!currentAgentId) {
+      // Reset to empty state
+      setTextKnowledge([]);
+      setLinks([]);
+      setFiles([]);
+      setQaPairs([]);
+    }
+  }, [currentAgentId, agentResponse]);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -45,58 +92,83 @@ const KnowledgeBase = forwardRef(({ agentData }, ref) => {
   };
 
   const handleSaveKnowledge = async () => {
-    const newItem = {
-      id: Date.now().toString(),
-      title: formData.title,
-      createdAt: new Date().toISOString(),
-      status: 'saved'
+    if (!currentAgentId) {
+      console.log('❌ No agent ID available for saving knowledge');
+      return;
+    }
+
+    // Map frontend tab names to backend enum values
+    const typeMapping = {
+      'text': 'text',
+      'links': 'url',    // Map 'links' to 'url' for backend
+      'files': 'file',
+      'qa': 'qa'
     };
 
+    const knowledgeData = {
+      title: formData.title,
+      type: typeMapping[activeTab] || activeTab
+    };
+
+    // Add type-specific data
     switch (activeTab) {
       case 'text':
-        const newTextItem = { ...newItem, content: formData.content };
-        setTextKnowledge([...textKnowledge, newTextItem]);
-        // Update agentData with new knowledge
-        if (agentData?.setAgentData) {
-          agentData.setAgentData(prev => ({
-            ...prev,
-            knowledgeBase: [...(prev.knowledgeBase || []), newTextItem]
-          }));
-        }
+        knowledgeData.content = formData.content;
         break;
       case 'links':
-        const newLinkItem = { ...newItem, url: formData.url, status: 'saved' };
-        setLinks([...links, newLinkItem]);
-        // Update agentData with new knowledge
-        if (agentData?.setAgentData) {
-          agentData.setAgentData(prev => ({
-            ...prev,
-            knowledgeBase: [...(prev.knowledgeBase || []), newLinkItem]
-          }));
-        }
+        knowledgeData.url = formData.url;
         break;
       case 'files':
-        const newFileItem = { ...newItem, fileName: formData.file?.name, fileSize: formData.file?.size };
-        setFiles([...files, newFileItem]);
-        // Update agentData with new knowledge
-        if (agentData?.setAgentData) {
-          agentData.setAgentData(prev => ({
-            ...prev,
-            knowledgeBase: [...(prev.knowledgeBase || []), newFileItem]
-          }));
-        }
+        knowledgeData.fileName = formData.file?.name;
+        knowledgeData.fileSize = formData.file?.size;
         break;
       case 'qa':
-        const newQAItem = { ...newItem, question: formData.question, answer: formData.answer };
-        setQaPairs([...qaPairs, newQAItem]);
-        // Update agentData with new knowledge
-        if (agentData?.setAgentData) {
-          agentData.setAgentData(prev => ({
-            ...prev,
-            knowledgeBase: [...(prev.knowledgeBase || []), newQAItem]
-          }));
-        }
+        knowledgeData.question = formData.question;
+        knowledgeData.answer = formData.answer;
         break;
+    }
+
+    try {
+      console.log('💾 Saving knowledge item:', knowledgeData);
+      const result = await addKnowledgeItem({
+        agentId: currentAgentId,
+        ...knowledgeData
+      }).unwrap();
+
+      console.log('✅ Knowledge item saved:', result);
+      
+      // Update local state
+      const newItem = {
+        id: result.data.id,
+        title: result.data.title,
+        type: result.data.type,
+        content: result.data.content,
+        url: result.data.url,
+        fileName: result.data.fileName,
+        fileSize: result.data.fileSize,
+        question: result.data.question,
+        answer: result.data.answer,
+        status: result.data.status,
+        createdAt: result.data.createdAt
+      };
+
+      switch (activeTab) {
+        case 'text':
+          setTextKnowledge([...textKnowledge, newItem]);
+          break;
+        case 'links':
+          setLinks([...links, newItem]);
+          break;
+        case 'files':
+          setFiles([...files, newItem]);
+          break;
+        case 'qa':
+          setQaPairs([...qaPairs, newItem]);
+          break;
+      }
+
+    } catch (error) {
+      console.error('❌ Error saving knowledge item:', error);
     }
 
     setIsAdding(false);
@@ -110,54 +182,6 @@ const KnowledgeBase = forwardRef(({ agentData }, ref) => {
     });
   };
 
-  // Function to crawl all saved URLs after agent is created
-  const crawlAllUrls = async (agentId) => {
-    const urlsToCrawl = links.filter(link => link.status === 'saved' && link.url);
-    
-    if (urlsToCrawl.length === 0) {
-      console.log('📝 No URLs to crawl');
-      return;
-    }
-
-    try {
-      setIsCrawling(true);
-      console.log(`🕷️ Starting crawl for ${urlsToCrawl.length} URLs for agent ${agentId}`);
-
-      const urls = urlsToCrawl.map(link => link.url);
-      
-      const result = await crawlAgentUrls({
-        agentId: agentId,
-        urls: urls
-      }).unwrap();
-
-      if (result.success) {
-        console.log(`✅ Successfully crawled ${result.data.crawledCount} pages`);
-        // Update all link statuses to completed
-        setLinks(prev => prev.map(link => 
-          urls.includes(link.url) ? { ...link, status: 'completed' } : link
-        ));
-      } else {
-        console.error('❌ Crawling failed:', result.message);
-        // Update all link statuses to failed
-        setLinks(prev => prev.map(link => 
-          urls.includes(link.url) ? { ...link, status: 'failed' } : link
-        ));
-      }
-    } catch (error) {
-      console.error('❌ Error crawling URLs:', error.message || error);
-      // Update all link statuses to failed
-      setLinks(prev => prev.map(link => 
-        urlsToCrawl.some(urlLink => urlLink.url === link.url) ? { ...link, status: 'failed' } : link
-      ));
-    } finally {
-      setIsCrawling(false);
-    }
-  };
-
-  // Expose crawlAllUrls function to parent component
-  useImperativeHandle(ref, () => ({
-    crawlAllUrls
-  }));
 
   const handleCancel = () => {
     setIsAdding(false);
@@ -229,7 +253,6 @@ const KnowledgeBase = forwardRef(({ agentData }, ref) => {
           setFormData={setFormData}
           onSave={handleSaveKnowledge}
           onCancel={handleCancel}
-          isCrawling={isCrawling}
         />
       )}
 
@@ -247,10 +270,9 @@ const KnowledgeBase = forwardRef(({ agentData }, ref) => {
         files={files}
         qaPairs={qaPairs}
       />
+
     </div>
   );
-});
-
-KnowledgeBase.displayName = 'KnowledgeBase';
+};
 
 export default KnowledgeBase;

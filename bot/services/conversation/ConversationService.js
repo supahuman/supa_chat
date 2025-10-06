@@ -33,6 +33,18 @@ class ConversationService {
   }
 
   /**
+   * Get full conversation for a session
+   */
+  async getConversation(sessionId) {
+    try {
+      return await this.repository.findBySessionId(sessionId);
+    } catch (error) {
+      console.error('❌ Error getting conversation:', error);
+      return null;
+    }
+  }
+
+  /**
    * Add message to conversation (keeps only last 4 messages for bot context)
    */
   async addMessage(sessionId, message, userId = null, companyId = null, agentId = null) {

@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import { Bot, Database, Zap, FileText, GraduationCap, X, Users, Settings, BarChart3, ExternalLink, Wrench } from 'lucide-react';
 import { Button } from '@/ui';
 
@@ -38,6 +39,20 @@ const Sidebar = ({
 
   const sidebarItems = getSidebarItems(activeTab);
 
+  // Prevent scrolling on the sidebar
+  useEffect(() => {
+    const handleWheel = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    const sidebar = document.querySelector('aside');
+    if (sidebar) {
+      sidebar.addEventListener('wheel', handleWheel, { passive: false });
+      return () => sidebar.removeEventListener('wheel', handleWheel);
+    }
+  }, []);
+
   const handleItemClick = (itemId) => {
     if (onItemClick) {
       onItemClick(itemId);
@@ -53,8 +68,8 @@ const Sidebar = ({
   return (
     <aside className={`${
       sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-    } fixed md:relative md:translate-x-0 z-50 w-64 md:w-64 h-screen md:h-screen bg-card shadow-lg border-r border-card transition-transform duration-300 ease-in-out top-0`}>
-      <div className="p-4 md:p-6 h-full overflow-y-auto">
+    } fixed md:relative md:translate-x-0 z-50 w-64 md:w-64 h-screen md:h-screen bg-card shadow-lg border-r border-card transition-transform duration-300 ease-in-out top-0 overflow-hidden`}>
+      <div className="p-4 md:p-6 h-full">
         {/* Mobile menu button for sidebar */}
         <div className="md:hidden flex items-center justify-between mb-4">
           <h2 className="heading-lg">Menu</h2>

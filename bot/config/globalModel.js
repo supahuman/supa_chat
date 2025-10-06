@@ -9,7 +9,7 @@ export const GLOBAL_MODEL = {
   provider: "groq",
   model: "llama-3.1-8b-instant",
   temperature: 0.7,
-  maxTokens: 1000,
+  maxTokens: 200, // Reduced from 1000 to 200 for shorter responses
   // Additional model settings
   topP: 1,
   stream: false

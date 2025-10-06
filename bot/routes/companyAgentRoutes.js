@@ -14,8 +14,11 @@ router.get('/:agentId', companyAgentController.getAgent.bind(companyAgentControl
 router.put('/:agentId', companyAgentController.updateAgent.bind(companyAgentController));
 router.delete('/:agentId', companyAgentController.deleteAgent.bind(companyAgentController));
 
+// Knowledge base operations
+router.post('/:agentId/knowledge', companyAgentController.addKnowledgeItem.bind(companyAgentController));
+
 // Chat operations
-router.post('/chat', companyAgentController.chatWithAgent.bind(companyAgentController));
-router.get('/conversation/:sessionId', companyAgentController.getConversation.bind(companyAgentController));
+router.post('/:agentId/chat', companyAgentController.chatWithAgent.bind(companyAgentController));
+router.get('/:agentId/conversation/:sessionId', companyAgentController.getConversation.bind(companyAgentController));
 
 export default router;

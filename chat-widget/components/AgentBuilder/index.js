@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import TopTabBar from './TopTabBar';
 import Sidebar from './Sidebar';
 import ContentArea from './ContentArea';
@@ -10,17 +10,7 @@ const DashboardLayout = ({ children }) => {
   const [activeTab, setActiveTab] = useState('build');
   const [activeSidebarItem, setActiveSidebarItem] = useState('ai-persona');
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const contentAreaRef = useRef();
-  
-  // Agent data collection
-  const [agentData, setAgentData] = useState({
-    name: '',
-    description: '',
-    personality: '',
-    knowledgeBase: [],
-    trainingExamples: []
-  });
-  const [isEditing, setIsEditing] = useState(false);
+  const [currentAgentId, setCurrentAgentId] = useState(null);
 
   const handleToggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -54,38 +44,17 @@ const DashboardLayout = ({ children }) => {
     }
   };
 
-  // Function to handle agent creation success and trigger crawling
+  // Function to handle agent creation success
   const handleAgentCreated = async (agentId) => {
     console.log(`🎉 Agent created with ID: ${agentId}`);
-    
-    // Trigger crawling of any saved URLs
-    if (contentAreaRef.current) {
-      try {
-        await contentAreaRef.current.crawlAllUrls(agentId);
-        console.log('✅ Crawling completed for new agent');
-      } catch (error) {
-        console.error('❌ Error crawling URLs for new agent:', error);
-      }
-    }
+    setCurrentAgentId(agentId);
+    // Backend will handle NLP processing automatically
   };
 
   // Function to handle editing an existing agent
   const handleEditAgent = (agent) => {
     console.log('Editing agent:', agent);
-    
-    // Load agent data into the form
-    setAgentData({
-      agentId: agent.agentId,
-      name: agent.name,
-      description: agent.description,
-      personality: agent.personality,
-      knowledgeBase: agent.knowledgeBase || [],
-      trainingExamples: agent.trainingExamples || [],
-      tools: agent.tools || {}
-    });
-    
-    // Set editing mode
-    setIsEditing(true);
+    setCurrentAgentId(agent.agentId);
     
     // Switch to Build tab and AI Persona
     setActiveTab('build');
@@ -93,8 +62,8 @@ const DashboardLayout = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      {/* Mobile-style Top Tab Bar */}
+    <div className="h-screen bg-gray-50 dark:bg-gray-900 flex flex-col overflow-hidden">
+      {/* Top Tab Bar - replaces main nav */}
       <TopTabBar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -104,7 +73,7 @@ const DashboardLayout = ({ children }) => {
       {/* Mobile backdrop overlay */}
       <Backdrop isOpen={sidebarOpen} onClose={handleCloseSidebar} />
 
-      <div className="flex h-[calc(100vh-200px)]">
+      <div className="flex flex-1 overflow-hidden">
         {/* Sidebar */}
         <Sidebar
           activeTab={activeTab}
@@ -117,11 +86,9 @@ const DashboardLayout = ({ children }) => {
 
         {/* Main Content */}
         <ContentArea
-          ref={contentAreaRef}
           activeTab={activeTab}
           activeSidebarItem={activeSidebarItem}
-          agentData={agentData}
-          setAgentData={setAgentData}
+          currentAgentId={currentAgentId}
           onAgentCreated={handleAgentCreated}
           onEditAgent={handleEditAgent}
         >

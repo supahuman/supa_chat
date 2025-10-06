@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, forwardRef, useImperativeHandle } from 'react';
+import React from 'react';
 import { Bot } from 'lucide-react';
 import { Card } from '@/ui';
 import AIPersona from './AIPersona';
@@ -11,25 +11,14 @@ import TeachYourAgent from './TeachYourAgent';
 import AgentsList from './Deploy/AgentsList';
 import EmbedsList from './Deploy/EmbedsList';
 
-const ContentArea = forwardRef(({ 
+const ContentArea = ({ 
   activeTab, 
   activeSidebarItem, 
-  agentData,
-  setAgentData,
+  currentAgentId,
   onAgentCreated,
   onEditAgent,
   children 
-}, ref) => {
-  const knowledgeBaseRef = useRef();
-
-  // Expose crawlAllUrls function to parent component
-  useImperativeHandle(ref, () => ({
-    crawlAllUrls: (agentId) => {
-      if (knowledgeBaseRef.current) {
-        return knowledgeBaseRef.current.crawlAllUrls(agentId);
-      }
-    }
-  }));
+}) => {
   const sidebarItems = [
     { id: 'ai-persona', label: 'AI Persona' },
     { id: 'knowledge-base', label: 'Knowledge Base' },
@@ -72,27 +61,27 @@ const ContentArea = forwardRef(({
     if (tab === 'build' || tab === 'train') {
       // AI Persona component
       if (sidebarItem === 'ai-persona') {
-        return <AIPersona agentData={agentData} setAgentData={setAgentData} onAgentCreated={onAgentCreated} />;
+        return <AIPersona currentAgentId={currentAgentId} onAgentCreated={onAgentCreated} />;
       }
 
       // Knowledge Base component
       if (sidebarItem === 'knowledge-base') {
-        return <KnowledgeBase ref={knowledgeBaseRef} agentData={agentData} setAgentData={setAgentData} />;
+        return <KnowledgeBase currentAgentId={currentAgentId} />;
       }
 
       // Actions component
       if (sidebarItem === 'actions') {
-        return <Actions agentData={agentData} setAgentData={setAgentData} />;
+        return <Actions currentAgentId={currentAgentId} />;
       }
 
       // Tools component
       if (sidebarItem === 'tools') {
-        return <Tools agentData={agentData} onUpdate={setAgentData} />;
+        return <Tools currentAgentId={currentAgentId} />;
       }
 
       // Teach Your Agent component
       if (sidebarItem === 'teach-agent') {
-        return <TeachYourAgent agentData={agentData} setAgentData={setAgentData} />;
+        return <TeachYourAgent currentAgentId={currentAgentId} />;
       }
     }
 
@@ -142,27 +131,34 @@ const ContentArea = forwardRef(({
   const currentItem = sidebarItems.find(item => item.id === activeSidebarItem);
 
   return (
-    <main className="flex-1 p-4 md:p-6 overflow-y-auto md:ml-0">
-      <div className="max-w-6xl mx-auto">
-        {/* Content Header */}
-        <div className="mb-4 md:mb-6">
-          <h2 className="text-xl md:text-2xl font-bold text-primary capitalize">
-            {activeTab} - {currentItem?.label}
-          </h2>
-          <p className="text-sm md:text-base text-secondary mt-1">
-            {getContentDescription(activeTab, activeSidebarItem)}
-          </p>
-        </div>
+    <main className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 overflow-y-auto p-4 md:p-6">
+        <div className="max-w-6xl mx-auto">
+          {/* Content Header */}
+          <div className="mb-4 md:mb-6">
+            <h2 className="text-xl md:text-2xl font-bold text-primary capitalize">
+              {activeTab} - {currentItem?.label}
+            </h2>
+            <p className="text-sm md:text-base text-secondary mt-1">
+              {getContentDescription(activeTab, activeSidebarItem)}
+            </p>
+          </div>
 
-        {/* Dynamic Content */}
-        <Card>
-          {children || getDynamicContent(activeTab, activeSidebarItem)}
-        </Card>
+          {/* Dynamic Content */}
+          {activeSidebarItem === 'teach-agent' ? (
+            // Teach Your Agent gets special treatment without Card wrapper
+            <div className="h-[600px] bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-700 overflow-hidden">
+              {children || getDynamicContent(activeTab, activeSidebarItem)}
+            </div>
+          ) : (
+            <Card>
+              {children || getDynamicContent(activeTab, activeSidebarItem)}
+            </Card>
+          )}
+        </div>
       </div>
     </main>
   );
-});
-
-ContentArea.displayName = 'ContentArea';
+};
 
 export default ContentArea;

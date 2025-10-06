@@ -1,8 +1,18 @@
 'use client';
 
+import { useRef, useEffect } from 'react';
 import { Send, Loader2 } from 'lucide-react';
 
 const ChatInput = ({ message, setMessage, onSend, isLoading }) => {
+  const inputRef = useRef(null);
+
+  // Focus input after sending (when message is cleared)
+  useEffect(() => {
+    if (message === '' && !isLoading) {
+      inputRef.current?.focus();
+    }
+  }, [message, isLoading]);
+
   const handleKeyPress = (e) => {
     if (e.key === 'Enter' && !isLoading && message.trim()) {
       onSend();
@@ -13,6 +23,7 @@ const ChatInput = ({ message, setMessage, onSend, isLoading }) => {
     <div className="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
       <div className="flex space-x-2">
         <input
+          ref={inputRef}
           type="text"
           value={message}
           onChange={(e) => setMessage(e.target.value)}

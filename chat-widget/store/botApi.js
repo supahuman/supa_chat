@@ -76,54 +76,6 @@ export const botApi = createApi({
       query: () => '/api/model/info',
       providesTags: ['Model'],
     }),
-    // Agent Builder endpoints
-    createAgent: builder.mutation({
-      query: (agentData) => ({
-        url: '/api/agent',
-        method: 'POST',
-        body: agentData,
-      }),
-      invalidatesTags: ['Agents'],
-    }),
-    getAgents: builder.query({
-      query: () => '/api/agent',
-      providesTags: ['Agents'],
-    }),
-    getAgent: builder.query({
-      query: (agentId) => `/api/agent/${agentId}`,
-      providesTags: (result, error, agentId) => [{ type: 'Agent', id: agentId }],
-    }),
-    updateAgent: builder.mutation({
-      query: ({ agentId, ...agentData }) => ({
-        url: `/api/agent/${agentId}`,
-        method: 'PUT',
-        body: agentData,
-      }),
-      invalidatesTags: (result, error, { agentId }) => [
-        { type: 'Agent', id: agentId },
-        'Agents'
-      ],
-    }),
-          deleteAgent: builder.mutation({
-            query: (agentId) => ({
-              url: `/api/agent/${agentId}`,
-              method: 'DELETE',
-            }),
-            invalidatesTags: ['Agents'],
-          }),
-          // Chat with an agent
-          chatWithAgent: builder.mutation({
-            query: ({ message, sessionId, agentId, personality, conversationHistory }) => ({
-              url: '/api/agent/chat',
-              method: 'POST',
-              body: { message, sessionId, agentId, personality, conversationHistory },
-            }),
-          }),
-        // Get conversation history
-        getConversation: builder.query({
-          query: (sessionId) => `/api/agent/conversation/${sessionId}`,
-          providesTags: (result, error, sessionId) => [{ type: 'Conversation', id: sessionId }],
-        }),
         
         // Company-scoped agent endpoints
         getCompanyAgents: builder.query({
@@ -135,6 +87,17 @@ export const botApi = createApi({
             }
           }),
           providesTags: ['CompanyAgents'],
+        }),
+
+        getCompanyAgent: builder.query({
+          query: (agentId) => ({
+            url: `/api/company/agents/${agentId}`,
+            headers: {
+              'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
+              'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : ''
+            }
+          }),
+          providesTags: (result, error, agentId) => [{ type: 'CompanyAgents', id: agentId }],
         }),
         
         createCompanyAgent: builder.mutation({
@@ -172,6 +135,20 @@ export const botApi = createApi({
               'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : '',
               'X-Admin-Key': 'admin_secret_key' // Temporary admin key
             },
+          }),
+          invalidatesTags: ['CompanyAgents'],
+        }),
+
+        // Knowledge base endpoints
+        addKnowledgeItem: builder.mutation({
+          query: ({ agentId, ...knowledgeData }) => ({
+            url: `/api/company/agents/${agentId}/knowledge`,
+            method: 'POST',
+            headers: {
+              'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
+              'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : ''
+            },
+            body: knowledgeData,
           }),
           invalidatesTags: ['CompanyAgents'],
         }),
@@ -271,6 +248,37 @@ export const botApi = createApi({
           }),
           providesTags: (result, error, { agentId }) => [{ type: 'CompanyAgents', id: agentId }],
         }),
+
+        // Agent chat endpoints
+        chatWithAgent: builder.mutation({
+          query: ({ agentId, message, sessionId }) => ({
+            url: `/api/company/agents/${agentId}/chat`,
+            method: 'POST',
+            headers: {
+              'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
+              'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : ''
+            },
+            body: { message, sessionId },
+          }),
+          invalidatesTags: (result, error, { agentId }) => [
+            { type: 'CompanyAgents', id: agentId },
+            'CompanyAgents'
+          ],
+        }),
+
+        getAgentConversation: builder.query({
+          query: ({ agentId, sessionId }) => ({
+            url: `/api/company/agents/${agentId}/conversation/${sessionId}`,
+            headers: {
+              'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
+              'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : ''
+            }
+          }),
+          providesTags: (result, error, { agentId, sessionId }) => [
+            { type: 'CompanyAgents', id: agentId },
+            { type: 'Conversation', id: sessionId }
+          ],
+        }),
   }),
 });
 
@@ -285,16 +293,12 @@ export const {
   useTestDatabaseConnectionMutation,
   useTestLLMConnectionMutation,
   useGetModelInfoQuery,
-  useCreateAgentMutation,
-  useGetAgentsQuery,
-  useGetAgentQuery,
-  useUpdateAgentMutation,
-  useDeleteAgentMutation,
-  useChatWithAgentMutation,
   useGetCompanyAgentsQuery,
+  useGetCompanyAgentQuery,
   useCreateCompanyAgentMutation,
   useUpdateCompanyAgentMutation,
   useDeleteCompanyAgentMutation,
+  useAddKnowledgeItemMutation,
   useCrawlAgentUrlsMutation,
   useGetCrawlStatusQuery,
   useTestCrawlUrlMutation,
@@ -302,7 +306,9 @@ export const {
   useGetDeploymentConfigQuery,
   useGenerateEmbedCodeMutation,
   useTestDeploymentMutation,
-  useGetDeploymentAnalyticsQuery
+  useGetDeploymentAnalyticsQuery,
+  useChatWithAgentMutation,
+  useGetAgentConversationQuery
 } = botApi;
 
 

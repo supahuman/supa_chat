@@ -27,11 +27,34 @@ const agentSchema = new mongoose.Schema({
     required: true
   },
   knowledgeBase: [{
+    id: {
+      type: String,
+      required: true
+    },
+    title: {
+      type: String,
+      required: true
+    },
     type: {
       type: String,
-      enum: ['document', 'url', 'text']
+      enum: ['text', 'url', 'file', 'qa'],
+      required: true
     },
-    content: String,
+    content: String,        // For text knowledge
+    url: String,           // For URLs
+    fileName: String,      // For files
+    fileSize: Number,      // For files
+    question: String,      // For Q&A
+    answer: String,        // For Q&A
+    status: {
+      type: String,
+      enum: ['saved', 'processing', 'completed', 'failed'],
+      default: 'saved'
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now
+    },
     metadata: mongoose.Schema.Types.Mixed
   }],
   trainingExamples: [{

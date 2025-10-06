@@ -5,7 +5,7 @@ import ActionHeader from './ActionHeader';
 import ActionForm from './ActionForm';
 import ActionList from './ActionList';
 
-const Actions = () => {
+const Actions = ({ currentAgentId }) => {
   const [actions, setActions] = useState([]);
   const [editingAction, setEditingAction] = useState(null);
 

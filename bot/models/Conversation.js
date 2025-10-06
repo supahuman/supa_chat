@@ -34,9 +34,9 @@ const conversationSchema = new mongoose.Schema({
       type: [Number],
       validate: {
         validator: function(v) {
-          return !v || (Array.isArray(v) && v.length === 1536 && v.every(n => typeof n === 'number'));
+          return !v || v.length === 0 || (Array.isArray(v) && v.length === 1536 && v.every(n => typeof n === 'number'));
         },
-        message: 'Embedding must be an array of 1536 numbers for OpenAI embeddings'
+        message: 'Embedding must be an empty array or an array of 1536 numbers for OpenAI embeddings'
       }
     }
   }],
