@@ -81,6 +81,16 @@ importers:
       nodemon:
         specifier: ^3.1.0
         version: 3.1.10
+    optionalDependencies:
+      '@browserbasehq/stagehand':
+        specifier: ^1.14.0
+        version: 1.14.0(@playwright/test@1.55.1)(deepmerge@4.3.1)(dotenv@16.6.1)(openai@4.104.0(ws@8.18.3)(zod@3.25.76))(zod@3.25.76)
+      '@ibm-cloud/watsonx-ai':
+        specifier: ^1.6.13
+        version: 1.6.13
+      ibm-cloud-sdk-core:
+        specifier: ^5.4.3
+        version: 5.4.3
 
 packages:
 
