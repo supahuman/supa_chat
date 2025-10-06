@@ -25,6 +25,7 @@ import companyRoutes from './routes/companyRoutes.js';
 import companyAgentRoutes from './routes/companyAgentRoutes.js';
 import agentCrawlerRoutes from './routes/agentCrawlerRoutes.js';
 import deploymentRoutes from './routes/deploymentRoutes.js';
+import toolRoutes from './routes/toolRoutes.js';
 
 async function bootstrap() {
   const port = process.env.PORT || 4000;
@@ -66,6 +67,9 @@ async function bootstrap() {
   
   // Register company-scoped agent routes LAST (catch-all routes)
   app.use('/api/company/agents', companyAgentRoutes);
+  
+  // Register tool routes
+  app.use('/api/company', toolRoutes);
 
   try {
     const botRoutes = await initializeBot();

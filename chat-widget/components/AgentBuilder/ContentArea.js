@@ -6,6 +6,7 @@ import { Card } from '@/ui';
 import AIPersona from './AIPersona';
 import KnowledgeBase from './KnowledgeBase';
 import Actions from './Actions';
+import Tools from './Tools';
 import TeachYourAgent from './TeachYourAgent';
 import AgentsList from './Deploy/AgentsList';
 import EmbedsList from './Deploy/EmbedsList';
@@ -33,6 +34,7 @@ const ContentArea = forwardRef(({
     { id: 'knowledge-base', label: 'Knowledge Base' },
     { id: 'actions', label: 'Actions' },
     { id: 'forms', label: 'Forms' },
+    { id: 'tools', label: 'Tools' },
     { id: 'teach-agent', label: 'Teach Your Agent' }
   ];
 
@@ -43,6 +45,7 @@ const ContentArea = forwardRef(({
         'knowledge-base': 'Upload and manage knowledge sources for your AI agent.',
         'actions': 'Configure actions and integrations your agent can perform.',
         'forms': 'Create forms for data collection and user interactions.',
+        'tools': 'Select tools and integrations for your agent to use.',
         'teach-agent': 'Provide training examples and feedback to improve your agent.'
       },
       train: {
@@ -50,6 +53,7 @@ const ContentArea = forwardRef(({
         'knowledge-base': 'Train your agent with specific knowledge domains.',
         'actions': 'Test and validate your agent\'s action capabilities.',
         'forms': 'Train your agent on form handling and data validation.',
+        'tools': 'Configure and test tool integrations for your agent.',
         'teach-agent': 'Provide training examples and monitor learning progress.'
       },
       deploy: {
@@ -78,6 +82,11 @@ const ContentArea = forwardRef(({
       // Actions component
       if (sidebarItem === 'actions') {
         return <Actions agentData={agentData} setAgentData={setAgentData} />;
+      }
+
+      // Tools component
+      if (sidebarItem === 'tools') {
+        return <Tools agentData={agentData} onUpdate={setAgentData} />;
       }
 
       // Teach Your Agent component

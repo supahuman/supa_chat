@@ -120,6 +120,38 @@ export const protect = async (req, res, next) => {
 };
 
 /**
+ * Company authentication middleware
+ * Validates company API key and sets company context
+ */
+export const authenticateCompany = async (req, res, next) => {
+  try {
+    const companyKey = req.headers['x-company-key'];
+    const userId = req.headers['x-user-id'];
+
+    if (!companyKey) {
+      return res.status(401).json({
+        success: false,
+        error: 'Company API key required'
+      });
+    }
+
+    // For now, accept any company key (in production, validate against database)
+    req.company = {
+      companyId: companyKey,
+      userId: userId || 'anonymous'
+    };
+
+    next();
+  } catch (error) {
+    console.error('❌ Company authentication error:', error);
+    res.status(401).json({
+      success: false,
+      error: 'Authentication failed'
+    });
+  }
+};
+
+/**
  * Legacy admin middleware for existing routes
  */
 export const isAdmin = async (req, res, next) => {

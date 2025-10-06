@@ -33,7 +33,7 @@ const DashboardLayout = ({ children }) => {
   useEffect(() => {
     if (activeTab === 'deploy' && !['agents', 'embeds', 'settings', 'analytics'].includes(activeSidebarItem)) {
       setActiveSidebarItem('agents');
-    } else if (activeTab === 'build' && !['ai-persona', 'knowledge-base', 'actions', 'forms', 'teach-agent'].includes(activeSidebarItem)) {
+    } else if (activeTab === 'build' && !['ai-persona', 'knowledge-base', 'actions', 'forms', 'tools', 'teach-agent'].includes(activeSidebarItem)) {
       setActiveSidebarItem('ai-persona');
     }
   }, [activeTab, activeSidebarItem]);
@@ -42,7 +42,7 @@ const DashboardLayout = ({ children }) => {
     setActiveSidebarItem(itemId);
     
     // Auto-switch to Train tab for training-related items
-    const trainingItems = ['knowledge-base', 'actions', 'forms', 'teach-agent'];
+    const trainingItems = ['knowledge-base', 'actions', 'forms', 'tools', 'teach-agent'];
     if (trainingItems.includes(itemId)) {
       setActiveTab('train');
     }
