@@ -49,5 +49,10 @@
   },
   "devDependencies": {
     "nodemon": "^3.1.0"
+  },
+  "optionalDependencies": {
+    "@browserbasehq/stagehand": "^1.14.0",
+    "@ibm-cloud/watsonx-ai": "^1.6.13",
+    "ibm-cloud-sdk-core": "^5.4.3"
   }
 }
