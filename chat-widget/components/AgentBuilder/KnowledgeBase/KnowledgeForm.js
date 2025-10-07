@@ -9,7 +9,8 @@ const KnowledgeForm = ({
   setFormData, 
   onSave, 
   onCancel,
-  isCrawling = false
+  isCrawling = false,
+  isUploading = false
 }) => {
   const formatFileSize = (bytes) => {
     if (bytes === 0) return '0 Bytes';
@@ -116,9 +117,19 @@ const KnowledgeForm = ({
                 Supports PDF, DOC, DOCX, TXT, MD files
               </p>
               {formData.file && (
-                <p className="text-sm text-gray-700 dark:text-gray-300 mt-2">
-                  Selected: {formData.file.name} ({formatFileSize(formData.file.size)})
-                </p>
+                <div className="mt-2">
+                  <p className="text-sm text-gray-700 dark:text-gray-300">
+                    Selected: {formData.file.name} ({formatFileSize(formData.file.size)})
+                  </p>
+                  {isUploading && (
+                    <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-md">
+                      <p className="text-xs text-blue-600 dark:text-blue-400 flex items-center">
+                        <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600 mr-2"></div>
+                        Processing file...
+                      </p>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           </div>
@@ -157,11 +168,15 @@ const KnowledgeForm = ({
         <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 pt-4">
           <button
             onClick={onSave}
-            disabled={isCrawling}
+            disabled={isCrawling || isUploading}
             className="flex items-center justify-center space-x-2 bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors w-full sm:w-auto disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Save className="w-4 h-4" />
-            <span>{isCrawling ? 'Crawling...' : 'Save'}</span>
+            <span>
+              {isCrawling ? 'Crawling...' : 
+               isUploading ? 'Uploading...' : 
+               'Save'}
+            </span>
           </button>
           <button
             onClick={onCancel}

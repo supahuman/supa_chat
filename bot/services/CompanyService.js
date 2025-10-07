@@ -1,6 +1,6 @@
 import crypto from 'crypto';
-import Company from '../models/Company.js';
-import User from '../models/User.js';
+import Company from '../models/company.js';
+import User from '../models/user.js';
 
 class CompanyService {
   constructor() {

@@ -1,6 +1,6 @@
 import express from 'express';
-import { authenticateApiKey } from '../middleware/auth.js';
-import DeploymentController from '../controller/deploymentController.js';
+import { authenticateApiKey } from '../../middleware/auth.js';
+import DeploymentController from '../../controller/deployment/deploymentController.js';
 
 const router = express.Router();
 

@@ -41,15 +41,15 @@ app.get('/health', (_req, res) => {
 });
 
 import { initializeBot, registerBotRoutes } from './utils/botUtils.js';
-import clientManagementRoutes from './routes/clientManagementRoutes.js';
-import escalationRoutes from './routes/escalationRoutes.js';
-import modelRoutes from './routes/modelRoutes.js';
-import companyRoutes from './routes/companyRoutes.js';
-import companyAgentRoutes from './routes/companyAgentRoutes.js';
-import agentCrawlerRoutes from './routes/agentCrawlerRoutes.js';
-import deploymentRoutes from './routes/deploymentRoutes.js';
-import toolRoutes from './routes/toolRoutes.js';
-import agentChatRoutes from './routes/agentChatRoutes.js';
+import clientManagementRoutes from './routes/client/clientManagementRoutes.js';
+import escalationRoutes from './routes/shared/escalationRoutes.js';
+import modelRoutes from './routes/shared/modelRoutes.js';
+import companyRoutes from './routes/company/companyRoutes.js';
+import companyAgentRoutes from './routes/agent/companyAgentRoutes.js';
+import agentCrawlerRoutes from './routes/agent/agentCrawlerRoutes.js';
+import deploymentRoutes from './routes/deployment/deploymentRoutes.js';
+import toolRoutes from './routes/tool/toolRoutes.js';
+import agentChatRoutes from './routes/agent/agentChatRoutes.js';
 
 async function bootstrap() {
   const port = process.env.PORT || 4000;
@@ -78,23 +78,15 @@ async function bootstrap() {
   app.use('/api/model', modelRoutes);
   
   
-  // Register company management routes
-  app.use('/api/company', companyRoutes);
-  
-  // Register deployment routes FIRST (more specific routes)
+  // Register specific routes FIRST (more specific routes)
   app.use('/api/company/agents', deploymentRoutes);
-  
-  // Register agent crawler routes
   app.use('/api/company/agents', agentCrawlerRoutes);
-  
-  // Register company-scoped agent routes LAST (catch-all routes)
   app.use('/api/company/agents', companyAgentRoutes);
-  
-  // Register tool routes
   app.use('/api/company', toolRoutes);
-  
-  // Register agent chat routes
   app.use('/api/company', agentChatRoutes);
+  
+  // Register company management routes LAST (catch-all routes)
+  app.use('/api/company', companyRoutes);
 
   try {
     const botRoutes = await initializeBot();

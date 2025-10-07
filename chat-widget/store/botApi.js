@@ -153,6 +153,26 @@ export const botApi = createApi({
           invalidatesTags: ['CompanyAgents'],
         }),
 
+        // File upload endpoint
+        uploadKnowledgeFile: builder.mutation({
+          query: ({ agentId, file, title }) => {
+            const formData = new FormData();
+            formData.append('file', file);
+            if (title) formData.append('title', title);
+            
+            return {
+              url: `/api/company/agents/${agentId}/knowledge/upload`,
+              method: 'POST',
+              headers: {
+                'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
+                'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : ''
+              },
+              body: formData,
+            };
+          },
+          invalidatesTags: ['CompanyAgents'],
+        }),
+
         // Agent crawler endpoints
         crawlAgentUrls: builder.mutation({
           query: ({ agentId, urls }) => ({
@@ -299,6 +319,7 @@ export const {
   useUpdateCompanyAgentMutation,
   useDeleteCompanyAgentMutation,
   useAddKnowledgeItemMutation,
+  useUploadKnowledgeFileMutation,
   useCrawlAgentUrlsMutation,
   useGetCrawlStatusQuery,
   useTestCrawlUrlMutation,

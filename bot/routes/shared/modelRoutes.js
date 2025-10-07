@@ -1,5 +1,5 @@
 import express from 'express';
-import modelController from '../controller/shared/modelController.js';
+import modelController from '../../controller/shared/modelController.js';
 
 const router = express.Router();
 

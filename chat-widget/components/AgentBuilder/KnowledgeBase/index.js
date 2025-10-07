@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAddKnowledgeItemMutation, useGetCompanyAgentQuery } from '@/store/botApi';
+import { useAddKnowledgeItemMutation, useUploadKnowledgeFileMutation, useGetCompanyAgentQuery } from '@/store/botApi';
 import KnowledgeTabs from './KnowledgeTabs';
 import KnowledgeHeader from './KnowledgeHeader';
 import KnowledgeForm from './KnowledgeForm';
@@ -17,8 +17,9 @@ const KnowledgeBase = ({ currentAgentId }) => {
   const [isAdding, setIsAdding] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   
-  // API mutation for adding knowledge items
+  // API mutations for adding knowledge items
   const [addKnowledgeItem, { isLoading: isSaving }] = useAddKnowledgeItemMutation();
+  const [uploadKnowledgeFile, { isLoading: isUploading }] = useUploadKnowledgeFileMutation();
 
   // Load existing knowledge base data when currentAgentId changes
   const { data: agentResponse } = useGetCompanyAgentQuery(currentAgentId, {
@@ -97,38 +98,59 @@ const KnowledgeBase = ({ currentAgentId }) => {
       return;
     }
 
-    // Map frontend tab names to backend enum values
-    const typeMapping = {
-      'text': 'text',
-      'links': 'url',    // Map 'links' to 'url' for backend
-      'files': 'file',
-      'qa': 'qa'
-    };
-
-    const knowledgeData = {
-      title: formData.title,
-      type: typeMapping[activeTab] || activeTab
-    };
-
-    // Add type-specific data
-    switch (activeTab) {
-      case 'text':
-        knowledgeData.content = formData.content;
-        break;
-      case 'links':
-        knowledgeData.url = formData.url;
-        break;
-      case 'files':
-        knowledgeData.fileName = formData.file?.name;
-        knowledgeData.fileSize = formData.file?.size;
-        break;
-      case 'qa':
-        knowledgeData.question = formData.question;
-        knowledgeData.answer = formData.answer;
-        break;
-    }
-
     try {
+      // Handle file upload differently
+      if (activeTab === 'files' && formData.file) {
+        console.log('📁 Uploading file:', formData.file.name);
+        
+        const result = await uploadKnowledgeFile({
+          agentId: currentAgentId,
+          file: formData.file,
+          title: formData.title || formData.file.name
+        }).unwrap();
+
+        console.log('✅ File uploaded successfully:', result);
+        
+        // Reset form and close
+        setFormData({
+          title: '',
+          content: '',
+          url: '',
+          file: null,
+          question: '',
+          answer: ''
+        });
+        setIsAdding(false);
+        return;
+      }
+
+      // Handle other knowledge types (text, links, qa)
+      const typeMapping = {
+        'text': 'text',
+        'links': 'url',    // Map 'links' to 'url' for backend
+        'files': 'file',
+        'qa': 'qa'
+      };
+
+      const knowledgeData = {
+        title: formData.title,
+        type: typeMapping[activeTab] || activeTab
+      };
+
+      // Add type-specific data
+      switch (activeTab) {
+        case 'text':
+          knowledgeData.content = formData.content;
+          break;
+        case 'links':
+          knowledgeData.url = formData.url;
+          break;
+        case 'qa':
+          knowledgeData.question = formData.question;
+          knowledgeData.answer = formData.answer;
+          break;
+      }
+
       console.log('💾 Saving knowledge item:', knowledgeData);
       const result = await addKnowledgeItem({
         agentId: currentAgentId,
@@ -253,6 +275,7 @@ const KnowledgeBase = ({ currentAgentId }) => {
           setFormData={setFormData}
           onSave={handleSaveKnowledge}
           onCancel={handleCancel}
+          isUploading={isUploading}
         />
       )}
 

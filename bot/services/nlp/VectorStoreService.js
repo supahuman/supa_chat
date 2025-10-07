@@ -1,4 +1,4 @@
-import AgentVector from '../../models/AgentVector.js';
+import AgentVector from '../../models/agentVector.js';
 
 /**
  * VectorStoreService - Handles vector storage and retrieval using MongoDB

@@ -1,6 +1,6 @@
 import express from 'express';
-import toolController from '../controller/toolController.js';
-import { authenticateCompany } from '../middleware/auth.js';
+import toolController from '../../controller/tool/toolController.js';
+import { authenticateCompany } from '../../middleware/auth.js';
 
 const router = express.Router();
 

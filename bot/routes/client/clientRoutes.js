@@ -1,6 +1,5 @@
 import express from 'express';
-import ClientController from '../controller/clientController.js';
-import { processClientChatMessage } from '../controller/chatController.js';
+import ClientController from '../../controller/client/clientController.js';
 
 const router = express.Router();
 const clientController = new ClientController();

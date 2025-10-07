@@ -1,5 +1,5 @@
-import ClientConfigService from '../services/client/ClientConfigService.js';
-import LLMFactory from '../services/llm/LLMFactory.js';
+import ClientConfigService from '../../services/client/ClientConfigService.js';
+import LLMFactory from '../../services/llm/LLMFactory.js';
 
 /**
  * Controller for client management operations
