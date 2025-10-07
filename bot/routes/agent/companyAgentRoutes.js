@@ -54,6 +54,7 @@ router.delete('/:agentId', agentManagementController.deleteAgent.bind(agentManag
 
 // Knowledge base operations
 router.post('/:agentId/knowledge', agentKnowledgeController.addKnowledgeItem.bind(agentKnowledgeController));
+router.delete('/:agentId/knowledge/:knowledgeId', agentKnowledgeController.deleteKnowledgeItem.bind(agentKnowledgeController));
 
 // File upload endpoint for knowledge base
 router.post('/:agentId/knowledge/upload', upload.single('file'), agentKnowledgeController.uploadKnowledgeFile.bind(agentKnowledgeController));

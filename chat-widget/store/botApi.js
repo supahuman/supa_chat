@@ -159,7 +159,7 @@ export const botApi = createApi({
             const formData = new FormData();
             formData.append('file', file);
             if (title) formData.append('title', title);
-            
+
             return {
               url: `/api/company/agents/${agentId}/knowledge/upload`,
               method: 'POST',
@@ -170,6 +170,19 @@ export const botApi = createApi({
               body: formData,
             };
           },
+          invalidatesTags: ['CompanyAgents'],
+        }),
+
+        // Delete knowledge item endpoint
+        deleteKnowledgeItem: builder.mutation({
+          query: ({ agentId, knowledgeId }) => ({
+            url: `/api/company/agents/${agentId}/knowledge/${knowledgeId}`,
+            method: 'DELETE',
+            headers: {
+              'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
+              'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : ''
+            },
+          }),
           invalidatesTags: ['CompanyAgents'],
         }),
 
@@ -320,6 +333,7 @@ export const {
   useDeleteCompanyAgentMutation,
   useAddKnowledgeItemMutation,
   useUploadKnowledgeFileMutation,
+  useDeleteKnowledgeItemMutation,
   useCrawlAgentUrlsMutation,
   useGetCrawlStatusQuery,
   useTestCrawlUrlMutation,

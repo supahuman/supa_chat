@@ -1,4 +1,5 @@
 import Agent from '../../models/agentModel.js';
+import AgentVector from '../../models/agentVectorModel.js';
 import AgentCrawlerService from '../../services/nlp/AgentCrawlerService.js';
 import NLPPipeline from '../../services/nlp/NLPPipeline.js';
 import DocumentProcessingService from '../../services/DocumentProcessingService.js';
@@ -71,8 +72,24 @@ class AgentKnowledgeController extends BaseController {
           // Don't fail the request if NLP processing fails
         }
       }
+
+      // If it's a Q&A pair, trigger Q&A processing
+      if (type === 'qa' && question && answer) {
+        try {
+          this.logAction('Triggering Q&A processing', { question: question.substring(0, 50), agentId });
+          await this.processQAPairs(agentId, companyId, [knowledgeItem]);
+        } catch (error) {
+          this.logError('Q&A processing', error, { question: question.substring(0, 50), agentId });
+          // Don't fail the request if Q&A processing fails
+        }
+      }
       
-      const message = type === 'url' ? 'URL added and processing started' : 'Knowledge item added successfully';
+      let message = 'Knowledge item added successfully';
+      if (type === 'url') {
+        message = 'URL added and processing started';
+      } else if (type === 'qa') {
+        message = 'Q&A pair added and processing started';
+      }
       return this.sendSuccess(res, knowledgeItem, message);
       
     } catch (error) {
@@ -207,6 +224,116 @@ class AgentKnowledgeController extends BaseController {
       }
 
       return this.sendError(res, 'Failed to upload and process file');
+    }
+  }
+
+  /**
+   * Delete knowledge item from an agent
+   */
+  async deleteKnowledgeItem(req, res) {
+    try {
+      const { companyId } = this.getCompanyContext(req);
+      const { agentId, knowledgeId } = req.params;
+      
+      if (!agentId || !knowledgeId) {
+        return this.sendValidationError(res, 'Agent ID and Knowledge ID are required');
+      }
+      
+      // Find the agent
+      const agent = await Agent.findOne({ agentId, companyId });
+      if (!agent) {
+        return this.sendNotFound(res, 'Agent');
+      }
+      
+      // Find the knowledge item to get its details for vector cleanup
+      const knowledgeItem = agent.knowledgeBase.find(item => item.id === knowledgeId);
+      if (!knowledgeItem) {
+        return this.sendNotFound(res, 'Knowledge item');
+      }
+      
+      // Remove the knowledge item from agent's knowledge base
+      agent.knowledgeBase = agent.knowledgeBase.filter(item => item.id !== knowledgeId);
+      await agent.save();
+      
+      // Clean up associated vectors from the vector database
+      try {
+        let vectorQuery = { agentId, companyId };
+        
+        // Build query based on knowledge item type
+        if (knowledgeItem.type === 'url') {
+          vectorQuery['source.url'] = knowledgeItem.url;
+        } else if (knowledgeItem.type === 'file') {
+          vectorQuery['source.name'] = knowledgeItem.fileName;
+        } else if (knowledgeItem.type === 'text') {
+          // For text items, we'll match by content similarity
+          vectorQuery['source.type'] = 'text';
+          vectorQuery['source.name'] = knowledgeItem.title;
+        } else if (knowledgeItem.type === 'qa') {
+          vectorQuery['source.type'] = 'qa';
+          vectorQuery['source.name'] = knowledgeItem.title;
+        }
+        
+        const deletedVectors = await AgentVector.deleteMany(vectorQuery);
+        
+        this.logAction('Cleaned up vectors', { 
+          agentId, 
+          knowledgeId, 
+          deletedCount: deletedVectors.deletedCount,
+          vectorQuery 
+        });
+        
+      } catch (vectorError) {
+        this.logError('Vector cleanup', vectorError, { agentId, knowledgeId });
+        // Don't fail the request if vector cleanup fails
+      }
+      
+      this.logAction('Deleted knowledge item', { agentId, knowledgeId, companyId });
+      
+      return this.sendSuccess(res, null, 'Knowledge item and associated vectors deleted successfully');
+      
+    } catch (error) {
+      this.logError('Delete knowledge item', error, { 
+        agentId: req.params.agentId, 
+        knowledgeId: req.params.knowledgeId 
+      });
+      return this.sendError(res, 'Failed to delete knowledge item');
+    }
+  }
+
+  /**
+   * Process Q&A pairs through NLP pipeline
+   * @private
+   */
+  async processQAPairs(agentId, companyId, qaPairs) {
+    try {
+      if (!qaPairs || qaPairs.length === 0) {
+        this.logAction('No Q&A pairs to process', { agentId });
+        return;
+      }
+
+      this.logAction('Starting Q&A processing', { agentId, qaCount: qaPairs.length });
+      
+      // Use NLPPipeline to process Q&A pairs
+      const nlpPipeline = new NLPPipeline();
+      
+      const result = await nlpPipeline.processQAPairs(
+        agentId,
+        companyId,
+        qaPairs
+      );
+
+      this.logAction('Q&A processing completed', {
+        agentId,
+        totalQAPairs: result.totalQAPairs,
+        totalVectors: result.totalVectors,
+        processingTime: result.processingTime
+      });
+
+      return result;
+
+    } catch (error) {
+      this.logError('Process Q&A pairs', error, { agentId, companyId });
+      throw error;
     }
   }
 

@@ -44,10 +44,11 @@ const agentVectorSchema = new mongoose.Schema({
   source: {
     type: {
       type: String,
-      enum: ['url', 'document', 'text', 'file'],
+      enum: ['url', 'document', 'text', 'file', 'qa'],
       required: true
     },
     url: String,
+    name: String,
     title: String,
     category: String,
     chunkIndex: Number,
