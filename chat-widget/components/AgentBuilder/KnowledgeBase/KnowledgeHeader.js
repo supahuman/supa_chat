@@ -5,7 +5,7 @@ import { Plus } from 'lucide-react';
 const KnowledgeHeader = ({ 
   activeTab, 
   dataLength, 
-  onAddKnowledge 
+  onAddKnowledge
 }) => {
   const getTabLabel = () => {
     const labels = {

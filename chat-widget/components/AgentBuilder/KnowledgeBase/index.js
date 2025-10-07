@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAddKnowledgeItemMutation, useUploadKnowledgeFileMutation, useGetCompanyAgentQuery } from '@/store/botApi';
+import { useAddKnowledgeItemMutation, useUploadKnowledgeFileMutation, useDeleteKnowledgeItemMutation, useGetCompanyAgentQuery } from '@/store/botApi';
 import KnowledgeTabs from './KnowledgeTabs';
 import KnowledgeHeader from './KnowledgeHeader';
 import KnowledgeForm from './KnowledgeForm';
@@ -14,12 +14,13 @@ const KnowledgeBase = ({ currentAgentId }) => {
   const [links, setLinks] = useState([]);
   const [files, setFiles] = useState([]);
   const [qaPairs, setQaPairs] = useState([]);
-  const [isAdding, setIsAdding] = useState(false);
+  const [isAdding, setIsAdding] = useState(true); // Start with form open for better UX
   const [editingItem, setEditingItem] = useState(null);
   
   // API mutations for adding knowledge items
   const [addKnowledgeItem, { isLoading: isSaving }] = useAddKnowledgeItemMutation();
   const [uploadKnowledgeFile, { isLoading: isUploading }] = useUploadKnowledgeFileMutation();
+  const [deleteKnowledgeItem, { isLoading: isDeleting }] = useDeleteKnowledgeItemMutation();
 
   // Load existing knowledge base data when currentAgentId changes
   const { data: agentResponse } = useGetCompanyAgentQuery(currentAgentId, {
@@ -92,6 +93,22 @@ const KnowledgeBase = ({ currentAgentId }) => {
     });
   };
 
+  // Auto-open form when switching tabs for better UX
+  const handleTabChange = (newTab) => {
+    setActiveTab(newTab);
+    // Auto-open form when switching to a new tab
+    setIsAdding(true);
+    setEditingItem(null);
+    setFormData({
+      title: '',
+      content: '',
+      url: '',
+      file: null,
+      question: '',
+      answer: ''
+    });
+  };
+
   const handleSaveKnowledge = async () => {
     if (!currentAgentId) {
       console.log('❌ No agent ID available for saving knowledge');
@@ -111,7 +128,7 @@ const KnowledgeBase = ({ currentAgentId }) => {
 
         console.log('✅ File uploaded successfully:', result);
         
-        // Reset form and close
+        // Reset form but keep it open for adding more files
         setFormData({
           title: '',
           content: '',
@@ -120,7 +137,7 @@ const KnowledgeBase = ({ currentAgentId }) => {
           question: '',
           answer: ''
         });
-        setIsAdding(false);
+        // Keep form open for better UX - user can add more files
         return;
       }
 
@@ -203,7 +220,7 @@ const KnowledgeBase = ({ currentAgentId }) => {
       alert(`Failed to save knowledge item: ${error?.data?.error || error?.message || 'Unknown error'}`);
     }
 
-    setIsAdding(false);
+    // Keep form open for better UX - user can add more items
     setFormData({
       title: '',
       content: '',
@@ -228,20 +245,51 @@ const KnowledgeBase = ({ currentAgentId }) => {
     });
   };
 
-  const handleDelete = (id) => {
-    switch (activeTab) {
-      case 'text':
-        setTextKnowledge(textKnowledge.filter(item => item.id !== id));
-        break;
-      case 'links':
-        setLinks(links.filter(item => item.id !== id));
-        break;
-      case 'files':
-        setFiles(files.filter(item => item.id !== id));
-        break;
-      case 'qa':
-        setQaPairs(qaPairs.filter(item => item.id !== id));
-        break;
+
+  const handleDelete = async (id) => {
+    if (!currentAgentId) {
+      console.log('❌ No agent ID available for deleting knowledge');
+      return;
+    }
+
+    try {
+      console.log('🗑️ Deleting knowledge item:', { id, agentId: currentAgentId });
+      
+      await deleteKnowledgeItem({
+        agentId: currentAgentId,
+        knowledgeId: id
+      }).unwrap();
+
+      console.log('✅ Knowledge item deleted successfully');
+      
+      // Update local state immediately for better UX
+      switch (activeTab) {
+        case 'text':
+          setTextKnowledge(textKnowledge.filter(item => item.id !== id));
+          break;
+        case 'links':
+          setLinks(links.filter(item => item.id !== id));
+          break;
+        case 'files':
+          setFiles(files.filter(item => item.id !== id));
+          break;
+        case 'qa':
+          setQaPairs(qaPairs.filter(item => item.id !== id));
+          break;
+      }
+      
+    } catch (error) {
+      console.error('❌ Error deleting knowledge item:', error);
+      console.error('❌ Error details:', {
+        message: error?.message,
+        status: error?.status,
+        data: error?.data,
+        originalStatus: error?.originalStatus,
+        error: error?.error
+      });
+      
+      // Show user-friendly error message
+      alert(`Failed to delete knowledge item: ${error?.data?.error || error?.message || 'Unknown error'}`);
     }
   };
 
@@ -268,7 +316,7 @@ const KnowledgeBase = ({ currentAgentId }) => {
       </div>
 
       {/* Tab Navigation */}
-      <KnowledgeTabs activeTab={activeTab} setActiveTab={setActiveTab} />
+      <KnowledgeTabs activeTab={activeTab} setActiveTab={handleTabChange} />
 
       {/* Header with Add Button */}
       <KnowledgeHeader 
@@ -294,6 +342,7 @@ const KnowledgeBase = ({ currentAgentId }) => {
         activeTab={activeTab}
         data={getCurrentData()}
         onDelete={handleDelete}
+        isDeleting={isDeleting}
       />
 
       {/* Summary */}

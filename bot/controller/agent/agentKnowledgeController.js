@@ -1,4 +1,5 @@
 import Agent from '../../models/agentModel.js';
+import AgentVector from '../../models/agentVectorModel.js';
 import AgentCrawlerService from '../../services/nlp/AgentCrawlerService.js';
 import NLPPipeline from '../../services/nlp/NLPPipeline.js';
 import DocumentProcessingService from '../../services/DocumentProcessingService.js';
@@ -207,6 +208,79 @@ class AgentKnowledgeController extends BaseController {
       }
 
       return this.sendError(res, 'Failed to upload and process file');
+    }
+  }
+
+  /**
+   * Delete knowledge item from an agent
+   */
+  async deleteKnowledgeItem(req, res) {
+    try {
+      const { companyId } = this.getCompanyContext(req);
+      const { agentId, knowledgeId } = req.params;
+      
+      if (!agentId || !knowledgeId) {
+        return this.sendValidationError(res, 'Agent ID and Knowledge ID are required');
+      }
+      
+      // Find the agent
+      const agent = await Agent.findOne({ agentId, companyId });
+      if (!agent) {
+        return this.sendNotFound(res, 'Agent');
+      }
+      
+      // Find the knowledge item to get its details for vector cleanup
+      const knowledgeItem = agent.knowledgeBase.find(item => item.id === knowledgeId);
+      if (!knowledgeItem) {
+        return this.sendNotFound(res, 'Knowledge item');
+      }
+      
+      // Remove the knowledge item from agent's knowledge base
+      agent.knowledgeBase = agent.knowledgeBase.filter(item => item.id !== knowledgeId);
+      await agent.save();
+      
+      // Clean up associated vectors from the vector database
+      try {
+        let vectorQuery = { agentId, companyId };
+        
+        // Build query based on knowledge item type
+        if (knowledgeItem.type === 'url') {
+          vectorQuery['source.url'] = knowledgeItem.url;
+        } else if (knowledgeItem.type === 'file') {
+          vectorQuery['source.name'] = knowledgeItem.fileName;
+        } else if (knowledgeItem.type === 'text') {
+          // For text items, we'll match by content similarity
+          vectorQuery['source.type'] = 'text';
+          vectorQuery['source.name'] = knowledgeItem.title;
+        } else if (knowledgeItem.type === 'qa') {
+          vectorQuery['source.type'] = 'qa';
+          vectorQuery['source.name'] = knowledgeItem.title;
+        }
+        
+        const deletedVectors = await AgentVector.deleteMany(vectorQuery);
+        
+        this.logAction('Cleaned up vectors', { 
+          agentId, 
+          knowledgeId, 
+          deletedCount: deletedVectors.deletedCount,
+          vectorQuery 
+        });
+        
+      } catch (vectorError) {
+        this.logError('Vector cleanup', vectorError, { agentId, knowledgeId });
+        // Don't fail the request if vector cleanup fails
+      }
+      
+      this.logAction('Deleted knowledge item', { agentId, knowledgeId, companyId });
+      
+      return this.sendSuccess(res, null, 'Knowledge item and associated vectors deleted successfully');
+      
+    } catch (error) {
+      this.logError('Delete knowledge item', error, { 
+        agentId: req.params.agentId, 
+        knowledgeId: req.params.knowledgeId 
+      });
+      return this.sendError(res, 'Failed to delete knowledge item');
     }
   }
 

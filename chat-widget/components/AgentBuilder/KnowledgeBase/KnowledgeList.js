@@ -5,7 +5,8 @@ import { Trash2, CheckCircle, AlertCircle, ExternalLink, File } from 'lucide-rea
 const KnowledgeList = ({ 
   activeTab, 
   data, 
-  onDelete 
+  onDelete,
+  isDeleting = false
 }) => {
   const getStatusIcon = (status) => {
     switch (status) {
@@ -123,7 +124,8 @@ const KnowledgeList = ({
             <div className="flex items-center space-x-2 ml-4">
               <button
                 onClick={() => onDelete(item.id)}
-                className="p-2 text-gray-400 hover:text-red-500 transition-colors"
+                disabled={isDeleting}
+                className="p-2 text-gray-400 hover:text-red-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <Trash2 className="w-4 h-4" />
               </button>
