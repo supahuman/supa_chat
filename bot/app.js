@@ -50,6 +50,9 @@ import agentCrawlerRoutes from './routes/agent/agentCrawlerRoutes.js';
 import deploymentRoutes from './routes/deployment/deploymentRoutes.js';
 import toolRoutes from './routes/tool/toolRoutes.js';
 import agentChatRoutes from './routes/agent/agentChatRoutes.js';
+import userRoutes from './routes/user/userRoutes.js';
+import conversationRoutes from './routes/conversation/conversationRoutes.js';
+import agentVectorRoutes from './routes/agentVector/agentVectorRoutes.js';
 
 async function bootstrap() {
   const port = process.env.PORT || 4000;
@@ -77,6 +80,14 @@ async function bootstrap() {
   // Register model routes
   app.use('/api/model', modelRoutes);
   
+  // Register user management routes
+  app.use('/api/users', userRoutes);
+  
+  // Register conversation routes
+  app.use('/api/conversations', conversationRoutes);
+  
+  // Register agent vector routes
+  app.use('/api/vectors', agentVectorRoutes);
   
   // Register specific routes FIRST (more specific routes)
   app.use('/api/company/agents', deploymentRoutes);

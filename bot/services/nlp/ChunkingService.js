@@ -1,5 +1,6 @@
 import { RecursiveCharacterTextSplitter } from '@langchain/textsplitters';
 import { Document } from '@langchain/core/documents';
+import * as cheerio from 'cheerio';
 
 /**
  * ChunkingService - Handles text chunking using LangChain
@@ -124,7 +125,15 @@ class ChunkingService {
    * @returns {string} Cleaned text
    */
   cleanText(text) {
-    return text
+    if (!text || typeof text !== 'string') {
+      return '';
+    }
+
+    // Strip HTML markup using Cheerio
+    const $ = cheerio.load(text);
+    const textContent = $.text();
+    
+    return textContent
       .replace(/\r\n/g, '\n')           // Normalize line endings
       .replace(/\r/g, '\n')             // Handle old Mac line endings
       .replace(/\n{3,}/g, '\n\n')       // Reduce multiple line breaks
