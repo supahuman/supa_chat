@@ -1,4 +1,4 @@
-import Conversation from '../../models/Conversation.js';
+import Conversation from '../../models/conversation.js';
 
 /**
  * Repository for basic conversation CRUD operations

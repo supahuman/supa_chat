@@ -1,4 +1,4 @@
-import { getModelInfo } from '../config/globalModel.js';
+import { getModelInfo } from '../../config/globalModel.js';
 
 /**
  * Controller for model-related endpoints

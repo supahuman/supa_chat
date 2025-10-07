@@ -1,4 +1,4 @@
-import AgentService from '../services/agent/AgentService.js';
+import AgentService from '../../services/agent/AgentService.js';
 
 /**
  * Controller for handling escalations and human agent interactions

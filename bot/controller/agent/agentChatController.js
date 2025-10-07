@@ -1,8 +1,8 @@
-import Agent from '../models/Agent.js';
-import VectorStoreService from '../services/nlp/VectorStoreService.js';
-import ToolExecutionService from '../services/tools/ToolExecutionService.js';
-import ConversationService from '../services/conversation/ConversationService.js';
-import LLMFactory from '../services/llm/LLMFactory.js';
+import Agent from '../../models/agent.js';
+import VectorStoreService from '../../services/nlp/VectorStoreService.js';
+import ToolExecutionService from '../../services/tools/ToolExecutionService.js';
+import ConversationService from '../../services/conversation/ConversationService.js';
+import LLMFactory from '../../services/llm/LLMFactory.js';
 
 class AgentChatController {
   constructor() {

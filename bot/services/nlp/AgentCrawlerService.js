@@ -1,7 +1,7 @@
 import * as cheerio from 'cheerio';
 import { RecursiveUrlLoader } from '@langchain/community/document_loaders/web/recursive_url';
 import { PlaywrightWebBaseLoader } from '@langchain/community/document_loaders/web/playwright';
-import Agent from '../../models/Agent.js';
+import Agent from '../../models/agent.js';
 import NLPPipeline from './NLPPipeline.js';
 
 class AgentCrawlerService {

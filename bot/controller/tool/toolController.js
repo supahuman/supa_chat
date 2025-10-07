@@ -1,5 +1,5 @@
-import Agent from '../models/Agent.js';
-import ToolExecutionService from '../services/tools/ToolExecutionService.js';
+import Agent from '../../models/agent.js';
+import ToolExecutionService from '../../services/tools/ToolExecutionService.js';
 
 /**
  * Controller for agent tool management

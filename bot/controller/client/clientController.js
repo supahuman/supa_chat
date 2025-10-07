@@ -1,4 +1,4 @@
-import ClientConfigService from '../services/client/ClientConfigService.js';
+import ClientConfigService from '../../services/client/ClientConfigService.js';
 
 /**
  * Controller for client management operations

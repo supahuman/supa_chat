@@ -1,5 +1,5 @@
 import express from 'express';
-import EscalationController from '../controller/escalationController.js';
+import EscalationController from '../../controller/shared/escalationController.js';
 
 const router = express.Router();
 const escalationController = new EscalationController();

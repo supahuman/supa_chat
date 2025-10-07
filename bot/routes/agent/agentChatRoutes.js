@@ -1,6 +1,6 @@
 import express from 'express';
-import agentChatController from '../controller/agentChatController.js';
-import { authenticateCompany } from '../middleware/auth.js';
+import agentChatController from '../../controller/agent/agentChatController.js';
+import { authenticateCompany } from '../../middleware/auth.js';
 
 const router = express.Router();
 

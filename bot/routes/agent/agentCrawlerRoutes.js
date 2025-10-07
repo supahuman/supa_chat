@@ -1,6 +1,6 @@
 import express from 'express';
-import { authenticateApiKey } from '../middleware/auth.js';
-import AgentCrawlerController from '../controller/agentCrawlerController.js';
+import { authenticateApiKey } from '../../middleware/auth.js';
+import AgentCrawlerController from '../../controller/agent/agentCrawlerController.js';
 
 const router = express.Router();
 

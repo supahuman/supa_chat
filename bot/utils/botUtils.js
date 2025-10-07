@@ -10,8 +10,9 @@ export async function initializeBot() {
 
   if (process.env.BOT_ENABLED === 'true') {
     try {
-      chatRoutes = (await import('../routes/chatRoutes.js')).default;
-      clientRoutes = (await import('../routes/clientRoutes.js')).default;
+      // General chat removed - only agent-specific chat is used
+      chatRoutes = null;
+      clientRoutes = (await import('../routes/client/clientRoutes.js')).default;
       console.log('🤖 Bot routes loaded successfully');
 
       // Knowledge base is now handled by NLP pipeline
