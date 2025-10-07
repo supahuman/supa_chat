@@ -46,7 +46,7 @@ class AgentChatController {
           agentId,
           companyId,
           message,
-          { limit: 5, threshold: 0.7 }
+          { limit: 5, threshold: 0.3 }
         );
 
         if (searchResults.length > 0) {

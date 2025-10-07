@@ -408,7 +408,15 @@ class AgentCrawlerService {
    * @returns {string} Cleaned content
    */
   cleanContent(content) {
-    return content
+    if (!content || typeof content !== 'string') {
+      return '';
+    }
+
+    // Strip HTML markup using Cheerio
+    const $ = cheerio.load(content);
+    const textContent = $.text();
+    
+    return textContent
       .replace(/\s+/g, ' ') // Replace multiple whitespace with single space
       .replace(/\n\s*\n/g, '\n') // Remove empty lines
       .trim();

@@ -207,7 +207,7 @@ class VectorStoreService {
     try {
       const {
         limit = this.options.defaultLimit,
-        threshold = Math.min(options.threshold || 0.3, 0.3), // Force max threshold of 0.3 for fallback
+        threshold = options.threshold || 0.3, // Use the original threshold, don't force it to 0.3
         sourceType = null,
         category = null
       } = options;
