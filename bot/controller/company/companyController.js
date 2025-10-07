@@ -1,5 +1,5 @@
-import Company from '../../models/Company.js';
-import User from '../../models/User.js';
+import Company from '../../models/companyModel.js';
+import User from '../../models/userModel.js';
 import CompanyService from '../../services/CompanyService.js';
 import BaseController from '../shared/baseController.js';
 

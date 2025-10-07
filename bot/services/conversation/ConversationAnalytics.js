@@ -1,5 +1,5 @@
 import ConversationRepository from './ConversationRepository.js';
-import Conversation from '../../models/conversation.js';
+import Conversation from '../../models/conversationModel.js';
 
 /**
  * Service for conversation analytics and statistics

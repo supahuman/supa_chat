@@ -1,4 +1,4 @@
-import Agent from '../../models/agent.js';
+import Agent from '../../models/agentModel.js';
 import AgentCrawlerService from '../../services/nlp/AgentCrawlerService.js';
 import NLPPipeline from '../../services/nlp/NLPPipeline.js';
 import DocumentProcessingService from '../../services/DocumentProcessingService.js';

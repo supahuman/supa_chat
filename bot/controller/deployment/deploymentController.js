@@ -1,4 +1,4 @@
-import Agent from '../../models/agent.js';
+import Agent from '../../models/agentModel.js';
 
 class DeploymentController {
   /**

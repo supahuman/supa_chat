@@ -1,4 +1,4 @@
-import Agent from '../../models/agent.js';
+import Agent from '../../models/agentModel.js';
 import VectorStoreService from '../../services/nlp/VectorStoreService.js';
 import ToolExecutionService from '../../services/tools/ToolExecutionService.js';
 import ConversationService from '../../services/conversation/ConversationService.js';

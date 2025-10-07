@@ -58,7 +58,7 @@ const KnowledgeList = ({
           No {getTabLabel()} Added Yet
         </h4>
         <p className="text-secondary max-w-md mx-auto">
-          Click "Add {getTabLabel()}" to start building your knowledge base.
+          Click &quot;Add {getTabLabel()}&quot; to start building your knowledge base.
         </p>
       </div>
     );
