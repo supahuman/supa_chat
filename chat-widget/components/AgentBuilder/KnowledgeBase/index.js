@@ -191,6 +191,16 @@ const KnowledgeBase = ({ currentAgentId }) => {
 
     } catch (error) {
       console.error('❌ Error saving knowledge item:', error);
+      console.error('❌ Error details:', {
+        message: error?.message,
+        status: error?.status,
+        data: error?.data,
+        originalStatus: error?.originalStatus,
+        error: error?.error
+      });
+      
+      // Show user-friendly error message
+      alert(`Failed to save knowledge item: ${error?.data?.error || error?.message || 'Unknown error'}`);
     }
 
     setIsAdding(false);

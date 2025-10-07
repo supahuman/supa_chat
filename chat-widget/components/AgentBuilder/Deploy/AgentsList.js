@@ -101,7 +101,16 @@ const AgentsList = ({ onNavigateToEmbeds, onEditAgent }) => {
           refetch(); // Refresh the list
         } catch (error) {
           console.error('Failed to delete agent:', error);
-          alert(`❌ Failed to delete agent: ${error.data?.error || error.message}`);
+          console.error('Error details:', {
+            message: error?.message,
+            status: error?.status,
+            data: error?.data,
+            originalStatus: error?.originalStatus,
+            error: error?.error
+          });
+          
+          // Show user-friendly error message
+          alert(`❌ Failed to delete agent: ${error?.data?.error || error?.message || 'Unknown error'}`);
         }
       } else {
         alert('❌ Deletion cancelled - confirmation text did not match');
