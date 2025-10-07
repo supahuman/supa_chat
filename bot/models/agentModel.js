@@ -73,6 +73,11 @@ const agentSchema = new mongoose.Schema({
     enum: ['active', 'inactive', 'training', 'deleted'],
     default: 'active'
   },
+  industry: {
+    type: String,
+    enum: ['healthcare', 'finance', 'ecommerce', 'events', 'education', 'support', 'technology', 'retail', 'hospitality', 'general'],
+    default: 'general'
+  },
   usage: {
     totalConversations: { type: Number, default: 0 },
     totalMessages: { type: Number, default: 0 },

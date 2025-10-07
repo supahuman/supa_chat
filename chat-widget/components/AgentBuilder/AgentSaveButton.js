@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Save, Check, Loader2 } from 'lucide-react';
 import { Button } from '@/ui';
 import { useCreateCompanyAgentMutation, useUpdateCompanyAgentMutation } from '@/store/botApi';
@@ -15,6 +15,7 @@ const AgentSaveButton = ({
   
   const isLoading = isCreating || isUpdating;
   const isEditing = !!agentData.agentId;
+
 
   // Debug: Log agent data to see what we're working with
   console.log('AgentSaveButton - agentData:', agentData);
@@ -77,8 +78,9 @@ const AgentSaveButton = ({
       icon={isLoading ? Loader2 : Save}
       loading={isLoading}
       disabled={!agentData.name?.trim()}
+      data-save-button
     >
-      {isLoading ? 'Saving Agent...' : (isEditing ? 'Update Agent' : 'Save Agent')}
+      <span>{isLoading ? 'Saving Agent...' : (isEditing ? 'Update Agent' : 'Save Agent')}</span>
     </Button>
   );
 };

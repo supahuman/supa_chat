@@ -9,6 +9,7 @@ import CustomDescription from './CustomDescription';
 import AgentPreview from './AgentPreview';
 import AgentSaveButton from '../AgentSaveButton';
 import { useGetCompanyAgentQuery } from '@/store/botApi';
+import { defaultAgentConfig } from '@/utils/agentConfigData';
 
 const AIPersona = ({ currentAgentId, onAgentCreated }) => {
   // Local agent data state
@@ -25,8 +26,9 @@ const AIPersona = ({ currentAgentId, onAgentCreated }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [tempDescription, setTempDescription] = useState('');
   const [agentTitle, setAgentTitle] = useState('');
-  const [maxCharacters, setMaxCharacters] = useState(500);
-  const [defaultLanguage, setDefaultLanguage] = useState('en');
+  const [maxCharacters, setMaxCharacters] = useState(defaultAgentConfig.maxCharacters);
+  const [defaultLanguage, setDefaultLanguage] = useState(defaultAgentConfig.language);
+  const [industry, setIndustry] = useState(defaultAgentConfig.industry);
 
   // Load existing agent data when currentAgentId changes
   const { data: agentResponse, isLoading: isLoadingAgent } = useGetCompanyAgentQuery(currentAgentId, {
@@ -40,16 +42,21 @@ const AIPersona = ({ currentAgentId, onAgentCreated }) => {
       console.log('Loading agent data for ID:', currentAgentId, agent);
       
       setAgentData({
+        agentId: agent.agentId, // CRITICAL: Include agentId for updates
         name: agent.name || '',
         description: agent.description || '',
         personality: agent.personality || '',
         knowledgeBase: agent.knowledgeBase || [],
-        trainingExamples: agent.trainingExamples || []
+        trainingExamples: agent.trainingExamples || [],
+        industry: agent.industry || defaultAgentConfig.industry
       });
+      
+      console.log('✅ Agent data loaded with agentId:', agent.agentId);
       
       // Set form fields
       setAgentTitle(agent.name || '');
       setCustomDescription(agent.description || '');
+      setIndustry(agent.industry || defaultAgentConfig.industry);
       
       // Set personality based on agent data
       if (agent.personality) {
@@ -61,16 +68,46 @@ const AIPersona = ({ currentAgentId, onAgentCreated }) => {
         }
       }
     } else if (!currentAgentId) {
-      // Reset to new agent state
+      // Check for draft data in localStorage
+      if (typeof window !== 'undefined') {
+        const draftData = localStorage.getItem('agentBuilder_draft');
+        if (draftData) {
+          try {
+            const parsedDraft = JSON.parse(draftData);
+            console.log('📝 Loading draft data:', parsedDraft);
+            setAgentData(parsedDraft);
+            setAgentTitle(parsedDraft.name || '');
+            setCustomDescription(parsedDraft.description || '');
+            setIndustry(parsedDraft.industry || defaultAgentConfig.industry);
+            
+            // Set personality based on draft data
+            if (parsedDraft.personality) {
+              const matchingPersona = personas.find(p => 
+                parsedDraft.personality.includes(p.description.substring(0, 50))
+              );
+              if (matchingPersona) {
+                setSelectedPersona(matchingPersona.id);
+              }
+            }
+            return; // Exit early if draft was loaded
+          } catch (error) {
+            console.error('Error parsing draft data:', error);
+          }
+        }
+      }
+      
+      // Reset to new agent state (no draft found)
       setAgentData({
         name: '',
         description: '',
         personality: '',
         knowledgeBase: [],
-        trainingExamples: []
+        trainingExamples: [],
+        industry: defaultAgentConfig.industry
       });
       setAgentTitle('');
       setCustomDescription('');
+      setIndustry(defaultAgentConfig.industry);
       setSelectedPersona('classy');
     }
   }, [currentAgentId, agentResponse]);
@@ -142,11 +179,20 @@ const AIPersona = ({ currentAgentId, onAgentCreated }) => {
 
   // Update agent data when fields change
   const updateAgentData = useCallback((field, value) => {
-    setAgentData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  }, [setAgentData]);
+    setAgentData(prev => {
+      const newData = {
+        ...prev,
+        [field]: value
+      };
+      
+      // Persist draft to localStorage (only for new agents or unsaved changes)
+      if (typeof window !== 'undefined' && (!currentAgentId || prev.agentId !== currentAgentId)) {
+        localStorage.setItem('agentBuilder_draft', JSON.stringify(newData));
+      }
+      
+      return newData;
+    });
+  }, [setAgentData, currentAgentId]);
 
   // Initialize agent data with default values
   useEffect(() => {
@@ -174,15 +220,53 @@ const AIPersona = ({ currentAgentId, onAgentCreated }) => {
     }
   }, [customDescription, agentData.description]);
 
+  useEffect(() => {
+    if (industry && industry !== agentData.industry) {
+      console.log('🔄 Updating agent industry:', industry);
+      updateAgentData('industry', industry);
+    }
+  }, [industry, agentData.industry]);
+
   // Debug: Log agentData changes
   useEffect(() => {
     console.log('📊 AIPersona - agentData updated:', agentData);
   }, [agentData]);
 
+  // Add beforeunload warning for unsaved changes
+  useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      // Check if there are unsaved changes
+      const hasUnsavedChanges = agentData.name?.trim() || 
+                               agentData.description?.trim() || 
+                               agentData.personality?.trim();
+      
+      if (hasUnsavedChanges && !currentAgentId) {
+        e.preventDefault();
+        e.returnValue = 'You have unsaved changes. Are you sure you want to leave?';
+        return 'You have unsaved changes. Are you sure you want to leave?';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, [agentData, currentAgentId]);
+
   // Handle agent title change
   const handleTitleChange = (title) => {
     setAgentTitle(title);
     updateAgentData('name', title);
+  };
+
+  // Handle save from keyboard shortcut
+  const handleSaveFromKeyboard = () => {
+    // Trigger the save button click
+    const saveButton = document.querySelector('[data-save-button]');
+    if (saveButton && !saveButton.disabled) {
+      saveButton.click();
+    }
   };
 
   // Handle description change
@@ -227,6 +311,9 @@ const AIPersona = ({ currentAgentId, onAgentCreated }) => {
         setDefaultLanguage={setDefaultLanguage}
         maxCharacters={maxCharacters}
         setMaxCharacters={setMaxCharacters}
+        industry={industry}
+        setIndustry={setIndustry}
+        onSave={handleSaveFromKeyboard}
       />
 
       {/* Persona Selection */}
@@ -258,12 +345,18 @@ const AIPersona = ({ currentAgentId, onAgentCreated }) => {
       />
 
       {/* Save Button */}
-      <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+      <div className="mt-8 pt-6 border-t border-gray-200 dark:border-gray-700 relative">
         <div className="flex justify-center">
           <AgentSaveButton 
             agentData={agentData}
             onSaveSuccess={(savedAgent) => {
               console.log('Agent saved successfully:', savedAgent);
+              
+              // Clear draft data from localStorage after successful save
+              if (typeof window !== 'undefined') {
+                localStorage.removeItem('agentBuilder_draft');
+              }
+              
               // Call the onAgentCreated callback with the agent ID
               if (onAgentCreated && savedAgent?.agentId) {
                 onAgentCreated(savedAgent.agentId);
