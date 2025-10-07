@@ -7,29 +7,12 @@ import ContentArea from './ContentArea';
 import Backdrop from './Backdrop';
 
 const DashboardLayout = ({ children }) => {
-  // Initialize state with localStorage persistence
-  const [activeTab, setActiveTab] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('agentBuilder_activeTab') || 'build';
-    }
-    return 'build';
-  });
-  
-  const [activeSidebarItem, setActiveSidebarItem] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('agentBuilder_activeSidebarItem') || 'ai-persona';
-    }
-    return 'ai-persona';
-  });
-  
+  // Initialize state with default values (same for server and client)
+  const [activeTab, setActiveTab] = useState('build');
+  const [activeSidebarItem, setActiveSidebarItem] = useState('ai-persona');
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  
-  const [currentAgentId, setCurrentAgentId] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('agentBuilder_currentAgentId') || null;
-    }
-    return null;
-  });
+  const [currentAgentId, setCurrentAgentId] = useState(null);
+  const [isHydrated, setIsHydrated] = useState(false);
 
   const handleToggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -39,28 +22,42 @@ const DashboardLayout = ({ children }) => {
     setSidebarOpen(false);
   };
 
-  // Persist state to localStorage when values change
+  // Load from localStorage after hydration to prevent SSR mismatch
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    setIsHydrated(true);
+    
+    // Load persisted state from localStorage
+    const savedActiveTab = localStorage.getItem('agentBuilder_activeTab');
+    const savedActiveSidebarItem = localStorage.getItem('agentBuilder_activeSidebarItem');
+    const savedCurrentAgentId = localStorage.getItem('agentBuilder_currentAgentId');
+    
+    if (savedActiveTab) setActiveTab(savedActiveTab);
+    if (savedActiveSidebarItem) setActiveSidebarItem(savedActiveSidebarItem);
+    if (savedCurrentAgentId) setCurrentAgentId(savedCurrentAgentId);
+  }, []);
+
+  // Persist state to localStorage when values change (only after hydration)
+  useEffect(() => {
+    if (isHydrated) {
       localStorage.setItem('agentBuilder_activeTab', activeTab);
     }
-  }, [activeTab]);
+  }, [activeTab, isHydrated]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (isHydrated) {
       localStorage.setItem('agentBuilder_activeSidebarItem', activeSidebarItem);
     }
-  }, [activeSidebarItem]);
+  }, [activeSidebarItem, isHydrated]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    if (isHydrated) {
       if (currentAgentId) {
         localStorage.setItem('agentBuilder_currentAgentId', currentAgentId);
       } else {
         localStorage.removeItem('agentBuilder_currentAgentId');
       }
     }
-  }, [currentAgentId]);
+  }, [currentAgentId, isHydrated]);
 
   // Set default sidebar item when switching tabs
   useEffect(() => {
@@ -122,6 +119,18 @@ const DashboardLayout = ({ children }) => {
     setActiveTab('build');
     setActiveSidebarItem('ai-persona');
   };
+
+  // Show loading state until hydration is complete
+  if (!isHydrated) {
+    return (
+      <div className="h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="h-screen bg-gray-50 dark:bg-gray-900 flex flex-col overflow-hidden">
