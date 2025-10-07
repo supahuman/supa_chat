@@ -1,4 +1,5 @@
 import CompanyService from '../services/CompanyService.js';
+import Agent from '../models/agentModel.js';
 
 /**
  * Middleware to authenticate requests using API key
@@ -147,6 +148,54 @@ export const authenticateCompany = async (req, res, next) => {
     res.status(401).json({
       success: false,
       error: 'Authentication failed'
+    });
+  }
+};
+
+/**
+ * Middleware to authenticate requests using agent API key
+ * This is the new authentication method for agent-specific operations
+ */
+export const authenticateAgentApiKey = async (req, res, next) => {
+  try {
+    const apiKey = req.headers['x-company-key'] || req.headers['authorization']?.replace('Bearer ', '');
+    const userId = req.headers['x-user-id'];
+    
+    if (!apiKey) {
+      return res.status(401).json({
+        success: false,
+        error: 'Agent API key required. Provide X-Company-Key header.'
+      });
+    }
+    
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        error: 'User ID required. Provide X-User-ID header.'
+      });
+    }
+    
+    // Validate agent API key and get agent info
+    const agent = await Agent.findOne({ apiKey, status: 'active' });
+    if (!agent) {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid agent API key'
+      });
+    }
+    
+    // Add agent and company info to request
+    req.agent = agent;
+    req.agentId = agent.agentId;
+    req.companyId = agent.companyId;
+    req.userId = userId;
+    
+    next();
+  } catch (error) {
+    console.error('❌ Agent authentication error:', error);
+    return res.status(500).json({
+      success: false,
+      error: 'Agent authentication failed'
     });
   }
 };

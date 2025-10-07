@@ -236,6 +236,151 @@ ${conversationHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n')}` : '
       });
     }
   }
+
+  /**
+   * Chat with agent using agent API key (for embed widget)
+   * POST /api/agent/chat
+   */
+  async chatWithAgentByApiKey(req, res) {
+    try {
+      const { message, sessionId, conversationHistory = [] } = req.body;
+      const { agentId, companyId, userId } = req; // From authenticateAgentApiKey middleware
+
+      if (!message) {
+        return res.status(400).json({
+          success: false,
+          error: 'Message is required'
+        });
+      }
+
+      // Get the agent (already validated by middleware)
+      const agent = req.agent;
+
+      // Use the existing chat logic but with agent context
+      const result = await this.processChatMessage({
+        agent,
+        agentId,
+        companyId,
+        userId,
+        message,
+        sessionId,
+        conversationHistory
+      });
+
+      res.json(result);
+    } catch (error) {
+      console.error('❌ Error in chatWithAgentByApiKey:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to process chat message'
+      });
+    }
+  }
+
+  /**
+   * Get conversation history using agent API key (for embed widget)
+   * GET /api/agent/conversations/:sessionId
+   */
+  async getConversationByApiKey(req, res) {
+    try {
+      const { sessionId } = req.params;
+      const { agentId, companyId, userId } = req; // From authenticateAgentApiKey middleware
+
+      if (!sessionId) {
+        return res.status(400).json({
+          success: false,
+          error: 'Session ID is required'
+        });
+      }
+
+      // Get conversation history
+      const conversation = await this.conversationService.getConversation(sessionId, agentId, companyId);
+      
+      if (!conversation) {
+        return res.status(404).json({
+          success: false,
+          error: 'Conversation not found'
+        });
+      }
+
+      res.json({
+        success: true,
+        data: conversation
+      });
+    } catch (error) {
+      console.error('❌ Error in getConversationByApiKey:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get conversation'
+      });
+    }
+  }
+
+  /**
+   * Helper method to process chat message (shared logic)
+   */
+  async processChatMessage({ agent, agentId, companyId, userId, message, sessionId, conversationHistory }) {
+    try {
+      // Get relevant knowledge from vector store
+      const relevantKnowledge = await this.vectorStoreService.searchVectors(
+        agentId,
+        message,
+        { limit: 5, threshold: 0.7 }
+      );
+
+      // Get conversation context
+      let conversation = null;
+      if (sessionId) {
+        conversation = await this.conversationService.getConversation(sessionId, agentId, companyId);
+      }
+
+      // Prepare context for LLM
+      const context = {
+        agent,
+        message,
+        relevantKnowledge,
+        conversationHistory: conversationHistory.length > 0 ? conversationHistory : (conversation?.messages || []),
+        sessionId: sessionId || `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      };
+
+      // Generate response using knowledge response service
+      const response = await this.knowledgeResponseService.generateResponse(context);
+
+      // Save conversation
+      await this.conversationService.addMessage(
+        context.sessionId,
+        agentId,
+        companyId,
+        userId,
+        message,
+        response.message,
+        'user'
+      );
+
+      await this.conversationService.addMessage(
+        context.sessionId,
+        agentId,
+        companyId,
+        userId,
+        response.message,
+        response.message,
+        'assistant'
+      );
+
+      return {
+        success: true,
+        data: {
+          message: response.message,
+          sessionId: context.sessionId,
+          sources: response.sources || [],
+          confidence: response.confidence || 0.8
+        }
+      };
+    } catch (error) {
+      console.error('❌ Error processing chat message:', error);
+      throw error;
+    }
+  }
 }
 
 export default new AgentChatController();

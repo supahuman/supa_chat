@@ -86,13 +86,12 @@ const ContentArea = ({
   const getDynamicContent = (tab, sidebarItem) => {
     // Build/Train tab components
     if (tab === 'build' || tab === 'train') {
-      // If we have a currentAgentId, show edit form
-      if (currentAgentId) {
-        return <AIPersona currentAgentId={currentAgentId} onAgentCreated={onAgentCreated} isEditMode={true} />;
-      }
-
       // Agents list component
       if (sidebarItem === 'agents') {
+        // If we have a currentAgentId, show edit form in place of agents list
+        if (currentAgentId) {
+          return <AIPersona currentAgentId={currentAgentId} onAgentCreated={onAgentCreated} isEditMode={true} />;
+        }
         return <AgentsList onEditAgent={onEditAgent} onSelectAgent={onSelectAgent} showEditButton={true} />;
       }
 
