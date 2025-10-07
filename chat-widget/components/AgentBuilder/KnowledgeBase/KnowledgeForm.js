@@ -123,10 +123,10 @@ const KnowledgeForm = ({
                   </p>
                   {isUploading && (
                     <div className="mt-2 p-2 bg-blue-50 dark:bg-blue-900/20 rounded-md">
-                      <p className="text-xs text-blue-600 dark:text-blue-400 flex items-center">
+                      <div className="text-xs text-blue-600 dark:text-blue-400 flex items-center">
                         <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-blue-600 mr-2"></div>
                         Processing file...
-                      </p>
+                      </div>
                     </div>
                   )}
                 </div>

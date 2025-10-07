@@ -70,7 +70,7 @@ const agentSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['active', 'inactive', 'training'],
+    enum: ['active', 'inactive', 'training', 'deleted'],
     default: 'active'
   },
   usage: {

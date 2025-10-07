@@ -159,11 +159,16 @@ class AgentManagementController extends BaseController {
       const { companyId } = this.getCompanyContext(req);
       const { agentId } = req.params;
       
+      console.log('🗑️ Delete agent request:', { agentId, companyId, reqCompanyId: req.companyId });
+      
       // Find the agent
       const agent = await Agent.findOne({ agentId, companyId });
       if (!agent) {
+        console.log('❌ Agent not found:', { agentId, companyId });
         return this.sendNotFound(res, 'Agent');
       }
+      
+      console.log('✅ Agent found, proceeding with deletion:', { agentId, agentName: agent.name });
       
       // Soft delete by updating status
       agent.status = 'deleted';
@@ -175,7 +180,8 @@ class AgentManagementController extends BaseController {
       return this.sendSuccess(res, null, 'Agent deleted successfully');
     } catch (error) {
       this.logError('Delete agent', error, { agentId: req.params.agentId });
-      return this.sendError(res, 'Failed to delete agent');
+      console.error('❌ Delete agent error details:', error);
+      return this.sendError(res, `Failed to delete agent: ${error.message}`);
     }
   }
 }
