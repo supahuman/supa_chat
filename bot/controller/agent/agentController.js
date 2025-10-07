@@ -1,4 +1,4 @@
-import Agent from '../../models/agent.js';
+import Agent from '../../models/Agent.js';
 import { getGlobalModel } from '../../config/globalModel.js';
 import BaseController from '../shared/baseController.js';
 
