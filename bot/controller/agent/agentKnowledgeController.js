@@ -72,8 +72,24 @@ class AgentKnowledgeController extends BaseController {
           // Don't fail the request if NLP processing fails
         }
       }
+
+      // If it's a Q&A pair, trigger Q&A processing
+      if (type === 'qa' && question && answer) {
+        try {
+          this.logAction('Triggering Q&A processing', { question: question.substring(0, 50), agentId });
+          await this.processQAPairs(agentId, companyId, [knowledgeItem]);
+        } catch (error) {
+          this.logError('Q&A processing', error, { question: question.substring(0, 50), agentId });
+          // Don't fail the request if Q&A processing fails
+        }
+      }
       
-      const message = type === 'url' ? 'URL added and processing started' : 'Knowledge item added successfully';
+      let message = 'Knowledge item added successfully';
+      if (type === 'url') {
+        message = 'URL added and processing started';
+      } else if (type === 'qa') {
+        message = 'Q&A pair added and processing started';
+      }
       return this.sendSuccess(res, knowledgeItem, message);
       
     } catch (error) {
@@ -281,6 +297,43 @@ class AgentKnowledgeController extends BaseController {
         knowledgeId: req.params.knowledgeId 
       });
       return this.sendError(res, 'Failed to delete knowledge item');
+    }
+  }
+
+  /**
+   * Process Q&A pairs through NLP pipeline
+   * @private
+   */
+  async processQAPairs(agentId, companyId, qaPairs) {
+    try {
+      if (!qaPairs || qaPairs.length === 0) {
+        this.logAction('No Q&A pairs to process', { agentId });
+        return;
+      }
+
+      this.logAction('Starting Q&A processing', { agentId, qaCount: qaPairs.length });
+      
+      // Use NLPPipeline to process Q&A pairs
+      const nlpPipeline = new NLPPipeline();
+      
+      const result = await nlpPipeline.processQAPairs(
+        agentId,
+        companyId,
+        qaPairs
+      );
+
+      this.logAction('Q&A processing completed', {
+        agentId,
+        totalQAPairs: result.totalQAPairs,
+        totalVectors: result.totalVectors,
+        processingTime: result.processingTime
+      });
+
+      return result;
+
+    } catch (error) {
+      this.logError('Process Q&A pairs', error, { agentId, companyId });
+      throw error;
     }
   }
 

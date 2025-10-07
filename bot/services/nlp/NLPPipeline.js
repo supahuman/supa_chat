@@ -1,6 +1,7 @@
 import ChunkingService from './ChunkingService.js';
 import EmbeddingService from './EmbeddingService.js';
 import VectorStoreService from './VectorStoreService.js';
+import QAProcessingService from '../QAProcessingService.js';
 
 /**
  * NLPPipeline - Orchestrates the complete NLP pipeline
@@ -40,11 +41,95 @@ class NLPPipeline {
       defaultLimit: this.options.searchLimit
     });
 
+    this.qaProcessingService = QAProcessingService;
+
     this.log('🚀 NLP Pipeline initialized', {
       chunkSize: this.options.chunkSize,
       chunkOverlap: this.options.chunkOverlap,
       embeddingProvider: this.options.embeddingProvider
     });
+  }
+
+  /**
+   * Process Q&A pairs through the NLP pipeline
+   * @param {string} agentId - Agent ID
+   * @param {string} companyId - Company ID
+   * @param {Array} qaPairs - Array of Q&A objects
+   * @param {Object} options - Processing options
+   * @returns {Object} Processing results
+   */
+  async processQAPairs(agentId, companyId, qaPairs, options = {}) {
+    try {
+      if (!agentId || !companyId || !qaPairs) {
+        throw new Error('Agent ID, Company ID, and Q&A pairs are required');
+      }
+
+      this.log(`❓ Starting Q&A processing for agent ${agentId}`, {
+        qaPairs: qaPairs.length,
+        agentId,
+        companyId
+      });
+
+      const startTime = Date.now();
+      const results = {
+        agentId,
+        companyId,
+        totalQAPairs: qaPairs.length,
+        processedQAPairs: 0,
+        totalVectors: 0,
+        errors: [],
+        processingTime: 0
+      };
+
+      // Step 1: Process Q&A pairs
+      this.log('❓ Step 1: Processing Q&A pairs...');
+      const processedQAs = await this.qaProcessingService.processQAPairs(qaPairs, agentId, companyId);
+      
+      if (!processedQAs.success) {
+        throw new Error(`Q&A processing failed: ${processedQAs.error}`);
+      }
+
+      results.processedQAPairs = processedQAs.totalChunks;
+      this.log(`✅ Processed ${processedQAs.totalChunks} Q&A pairs`);
+
+      if (processedQAs.qaPairs.length === 0) {
+        results.processingTime = Date.now() - startTime;
+        results.success = true;
+        return results;
+      }
+
+      // Step 2: Generate embeddings for Q&A pairs
+      this.log('🔮 Step 2: Generating embeddings for Q&A pairs...');
+      const embeddedQAs = await this.embedQAPairs(processedQAs.qaPairs);
+      results.totalVectors = embeddedQAs.length;
+      this.log(`✅ Generated ${embeddedQAs.length} embeddings for Q&A pairs`);
+
+      // Step 3: Store Q&A vectors
+      this.log('💾 Step 3: Storing Q&A vectors...');
+      const storageResult = await this.vectorStoreService.storeVectors(
+        agentId,
+        companyId,
+        embeddedQAs,
+        options
+      );
+      this.log(`✅ Stored ${storageResult.storedCount} Q&A vectors`);
+
+      // Calculate processing time
+      results.processingTime = Date.now() - startTime;
+      results.success = true;
+
+      this.log(`🎉 Q&A processing completed for agent ${agentId}`, {
+        processingTime: `${results.processingTime}ms`,
+        totalQAPairs: results.totalQAPairs,
+        totalVectors: results.totalVectors
+      });
+
+      return results;
+
+    } catch (error) {
+      this.log(`❌ Q&A processing failed for agent ${agentId}:`, error.message);
+      throw error;
+    }
   }
 
   /**
@@ -156,6 +241,47 @@ class NLPPipeline {
 
     } catch (error) {
       this.log('❌ Error chunking content:', error.message);
+      throw error;
+    }
+  }
+
+  /**
+   * Generate embeddings for Q&A pairs
+   * @param {Array} qaPairs - Array of processed Q&A pairs
+   * @returns {Array} Array of Q&A pairs with embeddings
+   */
+  async embedQAPairs(qaPairs) {
+    try {
+      if (qaPairs.length === 0) {
+        return [];
+      }
+
+      // Convert Q&A pairs to document format for embedding
+      const documents = qaPairs.map(qa => ({
+        content: qa.content,
+        metadata: {
+          ...qa.metadata,
+          type: 'qa',
+          source: 'manual-qa'
+        }
+      }));
+
+      // Generate embeddings using the existing embedding service
+      const embeddedDocuments = await this.embeddingService.embedDocuments(documents);
+
+      // Convert back to Q&A format with embeddings
+      return embeddedDocuments.map((doc, index) => ({
+        content: doc.content,
+        embedding: doc.embedding,
+        metadata: {
+          ...doc.metadata,
+          agentId: qaPairs[index].agentId,
+          companyId: qaPairs[index].companyId
+        }
+      }));
+
+    } catch (error) {
+      this.log('❌ Error embedding Q&A pairs:', error.message);
       throw error;
     }
   }
