@@ -26,6 +26,16 @@ const CustomDescription = ({
     setIsEditing(false);
   };
 
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      handleSaveDescription();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      handleCancelEdit();
+    }
+  };
+
   return (
     <Card>
       <div className="flex items-center justify-between mb-4">
@@ -49,9 +59,13 @@ const CustomDescription = ({
           <textarea
             value={tempDescription}
             onChange={(e) => setTempDescription(e.target.value)}
+            onKeyDown={handleKeyDown}
             placeholder="Add specific instructions for your AI agent's personality, tone, or behavior. For example: 'Always use our company's signature phrases' or 'Be extra patient with elderly customers'..."
             className="w-full h-32 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-800 text-gray-900 dark:text-white resize-none"
           />
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            💡 Tip: Press Enter to save, or Escape to cancel
+          </p>
           <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3">
             <Button
               onClick={handleSaveDescription}

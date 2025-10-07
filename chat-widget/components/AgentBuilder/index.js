@@ -7,10 +7,29 @@ import ContentArea from './ContentArea';
 import Backdrop from './Backdrop';
 
 const DashboardLayout = ({ children }) => {
-  const [activeTab, setActiveTab] = useState('build');
-  const [activeSidebarItem, setActiveSidebarItem] = useState('ai-persona');
+  // Initialize state with localStorage persistence
+  const [activeTab, setActiveTab] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('agentBuilder_activeTab') || 'build';
+    }
+    return 'build';
+  });
+  
+  const [activeSidebarItem, setActiveSidebarItem] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('agentBuilder_activeSidebarItem') || 'ai-persona';
+    }
+    return 'ai-persona';
+  });
+  
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [currentAgentId, setCurrentAgentId] = useState(null);
+  
+  const [currentAgentId, setCurrentAgentId] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('agentBuilder_currentAgentId') || null;
+    }
+    return null;
+  });
 
   const handleToggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -20,6 +39,29 @@ const DashboardLayout = ({ children }) => {
     setSidebarOpen(false);
   };
 
+  // Persist state to localStorage when values change
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('agentBuilder_activeTab', activeTab);
+    }
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('agentBuilder_activeSidebarItem', activeSidebarItem);
+    }
+  }, [activeSidebarItem]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      if (currentAgentId) {
+        localStorage.setItem('agentBuilder_currentAgentId', currentAgentId);
+      } else {
+        localStorage.removeItem('agentBuilder_currentAgentId');
+      }
+    }
+  }, [currentAgentId]);
+
   // Set default sidebar item when switching tabs
   useEffect(() => {
     if (activeTab === 'deploy' && !['agents', 'embeds', 'settings', 'analytics'].includes(activeSidebarItem)) {
@@ -27,6 +69,26 @@ const DashboardLayout = ({ children }) => {
     } else if (activeTab === 'build' && !['ai-persona', 'knowledge-base', 'actions', 'forms', 'tools', 'teach-agent'].includes(activeSidebarItem)) {
       setActiveSidebarItem('ai-persona');
     }
+  }, [activeTab, activeSidebarItem]);
+
+  // Global keyboard shortcuts (desktop only)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Only enable keyboard shortcuts on desktop (screen width >= 768px)
+      if (window.innerWidth < 768) return;
+      
+      // Escape key to cancel forms or close modals
+      if (e.key === 'Escape') {
+        // Dispatch a custom event for escape actions
+        window.dispatchEvent(new CustomEvent('agentBuilder:escape'));
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
   }, [activeTab, activeSidebarItem]);
 
   const handleSidebarItemClick = (itemId) => {

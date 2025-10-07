@@ -3,12 +3,14 @@ import VectorStoreService from '../../services/nlp/VectorStoreService.js';
 import ToolExecutionService from '../../services/tools/ToolExecutionService.js';
 import ConversationService from '../../services/conversation/ConversationService.js';
 import LLMFactory from '../../services/llm/LLMFactory.js';
+import KnowledgeResponseService from '../../services/KnowledgeResponseService.js';
 
 class AgentChatController {
   constructor() {
     this.vectorStoreService = new VectorStoreService();
     this.toolExecutionService = new ToolExecutionService();
     this.conversationService = new ConversationService();
+    this.knowledgeResponseService = KnowledgeResponseService;
   }
 
   /**
@@ -39,8 +41,10 @@ class AgentChatController {
         });
       }
 
-      // 1. Search knowledge base for relevant content
+      // 1. Search knowledge base for relevant content with confidence scoring
       let knowledgeContext = '';
+      let confidence = { score: 0, level: 'none', count: 0, averageSimilarity: 0 };
+      
       try {
         const searchResults = await this.vectorStoreService.searchSimilarContent(
           agentId,
@@ -51,7 +55,10 @@ class AgentChatController {
 
         if (searchResults.length > 0) {
           knowledgeContext = searchResults.map(result => result.content).join('\n\n');
-          console.log(`📚 Found ${searchResults.length} relevant knowledge chunks`);
+          confidence = this.knowledgeResponseService.calculateConfidence(searchResults);
+          console.log(`📚 Found ${searchResults.length} relevant knowledge chunks (confidence: ${confidence.level}, score: ${(confidence.score * 100).toFixed(0)}%)`);
+        } else {
+          console.log('📚 No relevant knowledge found for this query');
         }
       } catch (error) {
         console.error('❌ Knowledge search error:', error);
@@ -109,7 +116,7 @@ class AgentChatController {
         }
       }
 
-      // 3. Generate response using LLM with context
+      // 3. Generate response using LLM with enhanced context
       const llm = LLMFactory.create('openai', {
         apiKey: process.env.OPENAI_API_KEY,
         model: 'gpt-3.5-turbo'
@@ -117,18 +124,13 @@ class AgentChatController {
       
       await llm.initialize();
       
-      const systemPrompt = `You are ${agent.name}, an AI assistant with the following personality:
-${agent.personality}
-
-${agent.description ? `Description: ${agent.description}` : ''}
-
-${knowledgeContext ? `Relevant knowledge from your knowledge base:
-${knowledgeContext}` : ''}
-
-${toolResults ? `Tool execution results:
-${toolResults}` : ''}
-
-Respond to the user's message in character, using your personality and the provided knowledge. Be helpful, accurate, and engaging.`;
+      // Generate enhanced system prompt with knowledge enforcement
+      const systemPrompt = this.knowledgeResponseService.generateSystemPrompt(
+        agent,
+        knowledgeContext,
+        confidence,
+        toolResults
+      );
 
       const userPrompt = `User message: ${message}
 
@@ -177,14 +179,19 @@ ${conversationHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n')}` : '
         console.error('❌ Stats update error:', error);
       }
 
+      // Generate enhanced response metadata
+      const responseMetadata = this.knowledgeResponseService.generateResponseMetadata(
+        confidence,
+        knowledgeContext ? true : false,
+        toolResults ? true : false
+      );
+
       res.json({
         success: true,
         response,
         agentId,
         sessionId,
-        knowledgeUsed: knowledgeContext ? true : false,
-        toolsExecuted: toolResults ? true : false,
-        confidence: 0.9
+        ...responseMetadata
       });
 
     } catch (error) {

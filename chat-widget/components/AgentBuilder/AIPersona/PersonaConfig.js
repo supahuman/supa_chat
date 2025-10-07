@@ -1,6 +1,7 @@
 'use client';
 
 import { Input, Select, Button } from '@/ui';
+import { languages, industries, responseLengths } from '@/utils/agentConfigData';
 
 const PersonaConfig = ({ 
   agentTitle, 
@@ -8,27 +9,25 @@ const PersonaConfig = ({
   defaultLanguage, 
   setDefaultLanguage,
   maxCharacters,
-  setMaxCharacters 
+  setMaxCharacters,
+  industry,
+  setIndustry,
+  onSave
 }) => {
-  const languages = [
-    { value: 'en', label: 'English' },
-    { value: 'es', label: 'Spanish' },
-    { value: 'fr', label: 'French' },
-    { value: 'de', label: 'German' },
-    { value: 'it', label: 'Italian' },
-    { value: 'pt', label: 'Portuguese' },
-    { value: 'ru', label: 'Russian' },
-    { value: 'ja', label: 'Japanese' },
-    { value: 'ko', label: 'Korean' },
-    { value: 'zh', label: 'Chinese' },
-    { value: 'ar', label: 'Arabic' },
-    { value: 'hi', label: 'Hindi' }
-  ];
+  const handleTitleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      // Trigger save when Enter is pressed in title field
+      if (onSave) {
+        onSave();
+      }
+    }
+  };
 
   return (
     <>
       {/* Agent Configuration */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8 mt-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 mt-6">
         {/* Agent Title */}
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -38,10 +37,27 @@ const PersonaConfig = ({
             type="text"
             value={agentTitle}
             onChange={(e) => setAgentTitle(e.target.value)}
+            onKeyDown={handleTitleKeyDown}
             placeholder="e.g., Customer Support TechCorp"
           />
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            This will be displayed as your agent's name/role
+            This will be displayed as your agent&apos;s name/role
+          </p>
+        </div>
+
+        {/* Industry */}
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+            Industry
+          </label>
+          <Select
+            value={industry}
+            onChange={(e) => setIndustry(e.target.value)}
+            options={industries}
+            placeholder="Select industry"
+          />
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            Helps provide industry-specific guidelines
           </p>
         </div>
 
@@ -90,14 +106,14 @@ const PersonaConfig = ({
           </div>
         </div>
         <div className="mt-2 grid grid-cols-4 gap-2">
-          {[100, 300, 500, 1000].map((chars) => (
+          {responseLengths.map((length) => (
             <Button
-              key={chars}
-              onClick={() => setMaxCharacters(chars)}
-              variant={maxCharacters === chars ? 'primary' : 'secondary'}
+              key={length.value}
+              onClick={() => setMaxCharacters(length.value)}
+              variant={maxCharacters === length.value ? 'primary' : 'secondary'}
               size="xs"
             >
-              {chars} chars
+              {length.label}
             </Button>
           ))}
         </div>
