@@ -37,13 +37,6 @@ const DeploymentSettings = ({ selectedAgent }) => {
   const [generateEmbedCode, { isLoading: generatingCode }] = useGenerateEmbedCodeMutation();
   const [testDeployment, { isLoading: testing }] = useTestDeploymentMutation();
 
-  // Generate embed code when component mounts or config changes
-  useEffect(() => {
-    if (selectedAgent?.agentId) {
-      handleGenerateCode();
-    }
-  }, [selectedAgent, embedConfig, handleGenerateCode]);
-
   const generateFallbackEmbedCode = useCallback(() => {
     const fallbackCode = `<!-- SupaChatbot Widget -->
 <script>
@@ -95,6 +88,13 @@ const DeploymentSettings = ({ selectedAgent }) => {
       generateFallbackEmbedCode();
     }
   }, [selectedAgent?.agentId, embedConfig, generateEmbedCode, generateFallbackEmbedCode]);
+
+  // Generate embed code when component mounts or config changes
+  useEffect(() => {
+    if (selectedAgent?.agentId) {
+      handleGenerateCode();
+    }
+  }, [selectedAgent, embedConfig, handleGenerateCode]);
 
   const handleCopyCode = async () => {
     try {
