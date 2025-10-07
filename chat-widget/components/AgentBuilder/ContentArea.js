@@ -10,27 +10,51 @@ import Tools from './Tools';
 import TeachYourAgent from './TeachYourAgent';
 import AgentsList from './Deploy/AgentsList';
 import EmbedsList from './Deploy/EmbedsList';
+import DeploymentSettings from './Deploy/DeploymentSettings';
+import ApiKeys from './Deploy/ApiKeys';
 
 const ContentArea = ({ 
   activeTab, 
   activeSidebarItem, 
   currentAgentId,
+  selectedAgent,
   onAgentCreated,
   onEditAgent,
-  children 
+  onSelectAgent,
+  children
 }) => {
-  const sidebarItems = [
-    { id: 'ai-persona', label: 'AI Persona' },
-    { id: 'knowledge-base', label: 'Knowledge Base' },
-    { id: 'actions', label: 'Actions' },
-    { id: 'forms', label: 'Forms' },
-    { id: 'tools', label: 'Tools' },
-    { id: 'teach-agent', label: 'Teach Your Agent' }
-  ];
+  const getSidebarItems = (tab) => {
+    switch (tab) {
+      case 'build':
+      case 'train':
+        return [
+          { id: 'agents', label: 'Your Agents' },
+          { id: 'ai-persona', label: 'AI Persona' },
+          { id: 'knowledge-base', label: 'Knowledge Base' },
+          { id: 'actions', label: 'Actions' },
+          { id: 'forms', label: 'Forms' },
+          { id: 'tools', label: 'Tools' },
+          { id: 'teach-agent', label: 'Teach Your Agent' }
+        ];
+      case 'deploy':
+        return [
+          { id: 'agents', label: 'Agents' },
+          { id: 'embeds', label: 'Embeds' },
+          { id: 'api-keys', label: 'API Keys' },
+          { id: 'settings', label: 'Settings' },
+          { id: 'analytics', label: 'Analytics' }
+        ];
+      default:
+        return [];
+    }
+  };
+
+  const sidebarItems = getSidebarItems(activeTab);
 
   const getContentDescription = (tab, sidebarItem) => {
     const descriptions = {
       build: {
+        'agents': 'View and manage all your AI agents.',
         'ai-persona': 'Define your AI agent\'s personality, tone, and behavior patterns.',
         'knowledge-base': 'Upload and manage knowledge sources for your AI agent.',
         'actions': 'Configure actions and integrations your agent can perform.',
@@ -39,6 +63,7 @@ const ContentArea = ({
         'teach-agent': 'Provide training examples and feedback to improve your agent.'
       },
       train: {
+        'agents': 'View and manage all your AI agents.',
         'ai-persona': 'Refine your agent\'s personality based on training data.',
         'knowledge-base': 'Train your agent with specific knowledge domains.',
         'actions': 'Test and validate your agent\'s action capabilities.',
@@ -48,6 +73,8 @@ const ContentArea = ({
       },
       deploy: {
         'agents': 'View and manage all your deployed AI agents.',
+        'embeds': 'Generate embed codes for your AI agents.',
+        'api-keys': 'View and manage API keys for your agents.',
         'settings': 'Configure deployment settings and preferences.',
         'analytics': 'Monitor agent performance and usage analytics.'
       }
@@ -59,9 +86,19 @@ const ContentArea = ({
   const getDynamicContent = (tab, sidebarItem) => {
     // Build/Train tab components
     if (tab === 'build' || tab === 'train') {
+      // If we have a currentAgentId, show edit form
+      if (currentAgentId) {
+        return <AIPersona currentAgentId={currentAgentId} onAgentCreated={onAgentCreated} isEditMode={true} />;
+      }
+
+      // Agents list component
+      if (sidebarItem === 'agents') {
+        return <AgentsList onEditAgent={onEditAgent} onSelectAgent={onSelectAgent} showEditButton={true} />;
+      }
+
       // AI Persona component
       if (sidebarItem === 'ai-persona') {
-        return <AIPersona currentAgentId={currentAgentId} onAgentCreated={onAgentCreated} />;
+        return <AIPersona currentAgentId={currentAgentId} onAgentCreated={onAgentCreated} isEditMode={!!currentAgentId} />;
       }
 
       // Knowledge Base component
@@ -89,7 +126,7 @@ const ContentArea = ({
     if (tab === 'deploy') {
       // Agents list component
       if (sidebarItem === 'agents') {
-        return <AgentsList onEditAgent={onEditAgent} />;
+        return <AgentsList onEditAgent={onEditAgent} onSelectAgent={onSelectAgent} showEditButton={false} />;
       }
 
       // Embeds list component
@@ -97,9 +134,15 @@ const ContentArea = ({
         return <EmbedsList />;
       }
 
-      // Settings component (placeholder)
+      // API Keys component
+      if (sidebarItem === 'api-keys') {
+        console.log('🔑 Rendering API Keys component');
+        return <ApiKeys />;
+      }
+
+      // Settings component
       if (sidebarItem === 'settings') {
-        return getDefaultContent(tab, sidebarItem);
+        return <DeploymentSettings selectedAgent={selectedAgent} />;
       }
 
       // Analytics component (placeholder)

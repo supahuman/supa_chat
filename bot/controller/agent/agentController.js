@@ -1,6 +1,7 @@
 import Agent from '../../models/agentModel.js';
 import { getGlobalModel } from '../../config/globalModel.js';
 import BaseController from '../shared/baseController.js';
+import crypto from 'crypto';
 
 /**
  * AgentManagementController - Handles core agent CRUD operations
@@ -27,8 +28,9 @@ class AgentManagementController extends BaseController {
         });
       }
       
-      // Generate unique agent ID
+      // Generate unique agent ID and API key
       const agentId = `agent_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const apiKey = `sk_${crypto.randomBytes(16).toString('hex')}`;
       
       // Get global model configuration
       const globalModel = getGlobalModel();
@@ -38,6 +40,7 @@ class AgentManagementController extends BaseController {
         agentId,
         companyId,
         createdBy: userId,
+        apiKey,
         name,
         description: description || 'AI Agent created with Agent Builder',
         personality: personality || 'friendly and helpful',
@@ -49,7 +52,7 @@ class AgentManagementController extends BaseController {
       
       await agent.save();
       
-      this.logAction('Created agent', { agentId, name, companyId });
+      this.logAction('Created agent', { agentId, name, companyId, apiKey });
       
       // Trigger NLP pipeline for URLs in knowledge base
       if (knowledgeBase && knowledgeBase.length > 0) {

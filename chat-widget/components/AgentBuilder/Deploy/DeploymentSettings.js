@@ -43,7 +43,7 @@ const DeploymentSettings = ({ selectedAgent }) => {
   window.SupaChatbotConfig = {
     apiUrl: '${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}',
     agentId: '${selectedAgent?.agentId}',
-    companyApiKey: '${typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : 'your_company_key'}',
+    companyApiKey: '${selectedAgent?.apiKey || 'your_agent_api_key'}',
     userId: 'embed_user_${Date.now()}',
     name: '${selectedAgent?.name || 'AI Assistant'}',
     description: '${selectedAgent?.description || 'How can I help you today?'}',
@@ -58,7 +58,7 @@ const DeploymentSettings = ({ selectedAgent }) => {
     
     setEmbedCode(fallbackCode);
     console.log('🔄 Using fallback embed code');
-  }, [selectedAgent?.agentId, embedConfig]);
+  }, [selectedAgent?.agentId, selectedAgent?.apiKey, embedConfig]);
 
   const handleGenerateCode = useCallback(async () => {
     if (!selectedAgent?.agentId) return;
@@ -333,6 +333,72 @@ const DeploymentSettings = ({ selectedAgent }) => {
                     onChange={(e) => setEmbedConfig({ ...embedConfig, autoOpen: e.target.checked })}
                     className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                   />
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          {/* API Key Settings */}
+          <Card>
+            <div className="p-6">
+              <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+                API Key
+              </h4>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Agent API Key
+                  </label>
+                  <div className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      value={selectedAgent?.apiKey || 'No API key available'}
+                      readOnly
+                      className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm"
+                    />
+                    <Button
+                      onClick={() => {
+                        if (selectedAgent?.apiKey) {
+                          navigator.clipboard.writeText(selectedAgent.apiKey);
+                          setCopied(true);
+                          setTimeout(() => setCopied(false), 2000);
+                        }
+                      }}
+                      variant="secondary"
+                      size="sm"
+                      icon={copied ? Check : Copy}
+                      disabled={!selectedAgent?.apiKey}
+                    >
+                      {copied ? 'Copied!' : 'Copy'}
+                    </Button>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    This API key is unique to your agent and is used for authentication in embed codes and API calls.
+                  </p>
+                </div>
+
+                <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                  <h5 className="font-medium text-yellow-900 dark:text-yellow-100 mb-2">
+                    🔒 Security Notice
+                  </h5>
+                  <ul className="text-sm text-yellow-800 dark:text-yellow-200 space-y-1 list-disc list-inside">
+                    <li>Keep your API key secure and never share it publicly</li>
+                    <li>This key provides access to your agent's chat functionality</li>
+                    <li>If compromised, you can regenerate it by creating a new agent</li>
+                    <li>The API key is automatically included in generated embed codes</li>
+                  </ul>
+                </div>
+
+                <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                  <h5 className="font-medium text-blue-900 dark:text-blue-100 mb-2">
+                    📖 Usage Examples
+                  </h5>
+                  <div className="text-sm text-blue-800 dark:text-blue-200 space-y-2">
+                    <p><strong>In embed codes:</strong> The API key is automatically included when you generate embed codes.</p>
+                    <p><strong>For API calls:</strong> Use this key in the <code className="bg-blue-100 dark:bg-blue-800 px-1 rounded">X-Company-Key</code> header.</p>
+                    <p><strong>For testing:</strong> You can test your agent using this API key with tools like Postman or curl.</p>
+                  </div>
                 </div>
               </div>
             </div>

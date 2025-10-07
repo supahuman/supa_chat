@@ -57,16 +57,19 @@ export const useEmbeds = () => {
 
   const handleCopyEmbedCode = async (agentId) => {
     try {
+      // Find the agent to get its API key
+      const agent = agents.find(a => a.agentId === agentId);
+      
       // Generate a simple embed code for copying
       const embedCode = `<!-- SupaChatbot Widget -->
 <script>
   window.SupaChatbotConfig = {
     apiUrl: 'http://localhost:4000',
     agentId: '${agentId}',
-    companyApiKey: '${typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : 'your_company_key'}',
+    companyApiKey: '${agent?.apiKey || 'your_agent_api_key'}',
     userId: 'embed_user_${Date.now()}',
-    name: 'AI Assistant',
-    description: 'How can I help you today?',
+    name: '${agent?.name || 'AI Assistant'}',
+    description: '${agent?.description || 'How can I help you today?'}',
     position: 'bottom-right',
     theme: 'default',
     showWelcomeMessage: true,

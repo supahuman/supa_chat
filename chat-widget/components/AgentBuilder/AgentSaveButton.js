@@ -50,9 +50,10 @@ const AgentSaveButton = ({
     } catch (err) {
       console.error('Error saving agent:', err);
       console.error('Error details:', {
-        message: err.message,
-        status: err.status,
-        data: err.data
+        message: err?.message || 'Unknown error',
+        status: err?.status || err?.statusCode || 'No status',
+        data: err?.data || err?.response?.data || 'No data',
+        fullError: err
       });
     }
   };

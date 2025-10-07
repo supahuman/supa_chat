@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect } from 'react';
-import { Users, Plus, MoreVertical, Play, Pause, Trash2, Edit, BarChart3, ExternalLink } from 'lucide-react';
+import { Users, Plus, MoreVertical, Play, Pause, Trash2, Edit, BarChart3, ExternalLink, Copy } from 'lucide-react';
 import { Button } from '@/ui';
 import { Card } from '@/ui';
 import { useGetCompanyAgentsQuery, useDeleteCompanyAgentMutation } from '@/store/botApi';
 import { hasValidCredentials, setupMockCredentials } from '@/utils/auth';
 
-const AgentsList = ({ onNavigateToEmbeds, onEditAgent }) => {
+const AgentsList = ({ onNavigateToEmbeds, onEditAgent, onSelectAgent, showEditButton = true }) => {
   const [deleteAgent, { isLoading: isDeleting }] = useDeleteCompanyAgentMutation();
 
   // Set up mock credentials if none exist
@@ -213,6 +213,30 @@ const AgentsList = ({ onNavigateToEmbeds, onEditAgent }) => {
                 </div>
               </div>
 
+              {/* API Key */}
+              {agent.apiKey && (
+                <div className="mb-4 p-2 bg-gray-50 dark:bg-gray-800 rounded-md">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">API Key</div>
+                      <div className="text-xs font-mono text-gray-700 dark:text-gray-300 truncate">
+                        {agent.apiKey}
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(agent.apiKey);
+                        // You could add a toast notification here
+                      }}
+                      className="ml-2 p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"
+                      title="Copy API Key"
+                    >
+                      <Copy className="w-3 h-3" />
+                    </button>
+                  </div>
+                </div>
+              )}
+
               {/* Last Used */}
               <div className="text-xs text-gray-500 dark:text-gray-400 mb-4">
                 Last used: {formatDate(agent.usage.lastUsed)}
@@ -231,15 +255,17 @@ const AgentsList = ({ onNavigateToEmbeds, onEditAgent }) => {
                   >
                     Deploy
                   </Button>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    icon={Edit}
-                    className="flex-1"
-                    onClick={() => onEditAgent && onEditAgent(agent)}
-                  >
-                    Edit
-                  </Button>
+                  {showEditButton && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      icon={Edit}
+                      className="flex-1"
+                      onClick={() => onEditAgent && onEditAgent(agent)}
+                    >
+                      Edit
+                    </Button>
+                  )}
                 </div>
                 
                 {/* Secondary Actions Row */}
