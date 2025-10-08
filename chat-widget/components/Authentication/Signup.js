@@ -27,10 +27,7 @@ const Signup = () => {
     }));
   };
 
-  const handleGoogleSignup = () => {
-    // Handle Google signup logic here
-    console.log('Google signup clicked');
-  };
+
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -52,7 +49,7 @@ const Signup = () => {
         </div>
 
         {/* Google Signup Button */}
-        <GoogleSignupButton onClick={handleGoogleSignup} />
+        <GoogleSignupButton />
 
         {/* Divider */}
         <FormDivider />
