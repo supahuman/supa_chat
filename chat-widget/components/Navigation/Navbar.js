@@ -11,8 +11,6 @@ export default function Navbar() {
   const navigation = [
     { name: 'Home', href: '/', icon: Home },
     { name: 'Agent Builder', href: '/agent-builder', icon: Bot },
-    { name: 'Client Management', href: '/clients', icon: Settings },
-    { name: 'Agent Dashboard', href: '/agents', icon: Users },
   ];
 
   const isActive = (href) => pathname === href;
@@ -20,12 +18,12 @@ export default function Navbar() {
   return (
     <nav className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+        <div className="flex justify-between items-center h-14 sm:h-16">
           {/* Logo */}
           <div className="flex items-center">
             <Link href="/" className="flex items-center space-x-2">
-              <MessageCircle className="w-8 h-8 text-blue-600" />
-              <span className="text-xl font-bold text-gray-900 dark:text-white">
+              <MessageCircle className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
+              <span className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
                 Supa Chatbot
               </span>
             </Link>

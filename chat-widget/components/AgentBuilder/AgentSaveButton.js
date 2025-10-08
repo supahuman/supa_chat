@@ -65,6 +65,7 @@ const AgentSaveButton = ({
         size="lg"
         icon={Check}
         disabled
+        className="w-full sm:w-auto"
       >
         Agent Saved!
       </Button>
@@ -80,6 +81,7 @@ const AgentSaveButton = ({
       loading={isLoading}
       disabled={!agentData.name?.trim()}
       data-save-button
+      className="w-full sm:w-auto"
     >
       <span>{isLoading ? 'Saving Agent...' : (isEditing ? 'Update Agent' : 'Save Agent')}</span>
     </Button>
