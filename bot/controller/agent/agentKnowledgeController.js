@@ -83,12 +83,25 @@ class AgentKnowledgeController extends BaseController {
           // Don't fail the request if Q&A processing fails
         }
       }
+
+      // If it's text content, trigger text processing
+      if (type === 'text' && content) {
+        try {
+          this.logAction('Triggering text processing', { title: title.substring(0, 50), agentId });
+          await this.processTextContent(agentId, companyId, [knowledgeItem]);
+        } catch (error) {
+          this.logError('Text processing', error, { title: title.substring(0, 50), agentId });
+          // Don't fail the request if text processing fails
+        }
+      }
       
       let message = 'Knowledge item added successfully';
       if (type === 'url') {
         message = 'URL added and processing started';
       } else if (type === 'qa') {
         message = 'Q&A pair added and processing started';
+      } else if (type === 'text') {
+        message = 'Text knowledge added and processing started';
       }
       return this.sendSuccess(res, knowledgeItem, message);
       
@@ -297,6 +310,57 @@ class AgentKnowledgeController extends BaseController {
         knowledgeId: req.params.knowledgeId 
       });
       return this.sendError(res, 'Failed to delete knowledge item');
+    }
+  }
+
+  /**
+   * Process text content through NLP pipeline
+   * @private
+   */
+  async processTextContent(agentId, companyId, textItems) {
+    try {
+      if (!textItems || textItems.length === 0) {
+        this.logAction('No text items to process', { agentId });
+        return;
+      }
+
+      this.logAction('Starting text processing', { agentId, textCount: textItems.length });
+      
+      // Convert text items to content format for NLP pipeline
+      const textContent = textItems.map(item => ({
+        content: item.content,
+        title: item.title,
+        url: `text://${item.title}`,
+        category: 'text-knowledge',
+        metadata: {
+          source: 'text-input',
+          type: 'text',
+          title: item.title,
+          id: item.id
+        }
+      }));
+      
+      // Use NLPPipeline to process text content
+      const nlpPipeline = new NLPPipeline();
+      
+      const result = await nlpPipeline.processCrawledContent(
+        agentId,
+        companyId,
+        textContent
+      );
+
+      this.logAction('Text processing completed', {
+        agentId,
+        totalChunks: result.totalChunks,
+        totalVectors: result.totalVectors,
+        processingTime: result.processingTime
+      });
+
+      return result;
+
+    } catch (error) {
+      this.logError('Process text content', error, { agentId, companyId });
+      throw error;
     }
   }
 

@@ -11,9 +11,9 @@ router.post('/agents/:agentId/chat', authenticateCompany, agentChatController.ch
 router.get('/agents/:agentId/conversations/:sessionId', authenticateCompany, agentChatController.getConversation);
 
 // Chat with agent using agent API key (for embed widget)
-router.post('/chat', authenticateAgentApiKey, agentChatController.chatWithAgentByApiKey);
+router.post('/chat', authenticateAgentApiKey, agentChatController.chatWithAgentByApiKey.bind(agentChatController));
 
 // Get conversation history using agent API key (for embed widget)
-router.get('/conversations/:sessionId', authenticateAgentApiKey, agentChatController.getConversationByApiKey);
+router.get('/conversations/:sessionId', authenticateAgentApiKey, agentChatController.getConversationByApiKey.bind(agentChatController));
 
 export default router;
