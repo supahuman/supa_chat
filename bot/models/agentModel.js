@@ -116,6 +116,6 @@ const agentSchema = new mongoose.Schema({
 agentSchema.index({ companyId: 1, agentId: 1 });
 agentSchema.index({ companyId: 1, createdBy: 1 });
 agentSchema.index({ companyId: 1, status: 1 });
-agentSchema.index({ apiKey: 1 }); // Index for API key lookups
+// Note: apiKey index is automatically created by unique: true
 
 export default mongoose.model('Agent', agentSchema);

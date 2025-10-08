@@ -9,7 +9,7 @@ export const GLOBAL_MODEL = {
   provider: "groq",
   model: "llama-3.1-8b-instant",
   temperature: 0.7,
-  maxTokens: 200, // Reduced from 1000 to 200 for shorter responses
+  maxTokens: 150, // Reduced for concise responses
   // Additional model settings
   topP: 1,
   stream: false
@@ -38,8 +38,9 @@ export function updateGlobalModel(newModelConfig) {
  */
 export function getModelInfo() {
   const modelNames = {
-    'llama-3.1-8b-instant': 'Llama 3.1 8B',
-    'llama-3.1-70b-versatile': 'Llama 3.1 70B',
+    'llama-3.1-8b-instant': 'Llama 3.1 8B Instant',
+    'llama-3.1-70b-versatile': 'Llama 3.1 70B Versatile',
+    'llama-4-scout-17b-16e-instruct': 'Llama 4 Scout 17B',
     'gpt-4': 'GPT-4',
     'gpt-3.5-turbo': 'GPT-3.5 Turbo',
     'claude-3-sonnet-20240229': 'Claude 3 Sonnet',
