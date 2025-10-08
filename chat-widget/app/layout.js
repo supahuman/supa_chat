@@ -3,6 +3,7 @@ import "./globals.css";
 import Providers from "./providers";
 import ConditionalNavbar from "../components/Navigation/ConditionalNavbar";
 import AuthSetup from "../components/AuthSetup";
+import { AuthProvider } from "../lib/authContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,9 +27,11 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Providers>
-          <AuthSetup />
-          <ConditionalNavbar />
-          {children}
+          <AuthProvider>
+            <AuthSetup />
+            <ConditionalNavbar />
+            {children}
+          </AuthProvider>
         </Providers>
       </body>
     </html>

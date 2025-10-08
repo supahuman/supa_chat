@@ -1,5 +1,7 @@
 import CompanyService from '../services/CompanyService.js';
 import Agent from '../models/agentModel.js';
+import jwt from 'jsonwebtoken';
+import User from '../models/userModel.js';
 
 /**
  * Middleware to authenticate requests using API key
@@ -197,6 +199,84 @@ export const authenticateAgentApiKey = async (req, res, next) => {
       success: false,
       error: 'Agent authentication failed'
     });
+  }
+};
+
+/**
+ * JWT Authentication middleware
+ * Validates JWT token and sets user context
+ */
+export const authenticateJWT = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        error: 'No token provided'
+      });
+    }
+
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      return res.status(500).json({
+        success: false,
+        error: 'JWT_SECRET environment variable is not configured'
+      });
+    }
+    const decoded = jwt.verify(token, jwtSecret);
+    
+    const user = await User.findById(decoded.userId);
+    if (!user || !user.isActive) {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid token or user not found'
+      });
+    }
+
+    req.user = user;
+    req.userId = user._id;
+    req.userEmail = user.email;
+    
+    next();
+  } catch (error) {
+    console.error('❌ JWT authentication error:', error);
+    return res.status(401).json({
+      success: false,
+      error: 'Invalid token'
+    });
+  }
+};
+
+/**
+ * Optional JWT authentication - doesn't fail if no token provided
+ */
+export const optionalJWT = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '');
+    
+    if (token) {
+      const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      return res.status(500).json({
+        success: false,
+        error: 'JWT_SECRET environment variable is not configured'
+      });
+    }
+      const decoded = jwt.verify(token, jwtSecret);
+      
+      const user = await User.findById(decoded.userId);
+      if (user && user.isActive) {
+        req.user = user;
+        req.userId = user._id;
+        req.userEmail = user.email;
+      }
+    }
+    
+    next();
+  } catch (error) {
+    // Continue without auth
+    next();
   }
 };
 

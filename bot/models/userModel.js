@@ -1,26 +1,60 @@
 import mongoose from 'mongoose';
 
 const userSchema = new mongoose.Schema({
-  userId: {
+  // Google OAuth fields
+  googleId: {
     type: String,
-    required: true,
     unique: true,
-    index: true
+    sparse: true // Allows null values but ensures uniqueness when present
   },
+  
+  // Basic user fields
   email: {
     type: String,
     required: true,
     unique: true,
     lowercase: true
   },
-  name: {
+  firstName: {
     type: String,
     required: true
+  },
+  lastName: {
+    type: String,
+    required: true
+  },
+  
+  // Authentication
+  password: {
+    type: String,
+    required: function() {
+      return this.provider === 'email';
+    }
+  },
+  provider: {
+    type: String,
+    enum: ['google', 'email'],
+    default: 'email'
+  },
+  
+  // Profile
+  profilePicture: {
+    type: String
+  },
+  emailVerified: {
+    type: Boolean,
+    default: false
+  },
+  
+  // Legacy fields (for backward compatibility) - removed userId, using _id instead
+  name: {
+    type: String
   },
   companyId: {
-    type: String,
-    required: true
+    type: String
   },
+  
+  // User management
   role: {
     type: String,
     enum: ['admin', 'user'],
@@ -38,7 +72,17 @@ const userSchema = new mongoose.Schema({
   timestamps: true
 });
 
-// Index for efficient queries
-userSchema.index({ companyId: 1, userId: 1 });
+// Indexes for efficient queries
+userSchema.index({ companyId: 1 });
+
+// Virtual for full name
+userSchema.virtual('fullName').get(function() {
+  return `${this.firstName} ${this.lastName}`;
+});
+
+// Ensure virtual fields are serialized
+userSchema.set('toJSON', {
+  virtuals: true
+});
 
 export default mongoose.model('User', userSchema);
