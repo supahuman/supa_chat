@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { useAuth } from '../../lib/authContext';
 import { initializeGoogleAuth, renderGoogleButton } from '../../lib/googleAuth';
 
-const GoogleSignupButton = () => {
+const GoogleSignupButton = ({ onSuccess }) => {
   const googleButtonRef = useRef(null);
+  const { login } = useAuth();
 
   useEffect(() => {
     // Load Google Identity Services script
@@ -27,6 +29,18 @@ const GoogleSignupButton = () => {
       }
     };
   }, []);
+
+  // Override the global callback to use our auth context
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      window.handleGoogleSignInSuccess = (userData, token) => {
+        login(userData, token);
+        if (onSuccess) {
+          onSuccess(userData);
+        }
+      };
+    }
+  }, [login, onSuccess]);
 
   return (
     <div className="w-full">

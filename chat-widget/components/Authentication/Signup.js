@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '../../lib/authContext';
 import GoogleSignupButton from './GoogleSignupButton';
 import FormDivider from './FormDivider';
 import NameInputs from './NameInputs';
@@ -10,6 +12,8 @@ import TermsCheckbox from './TermsCheckbox';
 import AuthFooter from './AuthFooter';
 
 const Signup = () => {
+  const router = useRouter();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -18,6 +22,7 @@ const Signup = () => {
     confirmPassword: '',
     agreeToTerms: false
   });
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -27,12 +32,44 @@ const Signup = () => {
     }));
   };
 
+  const handleGoogleSignupSuccess = (userData) => {
+    // User is already logged in via the auth context
+    router.push('/agent-builder');
+  };
 
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Handle signup logic here
-    console.log('Signup data:', formData);
+    setIsLoading(true);
+
+    try {
+      const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+      const response = await fetch(`${backendUrl}/api/auth/signup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          email: formData.email,
+          password: formData.password
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        login(result.user, result.token);
+        router.push('/agent-builder');
+      } else {
+        alert('Signup failed: ' + result.error);
+      }
+    } catch (error) {
+      console.error('Signup error:', error);
+      alert('Signup failed: ' + error.message);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -49,7 +86,7 @@ const Signup = () => {
         </div>
 
         {/* Google Signup Button */}
-        <GoogleSignupButton />
+        <GoogleSignupButton onSuccess={handleGoogleSignupSuccess} />
 
         {/* Divider */}
         <FormDivider />
@@ -80,9 +117,10 @@ const Signup = () => {
 
           <button
             type="submit"
-            className="w-full bg-gray-900 text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-800 transition-colors"
+            disabled={isLoading}
+            className="w-full bg-gray-900 text-white py-3 px-4 rounded-lg font-medium hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Create Account
+            {isLoading ? 'Creating Account...' : 'Create Account'}
           </button>
         </form>
 

@@ -1,4 +1,5 @@
 // Google OAuth configuration and utilities
+import { checkBackendHealth } from './backendHealth.js';
 
 export const GOOGLE_CLIENT_ID = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
@@ -32,19 +33,35 @@ export const handleGoogleSignIn = async (response) => {
     const result = await signupWithGoogle(userData);
     
     if (result.success) {
-      // Redirect to dashboard or agent builder
-      window.location.href = '/agent-builder';
+      // Call the global success callback if it exists
+      if (typeof window.handleGoogleSignInSuccess === 'function') {
+        window.handleGoogleSignInSuccess(result.user, result.token);
+      } else {
+        // Fallback: redirect to dashboard
+        window.location.href = '/agent-builder';
+      }
     } else {
       console.error('Google signup failed:', result.error);
+      alert('Google signup failed: ' + result.error);
     }
   } catch (error) {
     console.error('Error processing Google signin:', error);
+    alert('Error processing Google signin: ' + error.message);
   }
 };
 
 export const signupWithGoogle = async (userData) => {
   try {
-    const response = await fetch('/api/auth/google-signup', {
+    // Check backend health first
+    const healthCheck = await checkBackendHealth();
+    if (!healthCheck.healthy) {
+      throw new Error(`Backend is not available: ${healthCheck.error}. Please ensure the backend server is running on port 4000.`);
+    }
+
+    const backendUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+    console.log('Calling backend Google signup API:', `${backendUrl}/api/auth/google-signup`);
+    
+    const response = await fetch(`${backendUrl}/api/auth/google-signup`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -52,10 +69,23 @@ export const signupWithGoogle = async (userData) => {
       body: JSON.stringify(userData),
     });
 
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Backend error (${response.status}): ${errorText}`);
+    }
+
     const result = await response.json();
+    
+    if (result.success && result.token) {
+      // Store the JWT token in localStorage
+      localStorage.setItem('authToken', result.token);
+      localStorage.setItem('user', JSON.stringify(result.user));
+      console.log('✅ User authenticated and token stored');
+    }
+    
     return result;
   } catch (error) {
-    console.error('Error calling Google signup API:', error);
+    console.error('❌ Error calling backend Google signup API:', error);
     return { success: false, error: error.message };
   }
 };

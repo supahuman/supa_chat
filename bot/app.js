@@ -53,13 +53,23 @@ import agentChatRoutes from './routes/agent/agentChatRoutes.js';
 import userRoutes from './routes/user/userRoutes.js';
 import conversationRoutes from './routes/conversation/conversationRoutes.js';
 import agentVectorRoutes from './routes/agentVector/agentVectorRoutes.js';
+import authRoutes from './routes/auth/authRoutes.js';
 
 async function bootstrap() {
   const port = process.env.PORT || 4000;
   const mongoUri = process.env.MONGODB_URI || '';
+  const jwtSecret = process.env.JWT_SECRET;
+
+  // Security check - JWT_SECRET is required
+  if (!jwtSecret) {
+    console.error('❌ JWT_SECRET is not configured! Authentication will fail.');
+    console.error('   Add JWT_SECRET to your .env file.');
+    console.error('   Generate one with: node -e "console.log(require(\'crypto\').randomBytes(64).toString(\'hex\'))"');
+    process.exit(1);
+  }
 
   if (!mongoUri) {
-    console.warn('MONGODB_URI is not set. Set it in your .env file.');
+    console.warn('⚠️ MONGODB_URI is not set. Set it in your .env file.');
   }
 
   if (mongoUri) {
@@ -79,6 +89,9 @@ async function bootstrap() {
   
   // Register model routes
   app.use('/api/model', modelRoutes);
+  
+  // Register authentication routes
+  app.use('/api/auth', authRoutes);
   
   // Register user management routes
   app.use('/api/users', userRoutes);
@@ -111,6 +124,8 @@ async function bootstrap() {
 
   app.listen(port, () => {
     console.log(`🚀 Server running on http://localhost:${port}`);
+    console.log(`🔐 JWT_SECRET configured: ${jwtSecret ? '✅ Yes' : '❌ No'}`);
+    console.log(`🗄️ MongoDB connected: ${mongoUri ? '✅ Yes' : '❌ No'}`);
   });
 }
 
