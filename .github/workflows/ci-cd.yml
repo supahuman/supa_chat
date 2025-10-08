@@ -102,13 +102,17 @@ jobs:
       - name: Build
         run: |
           cd ${{ matrix.app }}
-          pnpm run build || echo "No build script found"
+          if [ "${{ matrix.app }}" = "chat-widget" ]; then
+            pnpm run build
+          else
+            echo "No build script needed for bot"
+          fi
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.app }}-build
-          path: ${{ matrix.app }}/dist
+          path: ${{ matrix.app }}/.next
           if-no-files-found: ignore
 
   # Deploy to staging (on develop branch)
@@ -125,14 +129,8 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: bot-build
-          path: bot/dist
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
           name: chat-widget-build
-          path: chat-widget/dist
+          path: chat-widget/.next
 
       - name: Deploy to staging
         run: |
@@ -157,14 +155,8 @@ jobs:
       - name: Download build artifacts
         uses: actions/download-artifact@v4
         with:
-          name: bot-build
-          path: bot/dist
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
           name: chat-widget-build
-          path: chat-widget/dist
+          path: chat-widget/.next
 
       - name: Deploy to production
         run: |
