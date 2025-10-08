@@ -1,3 +1,4 @@
+import { getGlobalModel } from '../../config/globalModel.js';
 import Agent from '../../models/agentModel.js';
 import VectorStoreService from '../../services/nlp/VectorStoreService.js';
 import ToolExecutionService from '../../services/tools/ToolExecutionService.js';
@@ -117,9 +118,13 @@ class AgentChatController {
       }
 
       // 3. Generate response using LLM with enhanced context
-      const llm = LLMFactory.create('openai', {
-        apiKey: process.env.OPENAI_API_KEY,
-        model: 'gpt-3.5-turbo'
+      const globalModel = getGlobalModel();
+      const apiKey = globalModel.provider === 'groq' ? process.env.GROQ_API_KEY : process.env.OPENAI_API_KEY;
+      const llm = LLMFactory.create(globalModel.provider, {
+        apiKey: apiKey,
+        model: globalModel.model,
+        temperature: globalModel.temperature,
+        maxTokens: globalModel.maxTokens
       });
       
       await llm.initialize();
@@ -280,9 +285,13 @@ ${conversationHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n')}` : '
       };
 
       // Generate response using LLM with enhanced context
-      const llm = LLMFactory.create('openai', {
-        apiKey: process.env.OPENAI_API_KEY,
-        model: 'gpt-3.5-turbo'
+      const globalModel = getGlobalModel();
+      const apiKey = globalModel.provider === 'groq' ? process.env.GROQ_API_KEY : process.env.OPENAI_API_KEY;
+      const llm = LLMFactory.create(globalModel.provider, {
+        apiKey: apiKey,
+        model: globalModel.model,
+        temperature: globalModel.temperature,
+        maxTokens: globalModel.maxTokens
       });
       
       await llm.initialize();
