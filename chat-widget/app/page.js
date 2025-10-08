@@ -1,5 +1,5 @@
-import LandingPage from "../components/Landing/LandingPage";
+import { MianaLandingPage } from "../components/Landing/landing";
 
 export default function Home() {
-  return <LandingPage />;
+  return <MianaLandingPage />;
 }

@@ -146,3 +146,35 @@ body {
 .scrollbar-hide::-webkit-scrollbar { 
   display: none;  /* Safari and Chrome */
 }
+
+/* ========================================
+   GLASSMORPHIC STYLES FOR MIANA
+   ======================================== */
+
+/* Glassmorphic navbar */
+.glassmorphic-navbar {
+  @apply bg-white/80 backdrop-blur-md border-b border-gray-200/50;
+}
+
+/* Glassmorphic card */
+.glassmorphic-card {
+  @apply bg-white/70 backdrop-blur-lg border border-white/20 shadow-lg;
+}
+
+/* Glassmorphic button */
+.glassmorphic-button {
+  @apply bg-white/20 backdrop-blur-sm border border-white/30 text-gray-900 hover:bg-white/30 transition-all duration-200;
+}
+
+/* Gradient backgrounds */
+.gradient-bg-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.gradient-bg-secondary {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.gradient-bg-accent {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
