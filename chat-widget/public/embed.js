@@ -39,7 +39,7 @@
         <!-- Chat Toggle Button -->
         <div class="supachatbot-toggle" onclick="toggleChat()">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M20 2H4C2.9 2 2 2.9 2 4V22L6 18H20C21.1 18 22 17.1 22 16V4C22 2.9 21.1 2 20 2Z" fill="currentColor"/>
+            <path d="M12 2C6.48 2 2 6.48 2 12c0 1.54.36 2.98.97 4.29L1 23l6.71-1.97C9.02 21.64 10.46 22 12 22c5.52 0 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-2h2v2zm0-4h-2V9h2v4zm4 4h-2v-2h2v2zm0-4h-2V9h2v4z" fill="currentColor"/>
           </svg>
           <span class="supachatbot-badge" id="supachatbot-badge" style="display: none;">1</span>
         </div>
@@ -120,9 +120,14 @@
           bottom: 20px;
           right: 20px;
           z-index: 999999;
-          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-          font-size: 14px;
-          line-height: 1.4;
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+          font-size: 14px !important;
+          line-height: 1.4 !important;
+          font-weight: 400 !important;
+          color: #333 !important;
+          text-rendering: optimizeLegibility;
+          -webkit-font-smoothing: antialiased;
+          -moz-osx-font-smoothing: grayscale;
         }
 
         .supachatbot-toggle {
@@ -205,13 +210,15 @@
         }
 
         .supachatbot-title {
-          font-weight: 600;
-          font-size: 16px;
+          font-weight: 600 !important;
+          font-size: 16px !important;
+          color: white !important;
         }
 
         .supachatbot-subtitle {
-          font-size: 12px;
-          opacity: 0.8;
+          font-size: 12px !important;
+          opacity: 0.9 !important;
+          color: white !important;
         }
 
         .supachatbot-close {
@@ -299,16 +306,21 @@
           padding: 12px 16px;
           border-radius: 18px;
           word-wrap: break-word;
+          font-size: 14px !important;
+          line-height: 1.4 !important;
         }
 
         .supachatbot-message.user .supachatbot-message-content {
-          background: #007bff;
-          color: white;
+          background: #007bff !important;
+          color: white !important;
+          font-weight: 400 !important;
         }
 
         .supachatbot-message.assistant .supachatbot-message-content {
-          background: #f8f9fa;
-          color: #333;
+          background: #f8f9fa !important;
+          color: #333 !important;
+          font-weight: 400 !important;
+          border: 1px solid #e9ecef;
         }
 
         .supachatbot-typing {
@@ -357,7 +369,10 @@
           border: 1px solid #e9ecef;
           border-radius: 20px;
           padding: 12px 16px;
-          font-size: 14px;
+          font-size: 14px !important;
+          font-family: inherit !important;
+          color: #333 !important;
+          background: white !important;
           outline: none;
           transition: border-color 0.2s;
         }

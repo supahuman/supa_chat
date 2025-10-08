@@ -96,6 +96,9 @@ async function bootstrap() {
   app.use('/api/company', toolRoutes);
   app.use('/api/company', agentChatRoutes);
   
+  // Agent API routes for embed widget
+  app.use('/api/agent', agentChatRoutes);
+  
   // Register company management routes LAST (catch-all routes)
   app.use('/api/company', companyRoutes);
 

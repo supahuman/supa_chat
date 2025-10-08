@@ -256,18 +256,98 @@ ${conversationHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n')}` : '
       // Get the agent (already validated by middleware)
       const agent = req.agent;
 
-      // Use the existing chat logic but with agent context
-      const result = await this.processChatMessage({
+      // Get relevant knowledge from vector store
+      const relevantKnowledge = await this.vectorStoreService.searchSimilarContent(
+        agentId,
+        companyId,
+        message,
+        { limit: 5, threshold: 0.3 }
+      );
+
+      // Get conversation context
+      let conversation = null;
+      if (sessionId) {
+        conversation = await this.conversationService.getConversation(sessionId, agentId, companyId);
+      }
+
+      // Prepare context for LLM
+      const context = {
         agent,
+        message,
+        relevantKnowledge,
+        conversationHistory: conversationHistory.length > 0 ? conversationHistory : (conversation?.messages || []),
+        sessionId: sessionId || `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+      };
+
+      // Generate response using LLM with enhanced context
+      const llm = LLMFactory.create('openai', {
+        apiKey: process.env.OPENAI_API_KEY,
+        model: 'gpt-3.5-turbo'
+      });
+      
+      await llm.initialize();
+      
+      // Calculate confidence from search results
+      const confidence = this.knowledgeResponseService.calculateConfidence(relevantKnowledge);
+      
+      // Build knowledge context
+      let knowledgeContext = '';
+      if (relevantKnowledge && relevantKnowledge.length > 0) {
+        knowledgeContext = relevantKnowledge.map(item => 
+          `Source: ${item.source || 'Knowledge Base'}\nContent: ${item.content}`
+        ).join('\n\n');
+      }
+      
+      // Generate enhanced system prompt with knowledge enforcement
+      const systemPrompt = this.knowledgeResponseService.generateSystemPrompt(
+        agent,
+        knowledgeContext,
+        confidence,
+        '' // No tool results for embed widget
+      );
+
+      const userPrompt = `User message: ${message}
+
+${conversationHistory.length > 0 ? `Previous conversation context:
+${conversationHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n')}` : ''}`;
+
+      const llmResponse = await llm.generateResponse([
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: userPrompt }
+      ]);
+
+      const response = llmResponse.success ? llmResponse.content : 'I apologize, but I\'m having trouble processing your request right now.';
+
+      // Save conversation
+      await this.conversationService.addMessage(
+        context.sessionId,
         agentId,
         companyId,
         userId,
         message,
-        sessionId,
-        conversationHistory
-      });
+        response,
+        'user'
+      );
 
-      res.json(result);
+      await this.conversationService.addMessage(
+        context.sessionId,
+        agentId,
+        companyId,
+        userId,
+        response,
+        response,
+        'assistant'
+      );
+
+      res.json({
+        success: true,
+        data: {
+          message: response,
+          sessionId: context.sessionId,
+          sources: relevantKnowledge || [],
+          confidence: confidence.score || 0.8
+        }
+      });
     } catch (error) {
       console.error('❌ Error in chatWithAgentByApiKey:', error);
       res.status(500).json({
@@ -322,8 +402,9 @@ ${conversationHistory.map(msg => `${msg.role}: ${msg.content}`).join('\n')}` : '
   async processChatMessage({ agent, agentId, companyId, userId, message, sessionId, conversationHistory }) {
     try {
       // Get relevant knowledge from vector store
-      const relevantKnowledge = await this.vectorStoreService.searchVectors(
+      const relevantKnowledge = await this.vectorStoreService.searchSimilarContent(
         agentId,
+        companyId,
         message,
         { limit: 5, threshold: 0.7 }
       );
