@@ -59,13 +59,13 @@ jobs:
           cd ${{ matrix.app }}
           pnpm run type-check || echo "No type-check script found"
 
-  # Build both applications
+  # Build applications that need building
   build:
     runs-on: ubuntu-latest
     needs: test
     strategy:
       matrix:
-        app: [bot, chat-widget]
+        app: [chat-widget]
     
     steps:
       - name: Checkout code
@@ -102,11 +102,7 @@ jobs:
       - name: Build
         run: |
           cd ${{ matrix.app }}
-          if [ "${{ matrix.app }}" = "chat-widget" ]; then
-            pnpm run build
-          else
-            echo "No build script needed for bot"
-          fi
+          pnpm run build
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
