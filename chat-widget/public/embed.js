@@ -444,18 +444,16 @@
   // Send message to API
   async function sendMessageToAPI(message) {
     try {
-      const response = await fetch(`${CONFIG.apiUrl}/api/company/agents/${currentAgent.agentId}/chat`, {
+      const response = await fetch(`${CONFIG.apiUrl}/api/agent/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Company-Key': currentAgent.companyApiKey,
+          'X-Company-Key': currentAgent.companyApiKey, // This is actually the agent API key
           'X-User-ID': currentAgent.userId
         },
         body: JSON.stringify({
           message: message,
           sessionId: sessionId,
-          agentId: currentAgent.agentId,
-          personality: currentAgent.personality,
           conversationHistory: []
         })
       });
@@ -514,7 +512,7 @@
     
     // Add AI response
     if (response.success) {
-      addMessage(response.response, 'assistant');
+      addMessage(response.data.message, 'assistant');
     } else {
       addMessage('Sorry, I encountered an error. Please try again.', 'assistant');
     }

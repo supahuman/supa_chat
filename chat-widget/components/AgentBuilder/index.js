@@ -12,6 +12,7 @@ const DashboardLayout = ({ children }) => {
   const [activeSidebarItem, setActiveSidebarItem] = useState('ai-persona');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [currentAgentId, setCurrentAgentId] = useState(null);
+  const [selectedAgent, setSelectedAgent] = useState(null);
   const [isHydrated, setIsHydrated] = useState(false);
 
   const handleToggleSidebar = () => {
@@ -33,7 +34,11 @@ const DashboardLayout = ({ children }) => {
     
     if (savedActiveTab) setActiveTab(savedActiveTab);
     if (savedActiveSidebarItem) setActiveSidebarItem(savedActiveSidebarItem);
-    if (savedCurrentAgentId) setCurrentAgentId(savedCurrentAgentId);
+    
+    // Only load currentAgentId if we're not in build tab (to avoid creation mode issues)
+    if (savedCurrentAgentId && savedActiveTab !== 'build') {
+      setCurrentAgentId(savedCurrentAgentId);
+    }
   }, []);
 
   // Persist state to localStorage when values change (only after hydration)
@@ -61,10 +66,10 @@ const DashboardLayout = ({ children }) => {
 
   // Set default sidebar item when switching tabs
   useEffect(() => {
-    if (activeTab === 'deploy' && !['agents', 'embeds', 'settings', 'analytics'].includes(activeSidebarItem)) {
+    if (activeTab === 'deploy' && !['agents', 'embeds', 'api-keys', 'settings', 'analytics'].includes(activeSidebarItem)) {
       setActiveSidebarItem('agents');
-    } else if (activeTab === 'build' && !['ai-persona', 'knowledge-base', 'actions', 'forms', 'tools', 'teach-agent'].includes(activeSidebarItem)) {
-      setActiveSidebarItem('ai-persona');
+    } else if (activeTab === 'build' && !['agents', 'ai-persona', 'knowledge-base', 'actions', 'forms', 'tools', 'teach-agent'].includes(activeSidebarItem)) {
+      setActiveSidebarItem('agents');
     }
   }, [activeTab, activeSidebarItem]);
 
@@ -91,6 +96,16 @@ const DashboardLayout = ({ children }) => {
   const handleSidebarItemClick = (itemId) => {
     setActiveSidebarItem(itemId);
     
+    // Clear currentAgentId when clicking AI Persona to ensure create mode
+    if (itemId === 'ai-persona') {
+      setCurrentAgentId(null);
+      setSelectedAgent(null);
+      // Clear any draft data to ensure clean creation mode
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('agentBuilder_draft');
+      }
+    }
+    
     // Auto-switch to Train tab for training-related items
     const trainingItems = ['knowledge-base', 'actions', 'forms', 'tools', 'teach-agent'];
     if (trainingItems.includes(itemId)) {
@@ -100,6 +115,19 @@ const DashboardLayout = ({ children }) => {
     // Close sidebar on mobile after selection
     if (window.innerWidth < 768) {
       setSidebarOpen(false);
+    }
+  };
+
+  // Function to start creating a new agent
+  const handleNewAgent = () => {
+    setCurrentAgentId(null);
+    setSelectedAgent(null);
+    setActiveTab('build');
+    setActiveSidebarItem('ai-persona');
+    
+    // Clear any draft data
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('agentBuilder_draft');
     }
   };
 
@@ -114,10 +142,17 @@ const DashboardLayout = ({ children }) => {
   const handleEditAgent = (agent) => {
     console.log('Editing agent:', agent);
     setCurrentAgentId(agent.agentId);
+    setSelectedAgent(agent);
     
-    // Switch to Build tab and AI Persona
+    // Switch to Build tab but stay on agents sidebar
     setActiveTab('build');
-    setActiveSidebarItem('ai-persona');
+    setActiveSidebarItem('agents');
+  };
+
+  // Function to handle selecting an agent for settings
+  const handleSelectAgent = (agent) => {
+    console.log('Select agent:', agent);
+    setSelectedAgent(agent);
   };
 
   // Show loading state until hydration is complete
@@ -160,8 +195,10 @@ const DashboardLayout = ({ children }) => {
           activeTab={activeTab}
           activeSidebarItem={activeSidebarItem}
           currentAgentId={currentAgentId}
+          selectedAgent={selectedAgent}
           onAgentCreated={handleAgentCreated}
           onEditAgent={handleEditAgent}
+          onSelectAgent={handleSelectAgent}
         >
           {children}
         </ContentArea>

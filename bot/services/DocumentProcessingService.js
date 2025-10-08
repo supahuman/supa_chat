@@ -2,20 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import mammoth from 'mammoth';
 import csvParser from 'csv-parser';
-
-// Lazy load pdf-parse to avoid initialization issues
-let pdfParse = null;
-const loadPdfParse = async () => {
-  if (!pdfParse) {
-    try {
-      pdfParse = (await import('pdf-parse')).default;
-    } catch (error) {
-      console.error('Failed to load pdf-parse:', error);
-      throw new Error('PDF parsing not available');
-    }
-  }
-  return pdfParse;
-};
+import { PdfReader } from 'pdfreader';
 
 /**
  * DocumentProcessingService - Handles file parsing and text extraction
@@ -143,19 +130,31 @@ class DocumentProcessingService {
    * @returns {string} Extracted text
    */
   async extractFromPDF(file) {
-    try {
-      const dataBuffer = fs.readFileSync(file.path);
-      const pdfParseLib = await loadPdfParse();
-      const pdfData = await pdfParseLib(dataBuffer);
+    return new Promise((resolve, reject) => {
+      const textChunks = [];
       
-      if (!pdfData.text || pdfData.text.trim().length === 0) {
-        throw new Error('No text content found in PDF');
-      }
-
-      return pdfData.text;
-    } catch (error) {
-      throw new Error(`PDF processing failed: ${error.message}`);
-    }
+      new PdfReader().parseFileItems(file.path, (err, item) => {
+        if (err) {
+          reject(new Error(`PDF processing failed: ${err.message}`));
+          return;
+        }
+        
+        if (!item) {
+          // End of file
+          const fullText = textChunks.join(' ').trim();
+          if (fullText.length === 0) {
+            reject(new Error('No text content found in PDF'));
+            return;
+          }
+          resolve(fullText);
+          return;
+        }
+        
+        if (item.text) {
+          textChunks.push(item.text);
+        }
+      });
+    });
   }
 
   /**

@@ -29,7 +29,7 @@ class DeploymentController {
         description: agent.description,
         personality: agent.personality,
         status: agent.status,
-        companyApiKey: company.apiKey,
+        apiKey: agent.apiKey, // Use agent's API key instead of company's
         embedUrl: `${process.env.EMBED_BASE_URL || 'http://localhost:3000'}/embed.js`,
         apiUrl: process.env.API_BASE_URL || 'http://localhost:4000',
         createdAt: agent.createdAt,
@@ -89,7 +89,7 @@ class DeploymentController {
         agentId: agent.agentId,
         name: agent.name,
         description: agent.description,
-        companyApiKey: company.apiKey,
+        apiKey: agent.apiKey, // Use agent's API key instead of company's
         embedUrl,
         apiUrl: process.env.API_BASE_URL || 'http://localhost:4000',
         position,
@@ -106,7 +106,7 @@ class DeploymentController {
             agentId: agent.agentId,
             name: agent.name,
             description: agent.description,
-            companyApiKey: company.apiKey,
+            apiKey: agent.apiKey, // Use agent's API key instead of company's
             embedUrl,
             apiUrl: process.env.API_BASE_URL || 'http://localhost:4000',
             position,
@@ -252,7 +252,7 @@ class DeploymentController {
   window.SupaChatbotConfig = {
     apiUrl: '${config.apiUrl}',
     agentId: '${config.agentId}',
-    companyApiKey: '${config.companyApiKey}',
+    companyApiKey: '${config.apiKey}', // Use agent's API key
     userId: 'embed_user_${Date.now()}',
     name: '${config.name}',
     description: '${config.description}',

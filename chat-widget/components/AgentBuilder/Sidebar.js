@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import { Bot, Database, Zap, FileText, GraduationCap, X, Users, Settings, BarChart3, ExternalLink, Wrench } from 'lucide-react';
+import { Bot, Database, Zap, FileText, GraduationCap, X, Users, Settings, BarChart3, ExternalLink, Wrench, Key } from 'lucide-react';
 import { Button } from '@/ui';
 
 const Sidebar = ({ 
@@ -18,6 +18,7 @@ const Sidebar = ({
       case 'build':
       case 'train':
         return [
+          { id: 'agents', label: 'Your Agents', icon: Users },
           { id: 'ai-persona', label: 'AI Persona', icon: Bot },
           { id: 'knowledge-base', label: 'Knowledge Base', icon: Database },
           { id: 'actions', label: 'Actions', icon: Zap },
@@ -25,13 +26,14 @@ const Sidebar = ({
           { id: 'tools', label: 'Tools', icon: Wrench },
           { id: 'teach-agent', label: 'Teach Your Agent', icon: GraduationCap }
         ];
-             case 'deploy':
-               return [
-                 { id: 'agents', label: 'Agents', icon: Users },
-                 { id: 'embeds', label: 'Embeds', icon: ExternalLink },
-                 { id: 'settings', label: 'Settings', icon: Settings },
-                 { id: 'analytics', label: 'Analytics', icon: BarChart3 }
-               ];
+      case 'deploy':
+        return [
+          { id: 'agents', label: 'Agents', icon: Users },
+          { id: 'embeds', label: 'Embeds', icon: ExternalLink },
+          { id: 'api-keys', label: 'Api Keys', icon: Key },
+          { id: 'settings', label: 'Settings', icon: Settings },
+          { id: 'analytics', label: 'Analytics', icon: BarChart3 }
+        ];
       default:
         return [];
     }
@@ -54,6 +56,7 @@ const Sidebar = ({
   }, []);
 
   const handleItemClick = (itemId) => {
+    console.log('🔑 Sidebar item clicked:', itemId);
     if (onItemClick) {
       onItemClick(itemId);
     } else {

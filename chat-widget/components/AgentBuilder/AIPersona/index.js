@@ -11,7 +11,7 @@ import AgentSaveButton from '../AgentSaveButton';
 import { useGetCompanyAgentQuery } from '@/store/botApi';
 import { defaultAgentConfig } from '@/utils/agentConfigData';
 
-const AIPersona = ({ currentAgentId, onAgentCreated }) => {
+const AIPersona = ({ currentAgentId, onAgentCreated, isEditMode = false }) => {
   // Local agent data state
   const [agentData, setAgentData] = useState({
     name: '',
@@ -35,82 +35,105 @@ const AIPersona = ({ currentAgentId, onAgentCreated }) => {
     skip: !currentAgentId
   });
 
-  useEffect(() => {
-    if (currentAgentId && agentResponse?.success) {
-      // Load agent data from API response
-      const agent = agentResponse.data;
-      console.log('Loading agent data for ID:', currentAgentId, agent);
-      
-      setAgentData({
-        agentId: agent.agentId, // CRITICAL: Include agentId for updates
-        name: agent.name || '',
-        description: agent.description || '',
-        personality: agent.personality || '',
-        knowledgeBase: agent.knowledgeBase || [],
-        trainingExamples: agent.trainingExamples || [],
-        industry: agent.industry || defaultAgentConfig.industry
-      });
-      
-      console.log('✅ Agent data loaded with agentId:', agent.agentId);
-      
-      // Set form fields
-      setAgentTitle(agent.name || '');
-      setCustomDescription(agent.description || '');
-      setIndustry(agent.industry || defaultAgentConfig.industry);
-      
-      // Set personality based on agent data
-      if (agent.personality) {
-        const matchingPersona = personas.find(p => 
-          agent.personality.includes(p.description.substring(0, 50))
-        );
-        if (matchingPersona) {
-          setSelectedPersona(matchingPersona.id);
-        }
-      }
-    } else if (!currentAgentId) {
-      // Check for draft data in localStorage
-      if (typeof window !== 'undefined') {
-        const draftData = localStorage.getItem('agentBuilder_draft');
-        if (draftData) {
-          try {
-            const parsedDraft = JSON.parse(draftData);
-            console.log('📝 Loading draft data:', parsedDraft);
-            setAgentData(parsedDraft);
-            setAgentTitle(parsedDraft.name || '');
-            setCustomDescription(parsedDraft.description || '');
-            setIndustry(parsedDraft.industry || defaultAgentConfig.industry);
-            
-            // Set personality based on draft data
-            if (parsedDraft.personality) {
-              const matchingPersona = personas.find(p => 
-                parsedDraft.personality.includes(p.description.substring(0, 50))
-              );
-              if (matchingPersona) {
-                setSelectedPersona(matchingPersona.id);
-              }
+  // Switch case for data loading based on mode
+  const loadAgentData = () => {
+    const mode = currentAgentId && isEditMode ? 'edit' : 'create';
+    
+    switch (mode) {
+      case 'edit':
+        // EDIT MODE: Load agent data from API response
+        if (agentResponse?.success) {
+          const agent = agentResponse.data;
+          console.log('🔄 EDIT MODE: Loading agent data for ID:', currentAgentId, agent);
+          
+          setAgentData({
+            agentId: agent.agentId, // CRITICAL: Include agentId for updates
+            name: agent.name || '',
+            description: agent.description || '',
+            personality: agent.personality || '',
+            knowledgeBase: agent.knowledgeBase || [],
+            trainingExamples: agent.trainingExamples || [],
+            industry: agent.industry || defaultAgentConfig.industry
+          });
+          
+          console.log('✅ EDIT MODE: Agent data loaded with agentId:', agent.agentId);
+          
+          // Set form fields
+          setAgentTitle(agent.name || '');
+          setCustomDescription(agent.description || '');
+          setIndustry(agent.industry || defaultAgentConfig.industry);
+          
+          // Set personality based on agent data
+          if (agent.personality) {
+            const matchingPersona = personas.find(p => 
+              agent.personality.includes(p.description.substring(0, 50))
+            );
+            if (matchingPersona) {
+              setSelectedPersona(matchingPersona.id);
             }
-            return; // Exit early if draft was loaded
-          } catch (error) {
-            console.error('Error parsing draft data:', error);
           }
         }
-      }
-      
-      // Reset to new agent state (no draft found)
-      setAgentData({
-        name: '',
-        description: '',
-        personality: '',
-        knowledgeBase: [],
-        trainingExamples: [],
-        industry: defaultAgentConfig.industry
-      });
-      setAgentTitle('');
-      setCustomDescription('');
-      setIndustry(defaultAgentConfig.industry);
-      setSelectedPersona('classy');
+        break;
+
+      case 'create':
+        // CREATE MODE: Check for draft data in localStorage
+        if (typeof window !== 'undefined') {
+          const draftData = localStorage.getItem('agentBuilder_draft');
+          if (draftData) {
+            try {
+              const parsedDraft = JSON.parse(draftData);
+              console.log('📝 CREATE MODE: Loading draft data:', parsedDraft);
+              
+              // Remove agentId from draft to ensure creation mode
+              const draftWithoutId = { ...parsedDraft };
+              delete draftWithoutId.agentId;
+              
+              setAgentData(draftWithoutId);
+              setAgentTitle(parsedDraft.name || '');
+              setCustomDescription(parsedDraft.description || '');
+              setIndustry(parsedDraft.industry || defaultAgentConfig.industry);
+              
+              // Set personality based on draft data
+              if (parsedDraft.personality) {
+                const matchingPersona = personas.find(p => 
+                  parsedDraft.personality.includes(p.description.substring(0, 50))
+                );
+                if (matchingPersona) {
+                  setSelectedPersona(matchingPersona.id);
+                }
+              }
+              return; // Exit early if draft was loaded
+            } catch (error) {
+              console.error('Error parsing draft data:', error);
+            }
+          }
+        }
+        
+        // CREATE MODE: Reset to new agent state (no draft found)
+        setAgentData({
+          name: '',
+          description: '',
+          personality: '',
+          knowledgeBase: [],
+          trainingExamples: [],
+          industry: defaultAgentConfig.industry
+          // Note: No agentId - this ensures we're in creation mode
+        });
+        setAgentTitle('');
+        setCustomDescription('');
+        setIndustry(defaultAgentConfig.industry);
+        setSelectedPersona('classy');
+        break;
+
+      default:
+        console.log('⚠️ Unknown mode - no data loaded');
+        break;
     }
-  }, [currentAgentId, agentResponse]);
+  };
+
+  useEffect(() => {
+    loadAgentData();
+  }, [currentAgentId, agentResponse, isEditMode]);
 
   // Update local state when agentData changes (for editing)
   useEffect(() => {
@@ -130,6 +153,17 @@ const AIPersona = ({ currentAgentId, onAgentCreated }) => {
       }
     }
   }, [agentData]);
+
+  // CRITICAL: Ensure no agentId in creation mode
+  useEffect(() => {
+    if (!currentAgentId && agentData?.agentId) {
+      console.log('🚨 Removing agentId from creation mode data');
+      setAgentData(prev => {
+        const { agentId, ...dataWithoutId } = prev;
+        return dataWithoutId;
+      });
+    }
+  }, [currentAgentId, agentData?.agentId]);
 
   // Define personas array
   const personas = [
@@ -213,6 +247,24 @@ const AIPersona = ({ currentAgentId, onAgentCreated }) => {
     }
   }, [agentTitle, agentData.name]);
 
+  // Clear localStorage draft when switching to creation mode
+  useEffect(() => {
+    if (!currentAgentId && typeof window !== 'undefined') {
+      const draftData = localStorage.getItem('agentBuilder_draft');
+      if (draftData) {
+        try {
+          const parsedDraft = JSON.parse(draftData);
+          if (parsedDraft.agentId) {
+            console.log('🧹 Clearing draft with agentId from localStorage');
+            localStorage.removeItem('agentBuilder_draft');
+          }
+        } catch (error) {
+          console.error('Error parsing draft data:', error);
+        }
+      }
+    }
+  }, [currentAgentId]);
+
   useEffect(() => {
     if (customDescription && customDescription !== agentData.description) {
       console.log('🔄 Updating agent description:', customDescription);
@@ -295,12 +347,33 @@ const AIPersona = ({ currentAgentId, onAgentCreated }) => {
     <div className="space-y-6">
       {/* Header */}
       <div className="border-b border-gray-200 dark:border-gray-700 pb-4">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-          Configure Your AI Persona
-        </h3>
-        <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-          Set up your AI agent's identity, personality, and communication style.
-        </p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+              {currentAgentId ? 'Edit AI Agent' : 'Configure Your AI Persona'}
+            </h3>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
+              {currentAgentId 
+                ? 'Modify your AI agent\'s identity, personality, and communication style.'
+                : 'Set up your AI agent\'s identity, personality, and communication style.'
+              }
+            </p>
+          </div>
+          {currentAgentId && (
+            <button
+              onClick={() => {
+                // Clear currentAgentId to go back to agents list
+                if (typeof window !== 'undefined') {
+                  localStorage.removeItem('agentBuilder_currentAgentId');
+                }
+                window.location.reload(); // Simple way to reset state
+              }}
+              className="text-sm text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300"
+            >
+              ← Back to Agents
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Agent Configuration */}
