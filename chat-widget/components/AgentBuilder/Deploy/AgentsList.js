@@ -146,57 +146,57 @@ const AgentsList = ({ onNavigateToEmbeds, onEditAgent, onSelectAgent, showEditBu
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Your Agents</h2>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Your Agents</h2>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">
             Manage and monitor your deployed AI agents
           </p>
         </div>
-        <Button icon={Plus} variant="primary">
+        <Button icon={Plus} variant="primary" className="w-full sm:w-auto">
           Create Agent
         </Button>
       </div>
 
       {/* Agents Grid */}
       {agents.length === 0 ? (
-        <Card className="p-12 text-center">
-          <Users className="w-16 h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+        <Card className="p-8 sm:p-12 text-center">
+          <Users className="w-12 h-12 sm:w-16 sm:h-16 text-gray-400 dark:text-gray-500 mx-auto mb-4" />
+          <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-2">
             No agents yet
           </h3>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-6">
             Create your first AI agent to get started
           </p>
-          <Button icon={Plus} variant="primary">
+          <Button icon={Plus} variant="primary" className="w-full sm:w-auto">
             Create Your First Agent
           </Button>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
           {agents.map((agent) => (
-            <Card key={agent.agentId} className="p-6 hover:shadow-lg transition-shadow">
+            <Card key={agent.agentId} className="p-4 sm:p-6 hover:shadow-lg transition-shadow">
               <div className="flex items-start justify-between mb-4">
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1">
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-1 truncate">
                     {agent.name}
                   </h3>
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
                     {agent.description}
                   </p>
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(agent.status)}`}>
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(agent.status)}`}>
                     {agent.status}
                   </span>
                 </div>
-                <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded">
+                <button className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded flex-shrink-0">
                   <MoreVertical className="w-4 h-4 text-gray-500" />
                 </button>
               </div>
 
               {/* Usage Stats */}
-              <div className="grid grid-cols-2 gap-4 mb-4">
+              <div className="grid grid-cols-2 gap-3 sm:gap-4 mb-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                  <div className="text-lg sm:text-2xl font-bold text-blue-600 dark:text-blue-400">
                     {agent.usage.totalConversations}
                   </div>
                   <div className="text-xs text-gray-600 dark:text-gray-400">
@@ -204,7 +204,7 @@ const AgentsList = ({ onNavigateToEmbeds, onEditAgent, onSelectAgent, showEditBu
                   </div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  <div className="text-lg sm:text-2xl font-bold text-green-600 dark:text-green-400">
                     {agent.usage.totalMessages}
                   </div>
                   <div className="text-xs text-gray-600 dark:text-gray-400">
@@ -245,7 +245,7 @@ const AgentsList = ({ onNavigateToEmbeds, onEditAgent, onSelectAgent, showEditBu
               {/* Actions */}
               <div className="space-y-2">
                 {/* Primary Actions Row */}
-                <div className="flex space-x-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <Button
                     size="sm"
                     variant="primary"
@@ -269,7 +269,7 @@ const AgentsList = ({ onNavigateToEmbeds, onEditAgent, onSelectAgent, showEditBu
                 </div>
                 
                 {/* Secondary Actions Row */}
-                <div className="flex space-x-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <Button
                     size="sm"
                     variant="outline"

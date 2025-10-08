@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
+import Link from 'next/link';
 import { Bot, Database, Zap, FileText, GraduationCap, X, Users, Settings, BarChart3, ExternalLink, Wrench, Key } from 'lucide-react';
 import { Button } from '@/ui';
 
@@ -102,6 +103,24 @@ const Sidebar = ({
               </button>
             );
           })}
+          
+          {/* Mobile-only menu items */}
+          <div className="md:hidden border-t border-gray-200 dark:border-gray-700 pt-2 mt-4">
+            <Link
+              href="/clients"
+              className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-secondary hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
+            >
+              <Settings className="w-4 h-4 flex-shrink-0" />
+              <span className="truncate">Client Management</span>
+            </Link>
+            <Link
+              href="/agents"
+              className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm font-medium text-secondary hover:text-primary hover:bg-gray-50 dark:hover:bg-gray-700 transition-all"
+            >
+              <Users className="w-4 h-4 flex-shrink-0" />
+              <span className="truncate">Agent Dashboard</span>
+            </Link>
+          </div>
         </nav>
       </div>
     </aside>

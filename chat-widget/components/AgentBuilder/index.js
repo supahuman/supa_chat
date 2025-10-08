@@ -10,7 +10,7 @@ const DashboardLayout = ({ children }) => {
   // Initialize state with default values (same for server and client)
   const [activeTab, setActiveTab] = useState('build');
   const [activeSidebarItem, setActiveSidebarItem] = useState('ai-persona');
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentAgentId, setCurrentAgentId] = useState(null);
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [isHydrated, setIsHydrated] = useState(false);
@@ -38,6 +38,11 @@ const DashboardLayout = ({ children }) => {
     // Only load currentAgentId if we're not in build tab (to avoid creation mode issues)
     if (savedCurrentAgentId && savedActiveTab !== 'build') {
       setCurrentAgentId(savedCurrentAgentId);
+    }
+
+    // Set sidebar to open on desktop by default
+    if (window.innerWidth >= 768) {
+      setSidebarOpen(true);
     }
   }, []);
 
@@ -179,7 +184,7 @@ const DashboardLayout = ({ children }) => {
       {/* Mobile backdrop overlay */}
       <Backdrop isOpen={sidebarOpen} onClose={handleCloseSidebar} />
 
-      <div className="flex flex-1 overflow-hidden">
+      <div className="flex flex-1 overflow-hidden relative">
         {/* Sidebar */}
         <Sidebar
           activeTab={activeTab}

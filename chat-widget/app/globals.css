@@ -98,29 +98,29 @@ body {
   @apply inline-flex items-center justify-center font-medium px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200;
 }
 
-/* Button sizes */
-.btn-xs { @apply px-2 py-1 text-xs rounded; }
-.btn-sm { @apply px-3 py-1 text-xs rounded; }
-.btn-md { @apply px-4 py-2 text-sm rounded-lg; }
-.btn-lg { @apply px-6 py-3 text-base rounded-lg; }
-.btn-xl { @apply px-8 py-4 text-lg rounded-lg; }
+/* Button sizes - Mobile optimized */
+.btn-xs { @apply px-2 py-1.5 text-xs rounded min-h-[32px]; }
+.btn-sm { @apply px-3 py-2 text-xs rounded min-h-[36px]; }
+.btn-md { @apply px-4 py-2.5 text-sm rounded-lg min-h-[40px]; }
+.btn-lg { @apply px-6 py-3.5 text-base rounded-lg min-h-[48px]; }
+.btn-xl { @apply px-8 py-4 text-lg rounded-lg min-h-[56px]; }
 
-/* Typography utilities */
-.heading-xl { @apply text-xl font-bold text-gray-900 dark:text-white; }
-.heading-lg { @apply text-lg font-semibold text-gray-900 dark:text-white; }
-.heading-md { @apply text-base font-medium text-gray-900 dark:text-white; }
-.heading-sm { @apply text-sm font-medium text-gray-900 dark:text-white; }
+/* Typography utilities - Mobile optimized */
+.heading-xl { @apply text-lg sm:text-xl font-bold text-gray-900 dark:text-white; }
+.heading-lg { @apply text-base sm:text-lg font-semibold text-gray-900 dark:text-white; }
+.heading-md { @apply text-sm sm:text-base font-medium text-gray-900 dark:text-white; }
+.heading-sm { @apply text-xs sm:text-sm font-medium text-gray-900 dark:text-white; }
 
-/* Modal utilities */
-.modal-backdrop { @apply fixed inset-0 bg-black/50 flex items-center justify-center z-50; }
-.modal-content { @apply bg-white dark:bg-gray-800 rounded-lg w-full flex flex-col; }
-.modal-header { @apply px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between; }
-.modal-body { @apply flex-1 p-6 overflow-y-auto; }
+/* Modal utilities - Mobile optimized */
+.modal-backdrop { @apply fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4; }
+.modal-content { @apply bg-white dark:bg-gray-800 rounded-lg w-full max-w-md sm:max-w-lg md:max-w-xl flex flex-col max-h-[90vh]; }
+.modal-header { @apply px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between; }
+.modal-body { @apply flex-1 p-4 sm:p-6 overflow-y-auto; }
 
-/* Card utilities */
-.card-header { @apply px-6 py-4 border-b border-gray-200 dark:border-gray-700; }
-.card-body { @apply p-6; }
-.card-footer { @apply px-6 py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800; }
+/* Card utilities - Mobile optimized */
+.card-header { @apply px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-700; }
+.card-body { @apply p-4 sm:p-6; }
+.card-footer { @apply px-4 sm:px-6 py-3 sm:py-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800; }
 
 /* Chat animations */
 .animate-slide-up {
