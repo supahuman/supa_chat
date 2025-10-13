@@ -26,6 +26,27 @@ const MianaLandingPage = () => {
           </div>
         </section>
       </main>
+
+      {/* Chatbot Widget */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+            window.SupaChatbotConfig = {
+              apiUrl: 'http://localhost:4000',
+              agentId: 'agent_1759879385307_asr04fuhc',
+              companyApiKey: 'sk_e60d12d3196055498e2ec4e076ec947e',
+              userId: 'embed_user_1759881276252',
+              name: 'Miana AI Assistant',
+              description: 'AI Agent created with Miana Agent Builder',
+              position: 'bottom-right',
+              theme: 'default',
+              showWelcomeMessage: true,
+              autoOpen: false
+            };
+          `
+        }}
+      />
+      <script src="http://localhost:3000/embed.js" async></script>
     </div>
   );
 };

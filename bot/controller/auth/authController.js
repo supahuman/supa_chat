@@ -1,9 +1,73 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import User from '../../models/userModel.js';
+import Session from '../../models/sessionModel.js';
 import BaseController from '../shared/baseController.js';
+import { v4 as uuidv4 } from 'uuid';
 
 class AuthController extends BaseController {
+
+  // Helper function to create session
+  static async createUserSession(userId, req, isPaymentSession = false) {
+    try {
+      const sessionId = `sess_${uuidv4()}`;
+      const tokenId = `token_${uuidv4()}`;
+      const expiresAt = new Date(Date.now() + (7 * 24 * 60 * 60 * 1000)); // 7 days
+
+      // Extract device info from request
+      const userAgent = req.headers['user-agent'] || '';
+      const deviceInfo = {
+        userAgent,
+        platform: AuthController.extractPlatform(userAgent),
+        browser: AuthController.extractBrowser(userAgent),
+        os: AuthController.extractOS(userAgent)
+      };
+
+      // Get IP address
+      const ipAddress = req.ip || req.connection.remoteAddress || req.headers['x-forwarded-for'] || 'unknown';
+
+      const session = new Session({
+        userId,
+        sessionId,
+        tokenId,
+        deviceInfo,
+        ipAddress,
+        isPaymentSession,
+        expiresAt
+      });
+
+      await session.save();
+
+      return { sessionId, tokenId };
+    } catch (error) {
+      console.error('[AuthController] ❌ Create session failed:', error);
+      return null;
+    }
+  }
+
+  // Helper functions to extract device info
+  static extractPlatform(userAgent) {
+    if (userAgent.includes('Mobile')) return 'Mobile';
+    if (userAgent.includes('Tablet')) return 'Tablet';
+    return 'Desktop';
+  }
+
+  static extractBrowser(userAgent) {
+    if (userAgent.includes('Chrome')) return 'Chrome';
+    if (userAgent.includes('Firefox')) return 'Firefox';
+    if (userAgent.includes('Safari')) return 'Safari';
+    if (userAgent.includes('Edge')) return 'Edge';
+    return 'Unknown';
+  }
+
+  static extractOS(userAgent) {
+    if (userAgent.includes('Windows')) return 'Windows';
+    if (userAgent.includes('Mac')) return 'macOS';
+    if (userAgent.includes('Linux')) return 'Linux';
+    if (userAgent.includes('Android')) return 'Android';
+    if (userAgent.includes('iOS')) return 'iOS';
+    return 'Unknown';
+  }
 
   // Google OAuth signup
   async googleSignup(req, res) {
@@ -48,7 +112,13 @@ class AuthController extends BaseController {
         await user.save();
       }
 
-      // Generate JWT token
+      // Create session
+      const sessionData = await AuthController.createUserSession(user._id, req, false);
+      if (!sessionData) {
+        throw new Error('Failed to create session');
+      }
+
+      // Generate JWT token with session info
       const jwtSecret = process.env.JWT_SECRET;
       if (!jwtSecret) {
         throw new Error('JWT_SECRET environment variable is not configured');
@@ -57,17 +127,27 @@ class AuthController extends BaseController {
         { 
           userId: user._id,
           email: user.email,
-          provider: 'google'
+          provider: 'google',
+          sessionId: sessionData.sessionId,
+          tokenId: sessionData.tokenId
         },
         jwtSecret,
         { expiresIn: '7d' }
       );
 
-      console.log('[AuthController] ✅ Google signup successful', { userId: user._id, email });
+      console.log('[AuthController] ✅ Google signup successful', { 
+        userId: user._id, 
+        email,
+        sessionId: sessionData.sessionId
+      });
 
       res.json({
         success: true,
         token,
+        session: {
+          sessionId: sessionData.sessionId,
+          expiresAt: new Date(Date.now() + (7 * 24 * 60 * 60 * 1000))
+        },
         user: {
           id: user._id,
           email: user.email,
@@ -130,7 +210,13 @@ class AuthController extends BaseController {
 
       await user.save();
 
-      // Generate JWT token
+      // Create session
+      const sessionData = await AuthController.createUserSession(user._id, req, false);
+      if (!sessionData) {
+        throw new Error('Failed to create session');
+      }
+
+      // Generate JWT token with session info
       const jwtSecret = process.env.JWT_SECRET;
       if (!jwtSecret) {
         throw new Error('JWT_SECRET environment variable is not configured');
@@ -139,17 +225,27 @@ class AuthController extends BaseController {
         { 
           userId: user._id,
           email: user.email,
-          provider: 'email'
+          provider: 'email',
+          sessionId: sessionData.sessionId,
+          tokenId: sessionData.tokenId
         },
         jwtSecret,
         { expiresIn: '7d' }
       );
 
-      console.log('[AuthController] ✅ User signup successful', { userId: user._id, email });
+      console.log('[AuthController] ✅ User signup successful', { 
+        userId: user._id, 
+        email,
+        sessionId: sessionData.sessionId
+      });
 
       res.json({
         success: true,
         token,
+        session: {
+          sessionId: sessionData.sessionId,
+          expiresAt: new Date(Date.now() + (7 * 24 * 60 * 60 * 1000))
+        },
         user: {
           id: user._id,
           email: user.email,
@@ -196,7 +292,13 @@ class AuthController extends BaseController {
         });
       }
 
-      // Generate JWT token
+      // Create session
+      const sessionData = await AuthController.createUserSession(user._id, req, false);
+      if (!sessionData) {
+        throw new Error('Failed to create session');
+      }
+
+      // Generate JWT token with session info
       const jwtSecret = process.env.JWT_SECRET;
       if (!jwtSecret) {
         throw new Error('JWT_SECRET environment variable is not configured');
@@ -205,17 +307,27 @@ class AuthController extends BaseController {
         { 
           userId: user._id,
           email: user.email,
-          provider: user.provider
+          provider: user.provider,
+          sessionId: sessionData.sessionId,
+          tokenId: sessionData.tokenId
         },
         jwtSecret,
         { expiresIn: '7d' }
       );
 
-      console.log('[AuthController] ✅ User login successful', { userId: user._id, email });
+      console.log('[AuthController] ✅ User login successful', { 
+        userId: user._id, 
+        email,
+        sessionId: sessionData.sessionId
+      });
 
       res.json({
         success: true,
         token,
+        session: {
+          sessionId: sessionData.sessionId,
+          expiresAt: new Date(Date.now() + (7 * 24 * 60 * 60 * 1000))
+        },
         user: {
           id: user._id,
           email: user.email,

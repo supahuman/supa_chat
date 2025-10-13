@@ -29,15 +29,12 @@ RUN npm install -g pnpm
 COPY --from=bot-builder /app/bot/node_modules ./bot/node_modules
 COPY bot/ ./bot/
 
-# Copy built widget
+# Copy built widget and its dependencies
 COPY --from=widget-builder /app/chat-widget/.next ./chat-widget/.next
 COPY --from=widget-builder /app/chat-widget/public ./chat-widget/public
 COPY --from=widget-builder /app/chat-widget/package.json ./chat-widget/
 COPY --from=widget-builder /app/chat-widget/next.config.mjs ./chat-widget/
-
-# Install widget dependencies for production
-WORKDIR /app/chat-widget
-RUN pnpm install --frozen-lockfile --production
+COPY --from=widget-builder /app/chat-widget/node_modules ./chat-widget/node_modules
 
 # Go back to root
 WORKDIR /app
