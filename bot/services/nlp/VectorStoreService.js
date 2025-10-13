@@ -61,8 +61,11 @@ class VectorStoreService {
         }
       }));
 
-      // Store vectors directly using AgentVector model
-      const result = await this.VectorModel.insertMany(vectors);
+      // Store vectors directly using AgentVector model with timeout options
+      const result = await this.VectorModel.insertMany(vectors, {
+        timeout: 60000, // 60 seconds timeout
+        ordered: false  // Continue inserting even if some fail
+      });
 
       console.log(`✅ Successfully stored ${result.length} vectors for agent ${agentId}`);
       

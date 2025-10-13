@@ -5,7 +5,7 @@ import ChatWidgetContainer from '../ChatWidget/ChatWidgetContainer';
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50 dark:from-black dark:to-gray-950">
-      <main className="max-w-6xl mx-auto px-6 py-20">
+      <main className="max-w-6xl mx-auto px-4 sm:px-6 py-12 sm:py-20">
         <LandingHero />
         <FeaturesSection />
       </main>
@@ -16,7 +16,7 @@ export default function LandingPage() {
         dangerouslySetInnerHTML={{
           __html: `
             window.SupaChatbotConfig = {
-              apiUrl: 'https://supa-chat.onrender.com',
+              apiUrl: 'http://localhost:4000',
               agentId: 'agent_1759879385307_asr04fuhc',
               companyApiKey: 'sk_e60d12d3196055498e2ec4e076ec947e',
               userId: 'embed_user_1759881276252',
@@ -30,7 +30,7 @@ export default function LandingPage() {
           `
         }}
       />
-      <script src="https://supa-chat-mu.vercel.app/embed.js" async></script>
+      <script src="http://localhost:3000/embed.js" async></script>
     </div>
   );
 }
