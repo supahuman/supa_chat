@@ -18,18 +18,31 @@ const corsOptions = {
       'http://localhost:3000',
       'https://supa-chat-mu.vercel.app',
       'https://supa-chat-mu.vercel.app/',
+      'https://miana-ai.vercel.app',
+      'https://miana-ai.vercel.app/',
       process.env.CORS_ORIGIN
     ].filter(Boolean);
     
-    if (allowedOrigins.includes(origin)) {
+    // Check if origin matches any allowed origin (with or without trailing slash)
+    const isAllowed = allowedOrigins.some(allowedOrigin => {
+      return origin === allowedOrigin || 
+             origin === allowedOrigin.replace(/\/$/, '') || 
+             origin === allowedOrigin + '/';
+    });
+    
+    if (isAllowed) {
+      console.log('✅ CORS allowed origin:', origin);
       callback(null, true);
     } else {
-      console.log('CORS blocked origin:', origin);
+      console.log('❌ CORS blocked origin:', origin);
+      console.log('🔍 Allowed origins:', allowedOrigins);
       callback(new Error('Not allowed by CORS'));
     }
   },
   credentials: true,
-  optionsSuccessStatus: 200
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Company-Key', 'X-User-ID']
 };
 
 app.use(cors(corsOptions));
@@ -37,7 +50,20 @@ app.use(express.json({ limit: '1mb' }));
 app.use(morgan('dev'));
 
 app.get('/health', (_req, res) => {
-  res.status(200).json({ status: 'ok' });
+  res.status(200).json({ 
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    cors: 'enabled'
+  });
+});
+
+// CORS test endpoint
+app.get('/cors-test', (_req, res) => {
+  res.status(200).json({ 
+    message: 'CORS is working!',
+    origin: _req.headers.origin,
+    timestamp: new Date().toISOString()
+  });
 });
 
 import { initializeBot, registerBotRoutes } from './utils/botUtils.js';
