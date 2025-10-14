@@ -32,7 +32,7 @@ const MianaLandingPage = () => {
         dangerouslySetInnerHTML={{
           __html: `
             window.SupaChatbotConfig = {
-              apiUrl: 'http://localhost:4000',
+              apiUrl: 'https://supa-chat.onrender.com',
               agentId: 'agent_1759879385307_asr04fuhc',
               companyApiKey: 'sk_e60d12d3196055498e2ec4e076ec947e',
               userId: 'embed_user_1759881276252',
@@ -46,7 +46,7 @@ const MianaLandingPage = () => {
           `
         }}
       />
-      <script src="http://localhost:3000/embed.js" async></script>
+      <script src="https://miana-ai.vercel.app/embed.js" async></script>
     </div>
   );
 };
