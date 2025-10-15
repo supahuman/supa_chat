@@ -48,6 +48,7 @@ const upload = multer({
 // Agent CRUD operations
 router.post('/', agentManagementController.createAgent.bind(agentManagementController));
 router.get('/', agentManagementController.getAgents.bind(agentManagementController));
+router.get('/limits', agentManagementController.getAgentLimits.bind(agentManagementController));
 router.get('/:agentId', agentManagementController.getAgent.bind(agentManagementController));
 router.put('/:agentId', agentManagementController.updateAgent.bind(agentManagementController));
 router.delete('/:agentId', agentManagementController.deleteAgent.bind(agentManagementController));

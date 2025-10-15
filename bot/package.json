@@ -51,6 +51,7 @@
     "openai": "^4.56.0",
     "pdf-lib": "^1.17.1",
     "pdfreader": "^3.0.7",
+    "stripe": "^19.1.0",
     "uuid": "^13.0.0"
   },
   "devDependencies": {

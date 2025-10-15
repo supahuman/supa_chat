@@ -139,6 +139,18 @@ export const botApi = createApi({
           invalidatesTags: ['CompanyAgents'],
         }),
 
+        // Agent limits endpoint
+        getAgentLimits: builder.query({
+          query: () => ({
+            url: '/api/company/agents/limits',
+            headers: {
+              'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
+              'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : ''
+            },
+          }),
+          providesTags: ['AgentLimits'],
+        }),
+
         // Knowledge base endpoints
         addKnowledgeItem: builder.mutation({
           query: ({ agentId, ...knowledgeData }) => ({

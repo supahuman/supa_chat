@@ -1,19 +1,35 @@
-'use client';
+"use client";
 
-import GlassmorphicNavbar from './GlassmorphicNavbar';
-import HeroSection from './HeroSection';
+import { useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import GlassmorphicNavbar from "./GlassmorphicNavbar";
+import HeroSection from "./HeroSection";
+import PricingSection from "./PricingSection";
 
 const MianaLandingPage = () => {
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    // Check for upgrade cancel message (success redirects to agent-builder)
+    const upgrade = searchParams.get("upgrade");
+    if (upgrade === "canceled") {
+      alert("Upgrade canceled. You can try again anytime.");
+    }
+  }, [searchParams]);
+
   return (
     <div className="min-h-screen bg-white">
       {/* Glassmorphic Navbar */}
       <GlassmorphicNavbar />
-      
+
       {/* Main Content */}
       <main className="pt-16">
         {/* Hero Section */}
         <HeroSection />
-        
+
+        {/* Pricing Section */}
+        <PricingSection />
+
         {/* Features Section - Coming Soon */}
         <section className="py-20 px-4 sm:px-6 lg:px-8">
           <div className="max-w-7xl mx-auto text-center">
@@ -21,7 +37,8 @@ const MianaLandingPage = () => {
               Build the Future of AI
             </h2>
             <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-              Create intelligent agents that understand your business and serve your customers with precision.
+              Create intelligent agents that understand your business and serve
+              your customers with precision.
             </p>
           </div>
         </section>
@@ -32,10 +49,10 @@ const MianaLandingPage = () => {
         dangerouslySetInnerHTML={{
           __html: `
             window.SupaChatbotConfig = {
-              apiUrl: 'https://supa-chat.onrender.com',
-              agentId: 'agent_1759879385307_asr04fuhc',
-              companyApiKey: 'sk_e60d12d3196055498e2ec4e076ec947e',
-              userId: 'embed_user_1759881276252',
+              apiUrl: '${process.env.NEXT_PUBLIC_BOT_API_URL}',
+              agentId: '${process.env.NEXT_PUBLIC_AGENT_ID}',
+              companyApiKey: '${process.env.NEXT_PUBLIC_COMPANY_API_KEY}',
+              userId: '${process.env.NEXT_PUBLIC_USER_ID}',
               name: 'Miana AI Assistant',
               description: 'AI Agent created with Miana Agent Builder',
               position: 'bottom-right',
@@ -43,10 +60,13 @@ const MianaLandingPage = () => {
               showWelcomeMessage: true,
               autoOpen: false
             };
-          `
+          `,
         }}
       />
-      <script src="https://miana-ai.vercel.app/embed.js" async></script>
+      <script
+        src={`${process.env.NEXT_PUBLIC_EMBED_URL}/embed/embed-modular.js`}
+        async={true}
+      ></script>
     </div>
   );
 };

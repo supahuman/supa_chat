@@ -1,6 +1,6 @@
-import ConversationRepository from './ConversationRepository.js';
-import ConversationAnalytics from './ConversationAnalytics.js';
-import ConversationSummary from './ConversationSummary.js';
+import ConversationRepository from "./ConversationRepository.js";
+import ConversationAnalytics from "./ConversationAnalytics.js";
+import ConversationSummary from "./ConversationSummary.js";
 
 /**
  * Main conversation service - orchestrates other conversation services
@@ -27,7 +27,7 @@ class ConversationService {
       // Return last N messages
       return conversation.messages.slice(-limit);
     } catch (error) {
-      console.error('❌ Error getting conversation history:', error);
+      console.error("❌ Error getting conversation history:", error);
       return [];
     }
   }
@@ -39,7 +39,7 @@ class ConversationService {
     try {
       return await this.repository.findBySessionId(sessionId);
     } catch (error) {
-      console.error('❌ Error getting conversation:', error);
+      console.error("❌ Error getting conversation:", error);
       return null;
     }
   }
@@ -47,19 +47,25 @@ class ConversationService {
   /**
    * Add message to conversation (keeps only last 4 messages for bot context)
    */
-  async addMessage(sessionId, message, userId = null, companyId = null, agentId = null) {
+  async addMessage(
+    sessionId,
+    message,
+    userId = null,
+    companyId = null,
+    agentId = null
+  ) {
     try {
       // Find or create conversation
       let conversation = await this.repository.findBySessionId(sessionId);
-      
+
       if (!conversation) {
         conversation = await this.repository.create({
           sessionId,
-          userId: userId || 'unknown',
-          companyId: companyId || 'unknown',
-          agentId: agentId || 'unknown',
+          userId: userId || "unknown",
+          companyId: companyId || "unknown",
+          agentId: agentId || "unknown",
           messages: [],
-          status: 'active'
+          status: "active",
         });
       }
 
@@ -68,23 +74,25 @@ class ConversationService {
         role: message.role,
         content: message.content,
         timestamp: new Date(),
-        metadata: message.metadata || {}
+        metadata: message.metadata || {},
       });
 
       // Keep only last 4 messages for bot context
       if (conversation.messages.length > this.maxBotMessages) {
-        conversation.messages = conversation.messages.slice(-this.maxBotMessages);
+        conversation.messages = conversation.messages.slice(
+          -this.maxBotMessages
+        );
       }
 
       // Update metrics and save
       await this.repository.update(sessionId, {
         messages: conversation.messages,
-        'metrics.messageCount': conversation.messages.length
+        "metrics.messageCount": conversation.messages.length,
       });
 
       return conversation;
     } catch (error) {
-      console.error('❌ Error adding message to conversation:', error);
+      console.error("❌ Error adding message to conversation:", error);
       throw error;
     }
   }
@@ -95,14 +103,14 @@ class ConversationService {
   async getConversationContext(sessionId, limit = 5) {
     try {
       const messages = await this.getConversationHistory(sessionId, limit);
-      
+
       // Format messages for RAG service
-      return messages.map(msg => ({
+      return messages.map((msg) => ({
         role: msg.role,
-        content: msg.content
+        content: msg.content,
       }));
     } catch (error) {
-      console.error('❌ Error getting conversation context:', error);
+      console.error("❌ Error getting conversation context:", error);
       return [];
     }
   }
@@ -114,7 +122,7 @@ class ConversationService {
     try {
       await this.repository.delete(sessionId);
     } catch (error) {
-      console.error('❌ Error clearing conversation:', error);
+      console.error("❌ Error clearing conversation:", error);
     }
   }
 
@@ -164,10 +172,52 @@ class ConversationService {
    * Get conversation statistics for a company
    */
   async getConversationStats(companyId = null) {
-    return companyId 
+    return companyId
       ? await this.analytics.getCompanyStats(companyId)
       : await this.analytics.getGlobalStats();
   }
+
+  /**
+   * Process client chat message - handles messages from embed widget
+   */
+  async processClientChatMessage(req, res) {
+    try {
+      const { clientId } = req.params;
+      const { message, sessionId, conversationHistory } = req.body;
+      const { companyApiKey, userId } = req.headers;
+
+      // Validate required fields
+      if (!message) {
+        return res.status(400).json({
+          success: false,
+          error: "Message is required",
+        });
+      }
+
+      // TODO: Add client authentication and validation
+      // TODO: Process the message with the appropriate agent
+      // TODO: Return the response
+
+      // For now, return a simple response
+      res.json({
+        success: true,
+        response: `Echo: ${message}`,
+        sessionId: sessionId || `session_${Date.now()}`,
+      });
+    } catch (error) {
+      console.error("❌ Error processing client chat message:", error);
+      res.status(500).json({
+        success: false,
+        error: "Failed to process message",
+      });
+    }
+  }
 }
+
+// Export the function for use in routes
+export const processClientChatMessage = async (req, res) => {
+  const conversationService = new ConversationService();
+  return await conversationService.processClientChatMessage(req, res);
+};
 
 export default ConversationService;

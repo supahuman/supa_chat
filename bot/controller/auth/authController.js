@@ -72,6 +72,13 @@ class AuthController extends BaseController {
   // Google OAuth signup
   async googleSignup(req, res) {
     try {
+      console.log('[AuthController] 🔄 Google signup request received:', {
+        body: req.body,
+        timestamp: new Date().toISOString(),
+        userAgent: req.headers['user-agent'],
+        origin: req.headers.origin
+      });
+      
       const { googleId, email, firstName, lastName, profilePicture, emailVerified } = req.body;
 
       // Validate required fields
@@ -85,13 +92,39 @@ class AuthController extends BaseController {
       // Check if user already exists
       let user = await User.findOne({ 
         $or: [
-          { email: email },
+          { email: email.toLowerCase() },
           { googleId: googleId }
         ]
       });
 
       if (user) {
-        // User exists, update Google ID if missing
+        // User exists, check for conflicts
+        if (user.googleId && user.googleId !== googleId) {
+          console.error('[AuthController] ❌ Google ID conflict:', {
+            existingGoogleId: user.googleId,
+            newGoogleId: googleId,
+            email: email
+          });
+          return res.status(409).json({
+            success: false,
+            error: 'This email is already associated with a different Google account'
+          });
+        }
+        
+        if (user.email.toLowerCase() === email.toLowerCase() && user.googleId !== googleId) {
+          console.error('[AuthController] ❌ Email conflict:', {
+            existingEmail: user.email,
+            newEmail: email,
+            existingGoogleId: user.googleId,
+            newGoogleId: googleId
+          });
+          return res.status(409).json({
+            success: false,
+            error: 'This email is already registered with a different account'
+          });
+        }
+
+        // Update Google ID if missing
         if (!user.googleId) {
           user.googleId = googleId;
           user.profilePicture = profilePicture;
@@ -99,17 +132,44 @@ class AuthController extends BaseController {
         }
       } else {
         // Create new user
-        user = new User({
-          googleId,
-          email,
-          firstName,
-          lastName,
-          profilePicture,
-          emailVerified,
-          provider: 'google',
-          isActive: true
-        });
-        await user.save();
+        try {
+          user = new User({
+            googleId,
+            email: email.toLowerCase(),
+            firstName,
+            lastName,
+            profilePicture,
+            emailVerified,
+            provider: 'google',
+            isActive: true
+          });
+          await user.save();
+        } catch (saveError) {
+          console.error('[AuthController] ❌ User creation failed:', {
+            error: saveError.message,
+            code: saveError.code,
+            email: email,
+            googleId: googleId
+          });
+          
+          if (saveError.code === 11000) {
+            // Duplicate key error
+            if (saveError.keyPattern?.email) {
+              return res.status(409).json({
+                success: false,
+                error: 'This email is already registered'
+              });
+            }
+            if (saveError.keyPattern?.googleId) {
+              return res.status(409).json({
+                success: false,
+                error: 'This Google account is already registered'
+              });
+            }
+          }
+          
+          throw saveError;
+        }
       }
 
       // Create session
@@ -163,11 +223,16 @@ class AuthController extends BaseController {
       console.error('[AuthController] ❌ Google signup failed:', {
         error: error.message,
         stack: error.stack,
-        body: req.body
+        body: req.body,
+        timestamp: new Date().toISOString()
       });
+      
+      // Return more specific error in development
+      const isDevelopment = process.env.NODE_ENV !== 'production';
       res.status(500).json({
         success: false,
-        error: 'Internal server error'
+        error: isDevelopment ? error.message : 'Internal server error',
+        ...(isDevelopment && { details: error.stack })
       });
     }
   }

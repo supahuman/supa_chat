@@ -1,6 +1,7 @@
 import Agent from '../../models/agentModel.js';
 import { getGlobalModel } from '../../config/globalModel.js';
 import BaseController from '../shared/baseController.js';
+import SubscriptionService from '../../services/SubscriptionService.js';
 import crypto from 'crypto';
 
 /**
@@ -25,6 +26,21 @@ class AgentManagementController extends BaseController {
       if (!validation.isValid) {
         return this.sendValidationError(res, 'Agent name is required', {
           missingFields: validation.missingFields
+        });
+      }
+
+      // Check subscription limits
+      const limitCheck = await SubscriptionService.canCreateAgent(userId, companyId);
+      if (!limitCheck.canCreate) {
+        return res.status(403).json({
+          success: false,
+          error: limitCheck.reason,
+          limitInfo: {
+            currentCount: limitCheck.currentCount,
+            maxAllowed: limitCheck.maxAllowed,
+            plan: limitCheck.plan
+          },
+          upgradeOptions: SubscriptionService.getUpgradeOptions(SubscriptionService.getUserPlan(userId))
         });
       }
       
@@ -74,6 +90,44 @@ class AgentManagementController extends BaseController {
     } catch (error) {
       this.logError('Create agent', error, { companyId: req.companyId });
       return this.sendError(res, 'Failed to create agent');
+    }
+  }
+
+  /**
+   * Get agent count and limits for a user/company
+   */
+  async getAgentLimits(req, res) {
+    try {
+      const { companyId, userId } = this.getCompanyContext(req);
+      
+      // Get current agent count
+      const agentCount = await Agent.countDocuments({ 
+        $or: [
+          { createdBy: userId },
+          { companyId: companyId }
+        ]
+      });
+
+      // Get user's plan and limits
+      const plan = SubscriptionService.getUserPlan(userId);
+      const limitCheck = await SubscriptionService.canCreateAgent(userId, companyId);
+
+      res.json({
+        success: true,
+        data: {
+          currentCount: agentCount,
+          maxAllowed: plan.maxAgents,
+          canCreateMore: limitCheck.canCreate,
+          plan: plan.name,
+          upgradeOptions: SubscriptionService.getUpgradeOptions(plan)
+        }
+      });
+    } catch (error) {
+      this.logError('Get agent limits', error, req.body);
+      res.status(500).json({
+        success: false,
+        error: 'Failed to get agent limits'
+      });
     }
   }
 
