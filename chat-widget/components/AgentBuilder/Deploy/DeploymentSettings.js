@@ -253,7 +253,7 @@ const DeploymentSettings = ({ selectedAgent }) => {
                 <ol className="text-sm text-blue-800 dark:text-blue-200 space-y-1 list-decimal list-inside">
                   <li>Copy the embed code above</li>
                   <li>
-                    Paste it into your website's HTML before the closing
+                    Paste it into your website&apos;s HTML before the closing
                     &lt;/body&gt; tag
                   </li>
                   <li>
@@ -442,7 +442,7 @@ const DeploymentSettings = ({ selectedAgent }) => {
                       Keep your API key secure and never share it publicly
                     </li>
                     <li>
-                      This key provides access to your agent's chat
+                      This key provides access to your agent&apos;s chat
                       functionality
                     </li>
                     <li>
