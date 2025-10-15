@@ -7,6 +7,7 @@ import HeroSection from "./HeroSection";
 import PricingSection from "./PricingSection";
 
 const MianaLandingPage = () => {
+  console.log('🎯 MianaLandingPage component is rendering');
   const searchParams = useSearchParams();
 
   useEffect(() => {
