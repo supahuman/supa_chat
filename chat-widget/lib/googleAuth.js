@@ -60,7 +60,7 @@ export const signupWithGoogle = async (userData) => {
     }
 
     const backendUrl =
-      process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+      process.env.NEXT_PUBLIC_BOT_API_URL || "http://localhost:4000";
     console.log(
       "Calling backend Google signup API:",
       `${backendUrl}/api/auth/google-signup`
