@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useGetCompanyAgentsQuery } from '@/store/botApi';
-import { hasValidCredentials, setupMockCredentials } from '@/utils/auth';
+import { useState, useEffect } from "react";
+import { useGetCompanyAgentsQuery } from "@/store/botApi";
+import { hasValidCredentials } from "@/utils/auth";
 
 export const useEmbeds = () => {
   const [selectedAgent, setSelectedAgent] = useState(null);
@@ -11,65 +11,70 @@ export const useEmbeds = () => {
   // Set up mock credentials if none exist
   useEffect(() => {
     if (!hasValidCredentials()) {
-      setupMockCredentials();
+      // No mock credentials - require proper authentication
     }
   }, []);
 
   // Use RTK Query to fetch company agents
-  const { data: agentsData, isLoading, error: queryError, refetch } = useGetCompanyAgentsQuery();
-  
+  const {
+    data: agentsData,
+    isLoading,
+    error: queryError,
+    refetch,
+  } = useGetCompanyAgentsQuery();
+
   // Check if we have API credentials
   const hasCredentials = hasValidCredentials();
 
   // Use mock data if no credentials or API fails
   const mockAgents = [
     {
-      agentId: 'agent_1234567890_abc123',
-      name: 'Support Bot',
-      description: 'AI Agent for customer support',
-      personality: 'friendly and helpful',
-      status: 'active',
+      agentId: "agent_1234567890_abc123",
+      name: "Support Bot",
+      description: "AI Agent for customer support",
+      personality: "friendly and helpful",
+      status: "active",
       usage: {
         totalConversations: 15,
         totalMessages: 45,
-        lastUsed: '2024-01-15T10:30:00Z'
+        lastUsed: "2024-01-15T10:30:00Z",
       },
-      createdAt: '2024-01-10T09:00:00Z'
+      createdAt: "2024-01-10T09:00:00Z",
     },
     {
-      agentId: 'agent_1234567891_def456',
-      name: 'Sales Assistant',
-      description: 'AI Agent for sales inquiries',
-      personality: 'professional and persuasive',
-      status: 'inactive',
+      agentId: "agent_1234567891_def456",
+      name: "Sales Assistant",
+      description: "AI Agent for sales inquiries",
+      personality: "professional and persuasive",
+      status: "inactive",
       usage: {
         totalConversations: 8,
         totalMessages: 22,
-        lastUsed: '2024-01-14T16:45:00Z'
+        lastUsed: "2024-01-14T16:45:00Z",
       },
-      createdAt: '2024-01-12T14:20:00Z'
-    }
+      createdAt: "2024-01-12T14:20:00Z",
+    },
   ];
 
   const agents = agentsData?.success ? agentsData.data : mockAgents;
   const loading = isLoading;
-  const error = queryError ? 'Failed to fetch agents from database' : null;
+  const error = queryError ? "Failed to fetch agents from database" : null;
 
   const handleCopyEmbedCode = async (agentId) => {
     try {
       // Find the agent to get its API key
-      const agent = agents.find(a => a.agentId === agentId);
-      
+      const agent = agents.find((a) => a.agentId === agentId);
+
       // Generate a simple embed code for copying
       const embedCode = `<!-- SupaChatbot Widget -->
 <script>
   window.SupaChatbotConfig = {
     apiUrl: 'http://localhost:4000',
     agentId: '${agentId}',
-    companyApiKey: '${agent?.apiKey || 'your_agent_api_key'}',
+    companyApiKey: '${agent?.apiKey || "your_agent_api_key"}',
     userId: 'embed_user_${Date.now()}',
-    name: '${agent?.name || 'AI Assistant'}',
-    description: '${agent?.description || 'How can I help you today?'}',
+    name: '${agent?.name || "AI Assistant"}',
+    description: '${agent?.description || "How can I help you today?"}',
     position: 'bottom-right',
     theme: 'default',
     showWelcomeMessage: true,
@@ -83,7 +88,7 @@ export const useEmbeds = () => {
       setCopiedEmbedId(agentId);
       setTimeout(() => setCopiedEmbedId(null), 2000);
     } catch (error) {
-      console.error('Failed to copy embed code:', error);
+      console.error("Failed to copy embed code:", error);
     }
   };
 
@@ -97,12 +102,12 @@ export const useEmbeds = () => {
 
   const handleCreateEmbed = () => {
     // Navigate to agents or show create agent flow
-    console.log('Create embed clicked');
+    console.log("Create embed clicked");
   };
 
   const handleGoToAgents = () => {
     // Navigate to agents tab
-    console.log('Go to agents clicked');
+    console.log("Go to agents clicked");
   };
 
   return {
@@ -116,6 +121,6 @@ export const useEmbeds = () => {
     handleCloseDeploymentSettings,
     handleCreateEmbed,
     handleGoToAgents,
-    refetch
+    refetch,
   };
 };

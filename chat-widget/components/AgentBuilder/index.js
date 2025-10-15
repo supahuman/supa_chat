@@ -1,19 +1,21 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import TopTabBar from './TopTabBar';
-import Sidebar from './Sidebar';
-import ContentArea from './ContentArea';
-import Backdrop from './Backdrop';
+import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
+import TopTabBar from "./TopTabBar";
+import Sidebar from "./Sidebar";
+import ContentArea from "./ContentArea";
+import Backdrop from "./Backdrop";
 
 const DashboardLayout = ({ children }) => {
   // Initialize state with default values (same for server and client)
-  const [activeTab, setActiveTab] = useState('build');
-  const [activeSidebarItem, setActiveSidebarItem] = useState('ai-persona');
+  const [activeTab, setActiveTab] = useState("build");
+  const [activeSidebarItem, setActiveSidebarItem] = useState("ai-persona");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentAgentId, setCurrentAgentId] = useState(null);
   const [selectedAgent, setSelectedAgent] = useState(null);
   const [isHydrated, setIsHydrated] = useState(false);
+  const searchParams = useSearchParams();
 
   const handleToggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -26,17 +28,21 @@ const DashboardLayout = ({ children }) => {
   // Load from localStorage after hydration to prevent SSR mismatch
   useEffect(() => {
     setIsHydrated(true);
-    
+
     // Load persisted state from localStorage
-    const savedActiveTab = localStorage.getItem('agentBuilder_activeTab');
-    const savedActiveSidebarItem = localStorage.getItem('agentBuilder_activeSidebarItem');
-    const savedCurrentAgentId = localStorage.getItem('agentBuilder_currentAgentId');
-    
+    const savedActiveTab = localStorage.getItem("agentBuilder_activeTab");
+    const savedActiveSidebarItem = localStorage.getItem(
+      "agentBuilder_activeSidebarItem"
+    );
+    const savedCurrentAgentId = localStorage.getItem(
+      "agentBuilder_currentAgentId"
+    );
+
     if (savedActiveTab) setActiveTab(savedActiveTab);
     if (savedActiveSidebarItem) setActiveSidebarItem(savedActiveSidebarItem);
-    
+
     // Only load currentAgentId if we're not in build tab (to avoid creation mode issues)
-    if (savedCurrentAgentId && savedActiveTab !== 'build') {
+    if (savedCurrentAgentId && savedActiveTab !== "build") {
       setCurrentAgentId(savedCurrentAgentId);
     }
 
@@ -46,35 +52,61 @@ const DashboardLayout = ({ children }) => {
     }
   }, []);
 
+  // Check for upgrade success message
+  useEffect(() => {
+    const upgrade = searchParams.get("upgrade");
+    if (upgrade === "success") {
+      alert(
+        "🎉 Upgrade successful! Welcome to your new plan! You can now start building your AI agents."
+      );
+    }
+  }, [searchParams]);
+
   // Persist state to localStorage when values change (only after hydration)
   useEffect(() => {
     if (isHydrated) {
-      localStorage.setItem('agentBuilder_activeTab', activeTab);
+      localStorage.setItem("agentBuilder_activeTab", activeTab);
     }
   }, [activeTab, isHydrated]);
 
   useEffect(() => {
     if (isHydrated) {
-      localStorage.setItem('agentBuilder_activeSidebarItem', activeSidebarItem);
+      localStorage.setItem("agentBuilder_activeSidebarItem", activeSidebarItem);
     }
   }, [activeSidebarItem, isHydrated]);
 
   useEffect(() => {
     if (isHydrated) {
       if (currentAgentId) {
-        localStorage.setItem('agentBuilder_currentAgentId', currentAgentId);
+        localStorage.setItem("agentBuilder_currentAgentId", currentAgentId);
       } else {
-        localStorage.removeItem('agentBuilder_currentAgentId');
+        localStorage.removeItem("agentBuilder_currentAgentId");
       }
     }
   }, [currentAgentId, isHydrated]);
 
   // Set default sidebar item when switching tabs
   useEffect(() => {
-    if (activeTab === 'deploy' && !['agents', 'embeds', 'api-keys', 'settings', 'analytics'].includes(activeSidebarItem)) {
-      setActiveSidebarItem('agents');
-    } else if (activeTab === 'build' && !['agents', 'ai-persona', 'knowledge-base', 'actions', 'forms', 'tools', 'teach-agent'].includes(activeSidebarItem)) {
-      setActiveSidebarItem('agents');
+    if (
+      activeTab === "deploy" &&
+      !["agents", "embeds", "api-keys", "settings", "analytics"].includes(
+        activeSidebarItem
+      )
+    ) {
+      setActiveSidebarItem("agents");
+    } else if (
+      activeTab === "build" &&
+      ![
+        "agents",
+        "ai-persona",
+        "knowledge-base",
+        "actions",
+        "forms",
+        "tools",
+        "teach-agent",
+      ].includes(activeSidebarItem)
+    ) {
+      setActiveSidebarItem("agents");
     }
   }, [activeTab, activeSidebarItem]);
 
@@ -83,40 +115,46 @@ const DashboardLayout = ({ children }) => {
     const handleKeyDown = (e) => {
       // Only enable keyboard shortcuts on desktop (screen width >= 768px)
       if (window.innerWidth < 768) return;
-      
+
       // Escape key to cancel forms or close modals
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         // Dispatch a custom event for escape actions
-        window.dispatchEvent(new CustomEvent('agentBuilder:escape'));
+        window.dispatchEvent(new CustomEvent("agentBuilder:escape"));
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    
+    window.addEventListener("keydown", handleKeyDown);
+
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
+      window.removeEventListener("keydown", handleKeyDown);
     };
   }, [activeTab, activeSidebarItem]);
 
   const handleSidebarItemClick = (itemId) => {
     setActiveSidebarItem(itemId);
-    
+
     // Clear currentAgentId when clicking AI Persona to ensure create mode
-    if (itemId === 'ai-persona') {
+    if (itemId === "ai-persona") {
       setCurrentAgentId(null);
       setSelectedAgent(null);
       // Clear any draft data to ensure clean creation mode
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('agentBuilder_draft');
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("agentBuilder_draft");
       }
     }
-    
+
     // Auto-switch to Train tab for training-related items
-    const trainingItems = ['knowledge-base', 'actions', 'forms', 'tools', 'teach-agent'];
+    const trainingItems = [
+      "knowledge-base",
+      "actions",
+      "forms",
+      "tools",
+      "teach-agent",
+    ];
     if (trainingItems.includes(itemId)) {
-      setActiveTab('train');
+      setActiveTab("train");
     }
-    
+
     // Close sidebar on mobile after selection
     if (window.innerWidth < 768) {
       setSidebarOpen(false);
@@ -127,12 +165,12 @@ const DashboardLayout = ({ children }) => {
   const handleNewAgent = () => {
     setCurrentAgentId(null);
     setSelectedAgent(null);
-    setActiveTab('build');
-    setActiveSidebarItem('ai-persona');
-    
+    setActiveTab("build");
+    setActiveSidebarItem("ai-persona");
+
     // Clear any draft data
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('agentBuilder_draft');
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("agentBuilder_draft");
     }
   };
 
@@ -145,18 +183,18 @@ const DashboardLayout = ({ children }) => {
 
   // Function to handle editing an existing agent
   const handleEditAgent = (agent) => {
-    console.log('Editing agent:', agent);
+    console.log("Editing agent:", agent);
     setCurrentAgentId(agent.agentId);
     setSelectedAgent(agent);
-    
+
     // Switch to Build tab but stay on agents sidebar
-    setActiveTab('build');
-    setActiveSidebarItem('agents');
+    setActiveTab("build");
+    setActiveSidebarItem("agents");
   };
 
   // Function to handle selecting an agent for settings
   const handleSelectAgent = (agent) => {
-    console.log('Select agent:', agent);
+    console.log("Select agent:", agent);
     setSelectedAgent(agent);
   };
 
