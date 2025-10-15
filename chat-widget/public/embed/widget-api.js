@@ -21,7 +21,7 @@
         body: JSON.stringify({
           message: message,
           sessionId: window.SupaChatbotCore.sessionId(),
-          conversationHistory: [],
+          conversationHistory: window.SupaChatbotCore.getConversationHistory(),
         }),
       });
 
@@ -48,6 +48,10 @@
     if (window.SupaChatbotUI) {
       window.SupaChatbotUI.addMessage(message, "user");
     }
+    // Add to conversation history
+    if (window.SupaChatbotCore) {
+      window.SupaChatbotCore.addToHistory("user", message);
+    }
     input.value = "";
 
     // Show typing indicator
@@ -67,6 +71,10 @@
     if (response.success) {
       if (window.SupaChatbotUI) {
         window.SupaChatbotUI.addMessage(response.data.message, "assistant");
+      }
+      // Add to conversation history
+      if (window.SupaChatbotCore) {
+        window.SupaChatbotCore.addToHistory("assistant", response.data.message);
       }
     } else {
       if (window.SupaChatbotUI) {
