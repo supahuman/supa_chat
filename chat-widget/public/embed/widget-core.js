@@ -18,6 +18,7 @@
   let isInitialized = false;
   let currentAgent = null;
   let sessionId = null;
+  let conversationHistory = [];
 
   // Session management
   function generateSessionId() {
@@ -79,6 +80,20 @@
     console.log("SupaChatbot widget initialized");
   }
 
+  // Get conversation history for API calls
+  function getConversationHistory() {
+    return conversationHistory;
+  }
+
+  // Add message to conversation history
+  function addToHistory(role, content) {
+    conversationHistory.push({ role, content });
+    // Keep only last 10 messages to avoid token limits
+    if (conversationHistory.length > 10) {
+      conversationHistory = conversationHistory.slice(-10);
+    }
+  }
+
   // Export for global access
   window.SupaChatbotCore = {
     CONFIG,
@@ -86,6 +101,8 @@
     isInitialized: () => isInitialized,
     currentAgent: () => currentAgent,
     sessionId: () => sessionId,
+    getConversationHistory,
+    addToHistory,
     initWidget,
     toggleChat,
     handleKeyPress,

@@ -8,7 +8,7 @@ import ConversationSummary from "./ConversationSummary.js";
  */
 class ConversationService {
   constructor(options = {}) {
-    this.maxBotMessages = options.maxBotMessages || 4; // Keep last 4 messages for bot context
+    this.maxBotMessages = options.maxBotMessages || 10; // Keep last 10 messages for bot context
     this.repository = new ConversationRepository();
     this.analytics = new ConversationAnalytics();
     this.summary = new ConversationSummary();
@@ -77,7 +77,7 @@ class ConversationService {
         metadata: message.metadata || {},
       });
 
-      // Keep only last 4 messages for bot context
+      // Keep only last 10 messages for bot context
       if (conversation.messages.length > this.maxBotMessages) {
         conversation.messages = conversation.messages.slice(
           -this.maxBotMessages
