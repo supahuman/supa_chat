@@ -67,6 +67,31 @@ const MianaLandingPage = () => {
         src={`${process.env.NEXT_PUBLIC_EMBED_URL}/embed/embed-modular.js`}
         async={true}
       ></script>
+
+      {/* Debug Script for Production */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `
+             console.log('🔍 Widget Debug Information:');
+             console.log('================================');
+             console.log('Environment Variables:');
+             console.log('NEXT_PUBLIC_BOT_API_URL:', '${process.env.NEXT_PUBLIC_BOT_API_URL}' || 'NOT SET');
+             console.log('NEXT_PUBLIC_AGENT_ID:', '${process.env.NEXT_PUBLIC_AGENT_ID}' || 'NOT SET');
+             console.log('NEXT_PUBLIC_COMPANY_API_KEY:', '${process.env.NEXT_PUBLIC_COMPANY_API_KEY}' || 'NOT SET');
+             console.log('NEXT_PUBLIC_USER_ID:', '${process.env.NEXT_PUBLIC_USER_ID}' || 'NOT SET');
+             console.log('NEXT_PUBLIC_EMBED_URL:', '${process.env.NEXT_PUBLIC_EMBED_URL}' || 'NOT SET');
+             console.log('================================');
+             console.log('window.SupaChatbotConfig:', window.SupaChatbotConfig || 'NOT SET');
+             
+             // Check for script loading errors
+             window.addEventListener('error', (e) => {
+               if (e.filename && e.filename.includes('embed')) {
+                 console.error('❌ Widget Script Error:', e.message, e.filename);
+               }
+             });
+           `,
+        }}
+      />
     </div>
   );
 };
