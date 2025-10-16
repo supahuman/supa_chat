@@ -34,8 +34,8 @@ const Signup = () => {
 
   const handleGoogleSignupSuccess = (userData) => {
     // User is already logged in via the auth context
-    // Redirect to main page with pricing section for upgrade
-    router.push("/");
+    // Redirect to dashboard
+    router.push("/agent-builder");
   };
 
   const handleSubmit = async (e) => {
@@ -64,8 +64,8 @@ const Signup = () => {
         login(result.user, result.token);
         // Store user ID for payment system
         localStorage.setItem("userId", result.user._id || result.user.id);
-        // Redirect to main page with pricing section for upgrade
-        router.push("/");
+        // Redirect to dashboard
+        router.push("/agent-builder");
       } else {
         alert("Signup failed: " + result.error);
       }
