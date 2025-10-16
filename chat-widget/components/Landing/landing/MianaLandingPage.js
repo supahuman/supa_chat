@@ -5,16 +5,9 @@ import { useSearchParams } from "next/navigation";
 import GlassmorphicNavbar from "./GlassmorphicNavbar";
 import HeroSection from "./HeroSection";
 import PricingSection from "./PricingSection";
+import WidgetLoader from "../../ChatWidget/WidgetLoader";
 
 const MianaLandingPage = () => {
-  console.log("🎯 MianaLandingPage component is rendering");
-  console.log("🔍 Environment Variables:", {
-    NEXT_PUBLIC_BOT_API_URL: process.env.NEXT_PUBLIC_BOT_API_URL,
-    NEXT_PUBLIC_AGENT_ID: process.env.NEXT_PUBLIC_AGENT_ID,
-    NEXT_PUBLIC_COMPANY_API_KEY: process.env.NEXT_PUBLIC_COMPANY_API_KEY,
-    NEXT_PUBLIC_USER_ID: process.env.NEXT_PUBLIC_USER_ID,
-    NEXT_PUBLIC_EMBED_URL: process.env.NEXT_PUBLIC_EMBED_URL,
-  });
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -23,33 +16,6 @@ const MianaLandingPage = () => {
     if (upgrade === "canceled") {
       alert("Upgrade canceled. You can try again anytime.");
     }
-
-    // Load widget script after component mounts
-    const loadWidgetScript = () => {
-      // Set the config first
-      window.SupaChatbotConfig = {
-        apiUrl: process.env.NEXT_PUBLIC_BOT_API_URL,
-        agentId: process.env.NEXT_PUBLIC_AGENT_ID,
-        companyApiKey: process.env.NEXT_PUBLIC_COMPANY_API_KEY,
-        userId: process.env.NEXT_PUBLIC_USER_ID,
-        name: "Miana AI Assistant",
-        description: "AI Agent created with Miana Agent Builder",
-        position: "bottom-right",
-        theme: "default",
-        showWelcomeMessage: true,
-        autoOpen: false,
-      };
-
-      console.log("✅ window.SupaChatbotConfig set:", window.SupaChatbotConfig);
-
-      // Load the widget script
-      const script = document.createElement("script");
-      script.src = `${process.env.NEXT_PUBLIC_EMBED_URL}/embed/embed-modular.js`;
-      script.async = true;
-      document.head.appendChild(script);
-    };
-
-    loadWidgetScript();
   }, [searchParams]);
 
   return (
@@ -79,7 +45,8 @@ const MianaLandingPage = () => {
         </section>
       </main>
 
-      {/* Chatbot Widget - Loaded via useEffect */}
+      {/* Chatbot Widget */}
+      <WidgetLoader />
     </div>
   );
 };
