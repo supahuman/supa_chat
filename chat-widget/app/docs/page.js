@@ -122,8 +122,8 @@ function DocsContent() {
                   verify your email address
                 </li>
                 <li>
-                  <strong>Choose a Plan:</strong> Start with our Free plan (100
-                  conversations/month), or upgrade to Starter ($29/month),
+                  <strong>Choose a Plan:</strong> Start with our Free plan (50
+                  credits/month), or upgrade to Starter ($29/month),
                   Professional ($99/month), or Enterprise ($299/month)
                 </li>
                 <li>
@@ -336,9 +336,10 @@ function DocsContent() {
             </h2>
             <div className="prose prose-lg max-w-none">
               <p className="text-lg text-gray-700 mb-8">
-                Miana AI offers flexible pricing plans to suit businesses of all
-                sizes. Start with our free plan to test the platform, then
-                upgrade as your needs grow.
+                Miana AI uses a credit-based system for flexible, cost-effective
+                usage. Start with our free plan to test the platform, then
+                upgrade as your needs grow. Credits reset monthly and can be
+                topped up anytime.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div className="border border-gray-200 rounded-lg p-6">
@@ -350,7 +351,7 @@ function DocsContent() {
                   </p>
                   <ul className="space-y-2 text-gray-700">
                     <li>• 1 AI Agent</li>
-                    <li>• 100 conversations/month</li>
+                    <li>• 50 credits/month</li>
                     <li>• Basic knowledge base</li>
                     <li>• Community support</li>
                     <li>• Perfect for testing</li>
@@ -366,7 +367,7 @@ function DocsContent() {
                   </p>
                   <ul className="space-y-2 text-gray-700">
                     <li>• 1 AI Agent</li>
-                    <li>• 1,000 conversations/month</li>
+                    <li>• 500 credits/month</li>
                     <li>• Basic knowledge base</li>
                     <li>• Email support</li>
                   </ul>
@@ -386,7 +387,7 @@ function DocsContent() {
                   </p>
                   <ul className="space-y-2 text-gray-700">
                     <li>• 5 AI Agents</li>
-                    <li>• 10,000 conversations/month</li>
+                    <li>• 2,000 credits/month</li>
                     <li>• Advanced knowledge base</li>
                     <li>• Priority support</li>
                     <li>• Analytics dashboard</li>
@@ -402,11 +403,43 @@ function DocsContent() {
                   </p>
                   <ul className="space-y-2 text-gray-700">
                     <li>• Unlimited AI Agents</li>
-                    <li>• Unlimited conversations</li>
+                    <li>• 10,000+ credits/month</li>
                     <li>• Custom integrations</li>
                     <li>• 24/7 phone support</li>
                     <li>• Custom training</li>
+                    <li>• Priority credit top-ups</li>
                   </ul>
+                </div>
+              </div>
+
+              {/* Credit System Explanation */}
+              <div className="mt-12 bg-blue-50 rounded-lg p-6">
+                <h3 className="text-xl font-semibold text-blue-900 mb-4">
+                  How Credits Work
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-medium text-blue-800 mb-2">
+                      Credit Usage
+                    </h4>
+                    <ul className="text-blue-700 space-y-1 text-sm">
+                      <li>• Simple conversation: 1-2 credits</li>
+                      <li>• Complex conversation: 5-10 credits</li>
+                      <li>• File upload/processing: 10-20 credits</li>
+                      <li>• Custom training: 50+ credits</li>
+                    </ul>
+                  </div>
+                  <div>
+                    <h4 className="font-medium text-blue-800 mb-2">
+                      Credit Benefits
+                    </h4>
+                    <ul className="text-blue-700 space-y-1 text-sm">
+                      <li>• Fresh credits every month</li>
+                      <li>• Buy additional credits anytime</li>
+                      <li>• Use credits however you want</li>
+                      <li>• No surprise overage charges</li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             </div>
