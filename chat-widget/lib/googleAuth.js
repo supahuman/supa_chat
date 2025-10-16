@@ -36,8 +36,8 @@ export const handleGoogleSignIn = async (response) => {
       if (typeof window.handleGoogleSignInSuccess === "function") {
         window.handleGoogleSignInSuccess(result.user, result.token);
       } else {
-        // Fallback: redirect to main page with pricing section
-        window.location.href = "/";
+        // Fallback: redirect to dashboard
+        window.location.href = "/agent-builder";
       }
     } else {
       console.error("Google signup failed:", result.error);
