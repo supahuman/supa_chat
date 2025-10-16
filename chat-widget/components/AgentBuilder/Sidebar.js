@@ -44,7 +44,7 @@ const Sidebar = ({
       case "train":
         return [
           { id: "agents", label: "Your Agents", icon: Users },
-          { id: "ai-persona", label: "AI Persona", icon: Bot },
+          { id: "ai-persona", label: "Create New Agent", icon: Bot },
           { id: "knowledge-base", label: "Knowledge Base", icon: Database },
           { id: "actions", label: "Actions", icon: Zap },
           { id: "forms", label: "Forms", icon: FileText },
