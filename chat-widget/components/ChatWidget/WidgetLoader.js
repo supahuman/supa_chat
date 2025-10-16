@@ -20,8 +20,6 @@ const WidgetLoader = () => {
         autoOpen: false,
       };
 
-      console.log("✅ window.SupaChatbotConfig set:", window.SupaChatbotConfig);
-
       // Load the widget script
       const script = document.createElement("script");
       script.src = `${process.env.NEXT_PUBLIC_EMBED_URL}/embed/embed-modular.js`;
