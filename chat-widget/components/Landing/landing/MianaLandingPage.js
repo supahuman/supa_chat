@@ -8,6 +8,13 @@ import PricingSection from "./PricingSection";
 
 const MianaLandingPage = () => {
   console.log("🎯 MianaLandingPage component is rendering");
+  console.log("🔍 Environment Variables:", {
+    NEXT_PUBLIC_BOT_API_URL: process.env.NEXT_PUBLIC_BOT_API_URL,
+    NEXT_PUBLIC_AGENT_ID: process.env.NEXT_PUBLIC_AGENT_ID,
+    NEXT_PUBLIC_COMPANY_API_KEY: process.env.NEXT_PUBLIC_COMPANY_API_KEY,
+    NEXT_PUBLIC_USER_ID: process.env.NEXT_PUBLIC_USER_ID,
+    NEXT_PUBLIC_EMBED_URL: process.env.NEXT_PUBLIC_EMBED_URL,
+  });
   const searchParams = useSearchParams();
 
   useEffect(() => {
