@@ -122,13 +122,13 @@ function DocsContent() {
                   verify your email address
                 </li>
                 <li>
-                  <strong>Choose a Plan:</strong> Select from Starter
-                  ($29/month), Professional ($99/month), or Enterprise
-                  ($299/month)
+                  <strong>Choose a Plan:</strong> Start with our Free plan (100
+                  conversations/month), or upgrade to Starter ($29/month),
+                  Professional ($99/month), or Enterprise ($299/month)
                 </li>
                 <li>
                   <strong>Create Agent:</strong> Use our Agent Builder to define
-                  your agent's personality and capabilities
+                  your agent&apos;s personality and capabilities
                 </li>
                 <li>
                   <strong>Add Knowledge:</strong> Upload documents, FAQs, or
@@ -335,6 +335,11 @@ function DocsContent() {
               Pricing & Plans
             </h2>
             <div className="prose prose-lg max-w-none">
+              <p className="text-lg text-gray-700 mb-8">
+                Miana AI offers flexible pricing plans to suit businesses of all
+                sizes. Start with our free plan to test the platform, then
+                upgrade as your needs grow.
+              </p>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <div className="border border-gray-200 rounded-lg p-6">
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">
