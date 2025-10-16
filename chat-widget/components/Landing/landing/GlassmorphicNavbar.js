@@ -35,7 +35,7 @@ const GlassmorphicNavbar = () => {
               Pricing
             </Link>
             <Link
-              href="#docs"
+              href="/docs"
               className="text-gray-600 hover:text-gray-900 transition-colors"
             >
               Docs
@@ -98,7 +98,7 @@ const GlassmorphicNavbar = () => {
                 Pricing
               </Link>
               <Link
-                href="#docs"
+                href="/docs"
                 className="block px-3 py-2 text-gray-600 hover:text-gray-900"
               >
                 Docs
