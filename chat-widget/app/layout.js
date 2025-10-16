@@ -1,7 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "./providers";
-import ConditionalNavbar from "../components/Navigation/ConditionalNavbar";
 import AuthSetup from "../components/AuthSetup";
 import { AuthProvider } from "../lib/authContext";
 
@@ -29,7 +28,6 @@ export default function RootLayout({ children }) {
         <Providers>
           <AuthProvider>
             <AuthSetup />
-            <ConditionalNavbar />
             {children}
           </AuthProvider>
         </Providers>
