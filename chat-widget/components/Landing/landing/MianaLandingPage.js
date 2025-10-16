@@ -56,13 +56,7 @@ const MianaLandingPage = () => {
       <script
         dangerouslySetInnerHTML={{
           __html: `
-            console.log('🔍 Environment Variables Debug:');
-            console.log('NEXT_PUBLIC_BOT_API_URL:', '${process.env.NEXT_PUBLIC_BOT_API_URL}' || 'UNDEFINED');
-            console.log('NEXT_PUBLIC_AGENT_ID:', '${process.env.NEXT_PUBLIC_AGENT_ID}' || 'UNDEFINED');
-            console.log('NEXT_PUBLIC_COMPANY_API_KEY:', '${process.env.NEXT_PUBLIC_COMPANY_API_KEY}' || 'UNDEFINED');
-            console.log('NEXT_PUBLIC_USER_ID:', '${process.env.NEXT_PUBLIC_USER_ID}' || 'UNDEFINED');
-            console.log('NEXT_PUBLIC_EMBED_URL:', '${process.env.NEXT_PUBLIC_EMBED_URL}' || 'UNDEFINED');
-            
+            console.log('🚀 Widget script is executing!');
             window.SupaChatbotConfig = {
               apiUrl: '${process.env.NEXT_PUBLIC_BOT_API_URL}',
               agentId: '${process.env.NEXT_PUBLIC_AGENT_ID}',
@@ -75,8 +69,7 @@ const MianaLandingPage = () => {
               showWelcomeMessage: true,
               autoOpen: false
             };
-            
-            console.log('window.SupaChatbotConfig:', window.SupaChatbotConfig);
+            console.log('✅ window.SupaChatbotConfig set:', window.SupaChatbotConfig);
           `,
         }}
       />
