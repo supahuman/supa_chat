@@ -1,56 +1,60 @@
-'use client';
+"use client";
 
-import { Save, X } from 'lucide-react';
-import { Button, Card } from '@/ui';
-import { Select, Input } from '@/ui';
+import { Save, X } from "lucide-react";
+import { Button, Card } from "@/ui";
+import { Select, Input } from "@/ui";
 
-const ActionForm = ({ 
-  formData, 
-  setFormData, 
-  onSave, 
-  onCancel, 
-  isEditing 
-}) => {
+const ActionForm = ({ formData, setFormData, onSave, onCancel, isEditing }) => {
   const whenOptions = [
-    { value: 'user-mentions', label: 'User mentions' },
-    { value: 'user-asks-about', label: 'User asks about' },
-    { value: 'user-requests', label: 'User requests' },
-    { value: 'user-says', label: 'User says' },
-    { value: 'user-expresses', label: 'User expresses' },
-    { value: 'conversation-starts', label: 'Conversation starts' },
-    { value: 'user-greets', label: 'User greets' }
+    { value: "user-mentions", label: "User mentions" },
+    { value: "user-asks-about", label: "User asks about" },
+    { value: "user-requests", label: "User requests" },
+    { value: "user-says", label: "User says" },
+    { value: "user-expresses", label: "User expresses" },
+    { value: "conversation-starts", label: "Conversation starts" },
+    { value: "user-greets", label: "User greets" },
   ];
 
   const aboutOptions = [
-    { value: 'customizable-service', label: 'Customizable service' },
-    { value: 'pricing', label: 'Pricing' },
-    { value: 'support', label: 'Support' },
-    { value: 'features', label: 'Features' },
-    { value: 'account', label: 'Account' },
-    { value: 'billing', label: 'Billing' },
-    { value: 'refund', label: 'Refund' },
-    { value: 'demo', label: 'Demo' },
-    { value: 'documentation', label: 'Documentation' },
-    { value: 'integration', label: 'Integration' }
+    { value: "customizable-service", label: "Customizable service" },
+    { value: "pricing", label: "Pricing" },
+    { value: "support", label: "Support" },
+    { value: "features", label: "Features" },
+    { value: "account", label: "Account" },
+    { value: "billing", label: "Billing" },
+    { value: "refund", label: "Refund" },
+    { value: "demo", label: "Demo" },
+    { value: "documentation", label: "Documentation" },
+    { value: "integration", label: "Integration" },
   ];
 
   const doOptions = [
-    { value: 'send-email', label: 'Send email' },
-    { value: 'fill-form', label: 'Fill a form' },
-    { value: 'always-talk-about', label: 'Always talk about' },
-    { value: 'ask-info', label: 'Ask for info' },
-    { value: 'redirect-page', label: 'Redirect to page' },
-    { value: 'show-documentation', label: 'Show documentation' },
-    { value: 'schedule-call', label: 'Schedule a call' },
-    { value: 'create-ticket', label: 'Create support ticket' },
-    { value: 'provide-link', label: 'Provide specific link' },
-    { value: 'escalate-human', label: 'Escalate to human agent' }
+    { value: "send-email", label: "Send email" },
+    { value: "fill-form", label: "Fill a form" },
+    { value: "always-talk-about", label: "Always talk about" },
+    { value: "ask-info", label: "Ask for info" },
+    { value: "redirect-page", label: "Redirect to page" },
+    { value: "show-documentation", label: "Show documentation" },
+    { value: "schedule-call", label: "Schedule a call" },
+    { value: "create-ticket", label: "Create support ticket" },
+    { value: "provide-link", label: "Provide specific link" },
+    { value: "escalate-human", label: "Escalate to human agent" },
   ];
 
   const handleInputChange = (field, value) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
+    }));
+  };
+
+  const handleParamChange = (paramKey, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      params: {
+        ...(prev.params || {}),
+        [paramKey]: value,
+      },
     }));
   };
 
@@ -59,15 +63,10 @@ const ActionForm = ({
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h4 className="heading-lg">
-            {isEditing ? 'Edit Action Rule' : 'Create New Action Rule'}
+            {isEditing ? "Edit Action Rule" : "Create New Action Rule"}
           </h4>
           {isEditing && (
-            <Button
-              onClick={onCancel}
-              variant="ghost"
-              size="sm"
-              icon={X}
-            />
+            <Button onClick={onCancel} variant="ghost" size="sm" icon={X} />
           )}
         </div>
 
@@ -80,7 +79,7 @@ const ActionForm = ({
             </label>
             <Select
               value={formData.when}
-              onChange={(e) => handleInputChange('when', e.target.value)}
+              onChange={(e) => handleInputChange("when", e.target.value)}
               options={whenOptions}
               placeholder="Select trigger"
             />
@@ -93,7 +92,7 @@ const ActionForm = ({
             </label>
             <Select
               value={formData.about}
-              onChange={(e) => handleInputChange('about', e.target.value)}
+              onChange={(e) => handleInputChange("about", e.target.value)}
               options={aboutOptions}
               placeholder="Select topic"
             />
@@ -101,17 +100,54 @@ const ActionForm = ({
 
           {/* Do */}
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-primary">
-              Do
-            </label>
+            <label className="block text-sm font-medium text-primary">Do</label>
             <Select
               value={formData.do}
-              onChange={(e) => handleInputChange('do', e.target.value)}
+              onChange={(e) => handleInputChange("do", e.target.value)}
               options={doOptions}
               placeholder="Select action"
             />
           </div>
         </div>
+
+        {/* Conditional params for selected action */}
+        {formData.do === "send-email" && (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2 md:col-span-1">
+              <label className="block text-sm font-medium text-primary">
+                To (email)
+              </label>
+              <Input
+                type="email"
+                value={formData.params?.to || ""}
+                onChange={(e) => handleParamChange("to", e.target.value)}
+                placeholder="ops@miana.ai"
+              />
+            </div>
+            <div className="space-y-2 md:col-span-2">
+              <label className="block text-sm font-medium text-primary">
+                Subject
+              </label>
+              <Input
+                type="text"
+                value={formData.params?.subject || ""}
+                onChange={(e) => handleParamChange("subject", e.target.value)}
+                placeholder="Pricing inquiry"
+              />
+            </div>
+            <div className="space-y-2 md:col-span-3">
+              <label className="block text-sm font-medium text-primary">
+                Message
+              </label>
+              <Input
+                type="text"
+                value={formData.params?.text || ""}
+                onChange={(e) => handleParamChange("text", e.target.value)}
+                placeholder="A user asked about pricing."
+              />
+            </div>
+          </div>
+        )}
 
         {/* Description */}
         <div className="space-y-2">
@@ -121,7 +157,7 @@ const ActionForm = ({
           <Input
             type="text"
             value={formData.description}
-            onChange={(e) => handleInputChange('description', e.target.value)}
+            onChange={(e) => handleInputChange("description", e.target.value)}
             placeholder="Add a description for this action rule..."
           />
         </div>
@@ -131,7 +167,22 @@ const ActionForm = ({
           <div className="bg-surface rounded-lg p-4">
             <h5 className="text-sm font-medium text-primary mb-2">Preview:</h5>
             <p className="text-sm text-secondary">
-              <span className="font-medium">When</span> user {whenOptions.find(opt => opt.value === formData.when)?.label.toLowerCase()} <span className="font-medium">{aboutOptions.find(opt => opt.value === formData.about)?.label.toLowerCase()}</span>, <span className="font-medium">{doOptions.find(opt => opt.value === formData.do)?.label.toLowerCase()}</span>.
+              <span className="font-medium">When</span> user{" "}
+              {whenOptions
+                .find((opt) => opt.value === formData.when)
+                ?.label.toLowerCase()}{" "}
+              <span className="font-medium">
+                {aboutOptions
+                  .find((opt) => opt.value === formData.about)
+                  ?.label.toLowerCase()}
+              </span>
+              ,{" "}
+              <span className="font-medium">
+                {doOptions
+                  .find((opt) => opt.value === formData.do)
+                  ?.label.toLowerCase()}
+              </span>
+              .
             </p>
           </div>
         )}
@@ -144,7 +195,7 @@ const ActionForm = ({
             className="w-full sm:w-auto"
             disabled={!formData.when || !formData.about || !formData.do}
           >
-            {isEditing ? 'Update Action' : 'Add Action Rule'}
+            {isEditing ? "Update Action" : "Add Action Rule"}
           </Button>
           {isEditing && (
             <Button
