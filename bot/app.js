@@ -99,6 +99,7 @@ import agentCrawlerRoutes from "./routes/agent/agentCrawlerRoutes.js";
 import deploymentRoutes from "./routes/deployment/deploymentRoutes.js";
 import toolRoutes from "./routes/tool/toolRoutes.js";
 import agentChatRoutes from "./routes/agent/agentChatRoutes.js";
+import actionRoutes from "./routes/agent/actionRoutes.js";
 import userRoutes from "./routes/user/userRoutes.js";
 import conversationRoutes from "./routes/conversation/conversationRoutes.js";
 import agentVectorRoutes from "./routes/agentVector/agentVectorRoutes.js";
@@ -164,6 +165,8 @@ async function bootstrap() {
   app.use("/api/company/agents", companyAgentRoutes);
   app.use("/api/company", toolRoutes);
   app.use("/api/company", agentChatRoutes);
+  // Per-agent actions CRUD
+  app.use("/api/agents", actionRoutes);
 
   // Agent API routes for embed widget
   app.use("/api/agent", agentChatRoutes);

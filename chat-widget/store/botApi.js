@@ -1,334 +1,506 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const botApi = createApi({
-  reducerPath: 'botApi',
+  reducerPath: "botApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_BOT_API_URL || 'http://localhost:4000',
+    baseUrl: process.env.NEXT_PUBLIC_BOT_API_URL || "http://localhost:4000",
     prepareHeaders: (headers) => {
-      const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
-      if (token) headers.set('authorization', `Bearer ${token}`);
+      const token =
+        typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      if (token) headers.set("authorization", `Bearer ${token}`);
       return headers;
     },
   }),
-        tagTypes: ['Conversation', 'Clients', 'Client', 'Model', 'Agents', 'Agent', 'CompanyAgents'],
+  tagTypes: [
+    "Conversation",
+    "Clients",
+    "Client",
+    "Model",
+    "Agents",
+    "Agent",
+    "CompanyAgents",
+  ],
   endpoints: (builder) => ({
+    // Actions CRUD per agent
+    getAgentActions: builder.query({
+      query: (agentId) => ({
+        url: `/api/agents/${agentId}/actions`,
+        headers: {
+          "X-Company-Key":
+            typeof window !== "undefined"
+              ? localStorage.getItem("companyApiKey")
+              : "",
+          "X-User-ID":
+            typeof window !== "undefined" ? localStorage.getItem("userId") : "",
+        },
+      }),
+      providesTags: (result, error, agentId) => [
+        { type: "Agent", id: agentId },
+      ],
+    }),
+    createAgentAction: builder.mutation({
+      query: ({ agentId, ...data }) => ({
+        url: `/api/agents/${agentId}/actions`,
+        method: "POST",
+        headers: {
+          "X-Company-Key":
+            typeof window !== "undefined"
+              ? localStorage.getItem("companyApiKey")
+              : "",
+          "X-User-ID":
+            typeof window !== "undefined" ? localStorage.getItem("userId") : "",
+        },
+        body: data,
+      }),
+      invalidatesTags: (result, error, { agentId }) => [
+        { type: "Agent", id: agentId },
+      ],
+    }),
+    updateAgentAction: builder.mutation({
+      query: ({ agentId, actionId, ...data }) => ({
+        url: `/api/agents/${agentId}/actions/${actionId}`,
+        method: "PUT",
+        headers: {
+          "X-Company-Key":
+            typeof window !== "undefined"
+              ? localStorage.getItem("companyApiKey")
+              : "",
+          "X-User-ID":
+            typeof window !== "undefined" ? localStorage.getItem("userId") : "",
+        },
+        body: data,
+      }),
+      invalidatesTags: (result, error, { agentId }) => [
+        { type: "Agent", id: agentId },
+      ],
+    }),
+    deleteAgentAction: builder.mutation({
+      query: ({ agentId, actionId }) => ({
+        url: `/api/agents/${agentId}/actions/${actionId}`,
+        method: "DELETE",
+        headers: {
+          "X-Company-Key":
+            typeof window !== "undefined"
+              ? localStorage.getItem("companyApiKey")
+              : "",
+          "X-User-ID":
+            typeof window !== "undefined" ? localStorage.getItem("userId") : "",
+        },
+      }),
+      invalidatesTags: (result, error, { agentId }) => [
+        { type: "Agent", id: agentId },
+      ],
+    }),
     sendMessage: builder.mutation({
-      query: ({ message, sessionId, clientId = 'supa-chat' }) => ({
+      query: ({ message, sessionId, clientId = "supa-chat" }) => ({
         url: `/api/client/${clientId}/bot`,
-        method: 'POST',
+        method: "POST",
         body: { message, sessionId },
       }),
-      invalidatesTags: (result) => (result?.sessionId ? [{ type: 'Conversation', id: result.sessionId }] : []),
+      invalidatesTags: (result) =>
+        result?.sessionId
+          ? [{ type: "Conversation", id: result.sessionId }]
+          : [],
     }),
     getConversation: builder.query({
       query: (sessionId) => `/api/bot/conversations/${sessionId}`,
-      providesTags: (result, error, sessionId) => [{ type: 'Conversation', id: sessionId }],
+      providesTags: (result, error, sessionId) => [
+        { type: "Conversation", id: sessionId },
+      ],
     }),
     // Client management endpoints
     getClients: builder.query({
-      query: () => '/api/client',
-      providesTags: ['Clients'],
+      query: () => "/api/client",
+      providesTags: ["Clients"],
     }),
     getClient: builder.query({
       query: (clientId) => `/api/client/${clientId}`,
-      providesTags: (result, error, clientId) => [{ type: 'Client', id: clientId }],
+      providesTags: (result, error, clientId) => [
+        { type: "Client", id: clientId },
+      ],
     }),
     createClient: builder.mutation({
       query: (clientData) => ({
-        url: '/api/client',
-        method: 'POST',
+        url: "/api/client",
+        method: "POST",
         body: clientData,
       }),
-      invalidatesTags: ['Clients'],
+      invalidatesTags: ["Clients"],
     }),
     updateClient: builder.mutation({
       query: ({ clientId, ...clientData }) => ({
         url: `/api/client/${clientId}`,
-        method: 'PUT',
+        method: "PUT",
         body: clientData,
       }),
       invalidatesTags: (result, error, { clientId }) => [
-        { type: 'Client', id: clientId },
-        'Clients'
+        { type: "Client", id: clientId },
+        "Clients",
       ],
     }),
     deleteClient: builder.mutation({
       query: (clientId) => ({
         url: `/api/client/${clientId}`,
-        method: 'DELETE',
+        method: "DELETE",
       }),
-      invalidatesTags: ['Clients'],
+      invalidatesTags: ["Clients"],
     }),
     testDatabaseConnection: builder.mutation({
       query: (clientId) => ({
         url: `/api/client/${clientId}/test-database`,
-        method: 'POST',
+        method: "POST",
       }),
     }),
     testLLMConnection: builder.mutation({
       query: (clientId) => ({
         url: `/api/client/${clientId}/test-llm`,
-        method: 'POST',
+        method: "POST",
       }),
     }),
     // Global model information
     getModelInfo: builder.query({
-      query: () => '/api/model/info',
-      providesTags: ['Model'],
+      query: () => "/api/model/info",
+      providesTags: ["Model"],
     }),
-        
-        // Company-scoped agent endpoints
-        getCompanyAgents: builder.query({
-          query: () => ({
-            url: '/api/company/agents',
-            headers: {
-              'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
-              'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : ''
-            }
-          }),
-          providesTags: ['CompanyAgents'],
-        }),
 
-        getCompanyAgent: builder.query({
-          query: (agentId) => ({
-            url: `/api/company/agents/${agentId}`,
-            headers: {
-              'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
-              'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : ''
-            }
-          }),
-          providesTags: (result, error, agentId) => [{ type: 'CompanyAgents', id: agentId }],
-        }),
-        
-        createCompanyAgent: builder.mutation({
-          query: (agentData) => ({
-            url: '/api/company/agents',
-            method: 'POST',
-            headers: {
-              'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
-              'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : ''
-            },
-            body: agentData,
-          }),
-          invalidatesTags: ['CompanyAgents'],
-        }),
+    // Company-scoped agent endpoints
+    getCompanyAgents: builder.query({
+      query: () => ({
+        url: "/api/company/agents",
+        headers: {
+          "X-Company-Key":
+            typeof window !== "undefined"
+              ? localStorage.getItem("companyApiKey")
+              : "",
+          "X-User-ID":
+            typeof window !== "undefined" ? localStorage.getItem("userId") : "",
+        },
+      }),
+      providesTags: ["CompanyAgents"],
+    }),
 
-        updateCompanyAgent: builder.mutation({
-          query: ({ agentId, ...agentData }) => ({
-            url: `/api/company/agents/${agentId}`,
-            method: 'PUT',
-            headers: {
-              'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
-              'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : ''
-            },
-            body: agentData,
-          }),
-          invalidatesTags: ['CompanyAgents'],
-        }),
+    getCompanyAgent: builder.query({
+      query: (agentId) => ({
+        url: `/api/company/agents/${agentId}`,
+        headers: {
+          "X-Company-Key":
+            typeof window !== "undefined"
+              ? localStorage.getItem("companyApiKey")
+              : "",
+          "X-User-ID":
+            typeof window !== "undefined" ? localStorage.getItem("userId") : "",
+        },
+      }),
+      providesTags: (result, error, agentId) => [
+        { type: "CompanyAgents", id: agentId },
+      ],
+    }),
 
-        deleteCompanyAgent: builder.mutation({
-          query: (agentId) => ({
-            url: `/api/company/agents/${agentId}`,
-            method: 'DELETE',
-            headers: {
-              'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
-              'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : '',
-              'X-Admin-Key': 'admin_secret_key' // Temporary admin key
-            },
-          }),
-          invalidatesTags: ['CompanyAgents'],
-        }),
+    createCompanyAgent: builder.mutation({
+      query: (agentData) => ({
+        url: "/api/company/agents",
+        method: "POST",
+        headers: {
+          "X-Company-Key":
+            typeof window !== "undefined"
+              ? localStorage.getItem("companyApiKey")
+              : "",
+          "X-User-ID":
+            typeof window !== "undefined" ? localStorage.getItem("userId") : "",
+        },
+        body: agentData,
+      }),
+      invalidatesTags: ["CompanyAgents"],
+    }),
 
-        // Agent limits endpoint
-        getAgentLimits: builder.query({
-          query: () => ({
-            url: '/api/company/agents/limits',
-            headers: {
-              'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
-              'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : ''
-            },
-          }),
-          providesTags: ['AgentLimits'],
-        }),
+    updateCompanyAgent: builder.mutation({
+      query: ({ agentId, ...agentData }) => ({
+        url: `/api/company/agents/${agentId}`,
+        method: "PUT",
+        headers: {
+          "X-Company-Key":
+            typeof window !== "undefined"
+              ? localStorage.getItem("companyApiKey")
+              : "",
+          "X-User-ID":
+            typeof window !== "undefined" ? localStorage.getItem("userId") : "",
+        },
+        body: agentData,
+      }),
+      invalidatesTags: ["CompanyAgents"],
+    }),
 
-        // Knowledge base endpoints
-        addKnowledgeItem: builder.mutation({
-          query: ({ agentId, ...knowledgeData }) => ({
-            url: `/api/company/agents/${agentId}/knowledge`,
-            method: 'POST',
-            headers: {
-              'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
-              'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : ''
-            },
-            body: knowledgeData,
-          }),
-          invalidatesTags: ['CompanyAgents'],
-        }),
+    deleteCompanyAgent: builder.mutation({
+      query: (agentId) => ({
+        url: `/api/company/agents/${agentId}`,
+        method: "DELETE",
+        headers: {
+          "X-Company-Key":
+            typeof window !== "undefined"
+              ? localStorage.getItem("companyApiKey")
+              : "",
+          "X-User-ID":
+            typeof window !== "undefined" ? localStorage.getItem("userId") : "",
+          "X-Admin-Key": "admin_secret_key", // Temporary admin key
+        },
+      }),
+      invalidatesTags: ["CompanyAgents"],
+    }),
 
-        // File upload endpoint
-        uploadKnowledgeFile: builder.mutation({
-          query: ({ agentId, file, title }) => {
-            const formData = new FormData();
-            formData.append('file', file);
-            if (title) formData.append('title', title);
+    // Agent limits endpoint
+    getAgentLimits: builder.query({
+      query: () => ({
+        url: "/api/company/agents/limits",
+        headers: {
+          "X-Company-Key":
+            typeof window !== "undefined"
+              ? localStorage.getItem("companyApiKey")
+              : "",
+          "X-User-ID":
+            typeof window !== "undefined" ? localStorage.getItem("userId") : "",
+        },
+      }),
+      providesTags: ["AgentLimits"],
+    }),
 
-            return {
-              url: `/api/company/agents/${agentId}/knowledge/upload`,
-              method: 'POST',
-              headers: {
-                'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
-                'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : ''
-              },
-              body: formData,
-            };
+    // Knowledge base endpoints
+    addKnowledgeItem: builder.mutation({
+      query: ({ agentId, ...knowledgeData }) => ({
+        url: `/api/company/agents/${agentId}/knowledge`,
+        method: "POST",
+        headers: {
+          "X-Company-Key":
+            typeof window !== "undefined"
+              ? localStorage.getItem("companyApiKey")
+              : "",
+          "X-User-ID":
+            typeof window !== "undefined" ? localStorage.getItem("userId") : "",
+        },
+        body: knowledgeData,
+      }),
+      invalidatesTags: ["CompanyAgents"],
+    }),
+
+    // File upload endpoint
+    uploadKnowledgeFile: builder.mutation({
+      query: ({ agentId, file, title }) => {
+        const formData = new FormData();
+        formData.append("file", file);
+        if (title) formData.append("title", title);
+
+        return {
+          url: `/api/company/agents/${agentId}/knowledge/upload`,
+          method: "POST",
+          headers: {
+            "X-Company-Key":
+              typeof window !== "undefined"
+                ? localStorage.getItem("companyApiKey")
+                : "",
+            "X-User-ID":
+              typeof window !== "undefined"
+                ? localStorage.getItem("userId")
+                : "",
           },
-          invalidatesTags: ['CompanyAgents'],
-        }),
+          body: formData,
+        };
+      },
+      invalidatesTags: ["CompanyAgents"],
+    }),
 
-        // Delete knowledge item endpoint
-        deleteKnowledgeItem: builder.mutation({
-          query: ({ agentId, knowledgeId }) => ({
-            url: `/api/company/agents/${agentId}/knowledge/${knowledgeId}`,
-            method: 'DELETE',
-            headers: {
-              'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
-              'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : ''
-            },
-          }),
-          invalidatesTags: ['CompanyAgents'],
-        }),
+    // Delete knowledge item endpoint
+    deleteKnowledgeItem: builder.mutation({
+      query: ({ agentId, knowledgeId }) => ({
+        url: `/api/company/agents/${agentId}/knowledge/${knowledgeId}`,
+        method: "DELETE",
+        headers: {
+          "X-Company-Key":
+            typeof window !== "undefined"
+              ? localStorage.getItem("companyApiKey")
+              : "",
+          "X-User-ID":
+            typeof window !== "undefined" ? localStorage.getItem("userId") : "",
+        },
+      }),
+      invalidatesTags: ["CompanyAgents"],
+    }),
 
-        // Agent crawler endpoints
-        crawlAgentUrls: builder.mutation({
-          query: ({ agentId, urls }) => ({
-            url: `/api/company/agents/${agentId}/crawl`,
-            method: 'POST',
-            headers: {
-              'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
-              'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : ''
-            },
-            body: { urls },
-          }),
-          invalidatesTags: ['CompanyAgents'],
-        }),
+    // Agent crawler endpoints
+    crawlAgentUrls: builder.mutation({
+      query: ({ agentId, urls }) => ({
+        url: `/api/company/agents/${agentId}/crawl`,
+        method: "POST",
+        headers: {
+          "X-Company-Key":
+            typeof window !== "undefined"
+              ? localStorage.getItem("companyApiKey")
+              : "",
+          "X-User-ID":
+            typeof window !== "undefined" ? localStorage.getItem("userId") : "",
+        },
+        body: { urls },
+      }),
+      invalidatesTags: ["CompanyAgents"],
+    }),
 
-        getCrawlStatus: builder.query({
-          query: (agentId) => ({
-            url: `/api/company/agents/${agentId}/crawl/status`,
-            headers: {
-              'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
-              'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : ''
-            }
-          }),
-          providesTags: (result, error, agentId) => [{ type: 'CompanyAgents', id: agentId }],
-        }),
+    getCrawlStatus: builder.query({
+      query: (agentId) => ({
+        url: `/api/company/agents/${agentId}/crawl/status`,
+        headers: {
+          "X-Company-Key":
+            typeof window !== "undefined"
+              ? localStorage.getItem("companyApiKey")
+              : "",
+          "X-User-ID":
+            typeof window !== "undefined" ? localStorage.getItem("userId") : "",
+        },
+      }),
+      providesTags: (result, error, agentId) => [
+        { type: "CompanyAgents", id: agentId },
+      ],
+    }),
 
-        testCrawlUrl: builder.mutation({
-          query: ({ agentId, url }) => ({
-            url: `/api/company/agents/${agentId}/crawl/test`,
-            method: 'POST',
-            headers: {
-              'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
-              'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : ''
-            },
-            body: { url },
-          }),
-        }),
+    testCrawlUrl: builder.mutation({
+      query: ({ agentId, url }) => ({
+        url: `/api/company/agents/${agentId}/crawl/test`,
+        method: "POST",
+        headers: {
+          "X-Company-Key":
+            typeof window !== "undefined"
+              ? localStorage.getItem("companyApiKey")
+              : "",
+          "X-User-ID":
+            typeof window !== "undefined" ? localStorage.getItem("userId") : "",
+        },
+        body: { url },
+      }),
+    }),
 
-        clearAgentKnowledgeBase: builder.mutation({
-          query: (agentId) => ({
-            url: `/api/company/agents/${agentId}/crawl`,
-            method: 'DELETE',
-            headers: {
-              'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
-              'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : ''
-            },
-          }),
-          invalidatesTags: ['CompanyAgents'],
-        }),
+    clearAgentKnowledgeBase: builder.mutation({
+      query: (agentId) => ({
+        url: `/api/company/agents/${agentId}/crawl`,
+        method: "DELETE",
+        headers: {
+          "X-Company-Key":
+            typeof window !== "undefined"
+              ? localStorage.getItem("companyApiKey")
+              : "",
+          "X-User-ID":
+            typeof window !== "undefined" ? localStorage.getItem("userId") : "",
+        },
+      }),
+      invalidatesTags: ["CompanyAgents"],
+    }),
 
-        // Deployment endpoints
-        getDeploymentConfig: builder.query({
-          query: (agentId) => ({
-            url: `/api/company/agents/${agentId}/deploy`,
-            headers: {
-              'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
-              'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : ''
-            }
-          }),
-          providesTags: (result, error, agentId) => [{ type: 'CompanyAgents', id: agentId }],
-        }),
+    // Deployment endpoints
+    getDeploymentConfig: builder.query({
+      query: (agentId) => ({
+        url: `/api/company/agents/${agentId}/deploy`,
+        headers: {
+          "X-Company-Key":
+            typeof window !== "undefined"
+              ? localStorage.getItem("companyApiKey")
+              : "",
+          "X-User-ID":
+            typeof window !== "undefined" ? localStorage.getItem("userId") : "",
+        },
+      }),
+      providesTags: (result, error, agentId) => [
+        { type: "CompanyAgents", id: agentId },
+      ],
+    }),
 
-        generateEmbedCode: builder.mutation({
-          query: ({ agentId, ...config }) => ({
-            url: `/api/company/agents/${agentId}/deploy/embed-code`,
-            method: 'POST',
-            headers: {
-              'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
-              'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : ''
-            },
-            body: config,
-          }),
-        }),
+    generateEmbedCode: builder.mutation({
+      query: ({ agentId, ...config }) => ({
+        url: `/api/company/agents/${agentId}/deploy/embed-code`,
+        method: "POST",
+        headers: {
+          "X-Company-Key":
+            typeof window !== "undefined"
+              ? localStorage.getItem("companyApiKey")
+              : "",
+          "X-User-ID":
+            typeof window !== "undefined" ? localStorage.getItem("userId") : "",
+        },
+        body: config,
+      }),
+    }),
 
-        testDeployment: builder.mutation({
-          query: ({ agentId, testMessage }) => ({
-            url: `/api/company/agents/${agentId}/deploy/test`,
-            method: 'POST',
-            headers: {
-              'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
-              'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : ''
-            },
-            body: { testMessage },
-          }),
-        }),
+    testDeployment: builder.mutation({
+      query: ({ agentId, testMessage }) => ({
+        url: `/api/company/agents/${agentId}/deploy/test`,
+        method: "POST",
+        headers: {
+          "X-Company-Key":
+            typeof window !== "undefined"
+              ? localStorage.getItem("companyApiKey")
+              : "",
+          "X-User-ID":
+            typeof window !== "undefined" ? localStorage.getItem("userId") : "",
+        },
+        body: { testMessage },
+      }),
+    }),
 
-        getDeploymentAnalytics: builder.query({
-          query: ({ agentId, days = 7 }) => ({
-            url: `/api/company/agents/${agentId}/deploy/analytics?days=${days}`,
-            headers: {
-              'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
-              'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : ''
-            }
-          }),
-          providesTags: (result, error, { agentId }) => [{ type: 'CompanyAgents', id: agentId }],
-        }),
+    getDeploymentAnalytics: builder.query({
+      query: ({ agentId, days = 7 }) => ({
+        url: `/api/company/agents/${agentId}/deploy/analytics?days=${days}`,
+        headers: {
+          "X-Company-Key":
+            typeof window !== "undefined"
+              ? localStorage.getItem("companyApiKey")
+              : "",
+          "X-User-ID":
+            typeof window !== "undefined" ? localStorage.getItem("userId") : "",
+        },
+      }),
+      providesTags: (result, error, { agentId }) => [
+        { type: "CompanyAgents", id: agentId },
+      ],
+    }),
 
-        // Agent chat endpoints
-        chatWithAgent: builder.mutation({
-          query: ({ agentId, message, sessionId }) => ({
-            url: `/api/company/agents/${agentId}/chat`,
-            method: 'POST',
-            headers: {
-              'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
-              'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : ''
-            },
-            body: { message, sessionId },
-          }),
-          invalidatesTags: (result, error, { agentId }) => [
-            { type: 'CompanyAgents', id: agentId },
-            'CompanyAgents'
-          ],
-        }),
+    // Agent chat endpoints
+    chatWithAgent: builder.mutation({
+      query: ({ agentId, message, sessionId }) => ({
+        url: `/api/company/agents/${agentId}/chat`,
+        method: "POST",
+        headers: {
+          "X-Company-Key":
+            typeof window !== "undefined"
+              ? localStorage.getItem("companyApiKey")
+              : "",
+          "X-User-ID":
+            typeof window !== "undefined" ? localStorage.getItem("userId") : "",
+        },
+        body: { message, sessionId },
+      }),
+      invalidatesTags: (result, error, { agentId }) => [
+        { type: "CompanyAgents", id: agentId },
+        "CompanyAgents",
+      ],
+    }),
 
-        getAgentConversation: builder.query({
-          query: ({ agentId, sessionId }) => ({
-            url: `/api/company/agents/${agentId}/conversation/${sessionId}`,
-            headers: {
-              'X-Company-Key': typeof window !== 'undefined' ? localStorage.getItem('companyApiKey') : '',
-              'X-User-ID': typeof window !== 'undefined' ? localStorage.getItem('userId') : ''
-            }
-          }),
-          providesTags: (result, error, { agentId, sessionId }) => [
-            { type: 'CompanyAgents', id: agentId },
-            { type: 'Conversation', id: sessionId }
-          ],
-        }),
+    getAgentConversation: builder.query({
+      query: ({ agentId, sessionId }) => ({
+        url: `/api/company/agents/${agentId}/conversation/${sessionId}`,
+        headers: {
+          "X-Company-Key":
+            typeof window !== "undefined"
+              ? localStorage.getItem("companyApiKey")
+              : "",
+          "X-User-ID":
+            typeof window !== "undefined" ? localStorage.getItem("userId") : "",
+        },
+      }),
+      providesTags: (result, error, { agentId, sessionId }) => [
+        { type: "CompanyAgents", id: agentId },
+        { type: "Conversation", id: sessionId },
+      ],
+    }),
   }),
 });
 
-export const { 
-  useSendMessageMutation, 
+export const {
+  useSendMessageMutation,
   useGetConversationQuery,
   useGetClientsQuery,
   useGetClientQuery,
@@ -343,6 +515,10 @@ export const {
   useCreateCompanyAgentMutation,
   useUpdateCompanyAgentMutation,
   useDeleteCompanyAgentMutation,
+  useGetAgentActionsQuery,
+  useCreateAgentActionMutation,
+  useUpdateAgentActionMutation,
+  useDeleteAgentActionMutation,
   useAddKnowledgeItemMutation,
   useUploadKnowledgeFileMutation,
   useDeleteKnowledgeItemMutation,
@@ -355,7 +531,5 @@ export const {
   useTestDeploymentMutation,
   useGetDeploymentAnalyticsQuery,
   useChatWithAgentMutation,
-  useGetAgentConversationQuery
+  useGetAgentConversationQuery,
 } = botApi;
-
-
