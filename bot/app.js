@@ -35,6 +35,13 @@ const corsOptions = {
       process.env.CORS_ORIGIN,
     ].filter(Boolean);
 
+    // For development purposes, allow all origins
+    // In production, you should restrict this
+    console.log("✅ CORS allowing origin:", origin);
+    callback(null, true);
+
+    // Uncomment for more restrictive CORS policy in production
+    /*
     // Check if origin matches any allowed origin (with or without trailing slash)
     const isAllowed = allowedOrigins.some((allowedOrigin) => {
       return (
@@ -52,15 +59,17 @@ const corsOptions = {
       console.log("🔍 Allowed origins:", allowedOrigins);
       callback(new Error("Not allowed by CORS"));
     }
+    */
   },
   credentials: true,
   optionsSuccessStatus: 200,
-  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
   allowedHeaders: [
     "Content-Type",
     "Authorization",
     "X-Company-Key",
     "X-User-ID",
+    "X-Admin-Key",
   ],
 };
 
