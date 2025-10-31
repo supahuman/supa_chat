@@ -1,8 +1,9 @@
-import Agent from '../../models/agentModel.js';
-import { getGlobalModel } from '../../config/globalModel.js';
-import BaseController from '../shared/baseController.js';
-import SubscriptionService from '../../services/SubscriptionService.js';
-import crypto from 'crypto';
+import Agent from "../../models/agentModel.js";
+import { getGlobalModel } from "../../config/globalModel.js";
+import BaseController from "../shared/baseController.js";
+import SubscriptionService from "../../services/SubscriptionService.js";
+import CompanyService from "../../services/CompanyService.js";
+import crypto from "crypto";
 
 /**
  * AgentManagementController - Handles core agent CRUD operations
@@ -18,19 +19,35 @@ class AgentManagementController extends BaseController {
    */
   async createAgent(req, res) {
     try {
-      const { companyId, userId } = this.getCompanyContext(req);
-      const { name, description, personality, knowledgeBase, trainingExamples } = req.body;
-      
+      let { companyId, userId } = this.getCompanyContext(req);
+      const {
+        name,
+        description,
+        personality,
+        knowledgeBase,
+        trainingExamples,
+      } = req.body;
+      // Require valid company context (set by authenticateApiKey middleware)
+      if (!companyId) {
+        return this.sendUnauthorized(
+          res,
+          "Missing company context. Provide a valid X-Company-Key."
+        );
+      }
+
       // Validate required fields
-      const validation = this.validateRequiredFields(req.body, ['name']);
+      const validation = this.validateRequiredFields(req.body, ["name"]);
       if (!validation.isValid) {
-        return this.sendValidationError(res, 'Agent name is required', {
-          missingFields: validation.missingFields
+        return this.sendValidationError(res, "Agent name is required", {
+          missingFields: validation.missingFields,
         });
       }
 
       // Check subscription limits
-      const limitCheck = await SubscriptionService.canCreateAgent(userId, companyId);
+      const limitCheck = await SubscriptionService.canCreateAgent(
+        userId,
+        companyId
+      );
       if (!limitCheck.canCreate) {
         return res.status(403).json({
           success: false,
@@ -38,19 +55,23 @@ class AgentManagementController extends BaseController {
           limitInfo: {
             currentCount: limitCheck.currentCount,
             maxAllowed: limitCheck.maxAllowed,
-            plan: limitCheck.plan
+            plan: limitCheck.plan,
           },
-          upgradeOptions: SubscriptionService.getUpgradeOptions(SubscriptionService.getUserPlan(userId))
+          upgradeOptions: SubscriptionService.getUpgradeOptions(
+            SubscriptionService.getUserPlan(userId)
+          ),
         });
       }
-      
+
       // Generate unique agent ID and API key
-      const agentId = `agent_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      const apiKey = `sk_${crypto.randomBytes(16).toString('hex')}`;
-      
+      const agentId = `agent_${Date.now()}_${Math.random()
+        .toString(36)
+        .substr(2, 9)}`;
+      const apiKey = `sk_${crypto.randomBytes(16).toString("hex")}`;
+
       // Get global model configuration
       const globalModel = getGlobalModel();
-      
+
       // Create agent
       const agent = new Agent({
         agentId,
@@ -58,38 +79,40 @@ class AgentManagementController extends BaseController {
         createdBy: userId,
         apiKey,
         name,
-        description: description || 'AI Agent created with Agent Builder',
-        personality: personality || 'friendly and helpful',
+        description: description || "AI Agent created with Agent Builder",
+        personality: personality || "friendly and helpful",
         knowledgeBase: knowledgeBase || [],
         trainingExamples: trainingExamples || [],
         model: globalModel,
-        status: 'active'
+        status: "active",
       });
-      
+
       await agent.save();
-      
-      this.logAction('Created agent', { agentId, name, companyId, apiKey });
-      
+
+      this.logAction("Created agent", { agentId, name, companyId, apiKey });
+
       // Trigger NLP pipeline for URLs in knowledge base
       if (knowledgeBase && knowledgeBase.length > 0) {
-        const urls = knowledgeBase.filter(item => item.url).map(item => item.url);
+        const urls = knowledgeBase
+          .filter((item) => item.url)
+          .map((item) => item.url);
         if (urls.length > 0) {
-          this.logAction('Triggering NLP pipeline', { urls: urls.length });
+          this.logAction("Triggering NLP pipeline", { urls: urls.length });
           try {
             // Note: NLP processing will be handled by AgentKnowledgeController
             // This is just a placeholder for now
-            console.log(`🕷️ URLs to process: ${urls.join(', ')}`);
+            console.log(`🕷️ URLs to process: ${urls.join(", ")}`);
           } catch (error) {
-            this.logError('NLP processing', error, { agentId });
+            this.logError("NLP processing", error, { agentId });
             // Don't fail the agent creation if NLP processing fails
           }
         }
       }
-      
-      return this.sendSuccess(res, agent, 'Agent created successfully', 201);
+
+      return this.sendSuccess(res, agent, "Agent created successfully", 201);
     } catch (error) {
-      this.logError('Create agent', error, { companyId: req.companyId });
-      return this.sendError(res, 'Failed to create agent');
+      this.logError("Create agent", error, { companyId: req.companyId });
+      return this.sendError(res, "Failed to create agent");
     }
   }
 
@@ -99,18 +122,18 @@ class AgentManagementController extends BaseController {
   async getAgentLimits(req, res) {
     try {
       const { companyId, userId } = this.getCompanyContext(req);
-      
+
       // Get current agent count
-      const agentCount = await Agent.countDocuments({ 
-        $or: [
-          { createdBy: userId },
-          { companyId: companyId }
-        ]
+      const agentCount = await Agent.countDocuments({
+        $or: [{ createdBy: userId }, { companyId: companyId }],
       });
 
       // Get user's plan and limits
       const plan = SubscriptionService.getUserPlan(userId);
-      const limitCheck = await SubscriptionService.canCreateAgent(userId, companyId);
+      const limitCheck = await SubscriptionService.canCreateAgent(
+        userId,
+        companyId
+      );
 
       res.json({
         success: true,
@@ -119,14 +142,14 @@ class AgentManagementController extends BaseController {
           maxAllowed: plan.maxAgents,
           canCreateMore: limitCheck.canCreate,
           plan: plan.name,
-          upgradeOptions: SubscriptionService.getUpgradeOptions(plan)
-        }
+          upgradeOptions: SubscriptionService.getUpgradeOptions(plan),
+        },
       });
     } catch (error) {
-      this.logError('Get agent limits', error, req.body);
+      this.logError("Get agent limits", error, req.body);
       res.status(500).json({
         success: false,
-        error: 'Failed to get agent limits'
+        error: "Failed to get agent limits",
       });
     }
   }
@@ -137,18 +160,18 @@ class AgentManagementController extends BaseController {
   async getAgents(req, res) {
     try {
       const { companyId } = this.getCompanyContext(req);
-      
-      const agents = await Agent.find({ 
-        companyId, 
-        status: { $ne: 'deleted' } 
+
+      const agents = await Agent.find({
+        companyId,
+        status: { $ne: "deleted" },
       }).sort({ createdAt: -1 });
-      
-      this.logAction('Retrieved agents', { count: agents.length, companyId });
-      
+
+      this.logAction("Retrieved agents", { count: agents.length, companyId });
+
       return this.sendSuccess(res, agents);
     } catch (error) {
-      this.logError('Get agents', error, { companyId: req.companyId });
-      return this.sendError(res, 'Failed to get agents');
+      this.logError("Get agents", error, { companyId: req.companyId });
+      return this.sendError(res, "Failed to get agents");
     }
   }
 
@@ -159,18 +182,18 @@ class AgentManagementController extends BaseController {
     try {
       const { companyId } = this.getCompanyContext(req);
       const { agentId } = req.params;
-      
+
       const agent = await Agent.findOne({ agentId, companyId });
       if (!agent) {
-        return this.sendNotFound(res, 'Agent');
+        return this.sendNotFound(res, "Agent");
       }
-      
-      this.logAction('Retrieved agent', { agentId, companyId });
-      
+
+      this.logAction("Retrieved agent", { agentId, companyId });
+
       return this.sendSuccess(res, agent);
     } catch (error) {
-      this.logError('Get agent', error, { agentId: req.params.agentId });
-      return this.sendError(res, 'Failed to get agent');
+      this.logError("Get agent", error, { agentId: req.params.agentId });
+      return this.sendError(res, "Failed to get agent");
     }
   }
 
@@ -182,29 +205,37 @@ class AgentManagementController extends BaseController {
       const { companyId } = this.getCompanyContext(req);
       const { agentId } = req.params;
       const updateData = req.body;
-      
+
       // Find the agent
       const agent = await Agent.findOne({ agentId, companyId });
       if (!agent) {
-        return this.sendNotFound(res, 'Agent');
+        return this.sendNotFound(res, "Agent");
       }
-      
+
       // Update agent fields
-      Object.keys(updateData).forEach(key => {
-        if (updateData[key] !== undefined && key !== 'agentId' && key !== 'companyId') {
+      Object.keys(updateData).forEach((key) => {
+        if (
+          updateData[key] !== undefined &&
+          key !== "agentId" &&
+          key !== "companyId"
+        ) {
           agent[key] = updateData[key];
         }
       });
-      
+
       agent.updatedAt = new Date();
       await agent.save();
-      
-      this.logAction('Updated agent', { agentId, companyId, updatedFields: Object.keys(updateData) });
-      
-      return this.sendSuccess(res, agent, 'Agent updated successfully');
+
+      this.logAction("Updated agent", {
+        agentId,
+        companyId,
+        updatedFields: Object.keys(updateData),
+      });
+
+      return this.sendSuccess(res, agent, "Agent updated successfully");
     } catch (error) {
-      this.logError('Update agent', error, { agentId: req.params.agentId });
-      return this.sendError(res, 'Failed to update agent');
+      this.logError("Update agent", error, { agentId: req.params.agentId });
+      return this.sendError(res, "Failed to update agent");
     }
   }
 
@@ -215,29 +246,36 @@ class AgentManagementController extends BaseController {
     try {
       const { companyId } = this.getCompanyContext(req);
       const { agentId } = req.params;
-      
-      console.log('🗑️ Delete agent request:', { agentId, companyId, reqCompanyId: req.companyId });
-      
+
+      console.log("🗑️ Delete agent request:", {
+        agentId,
+        companyId,
+        reqCompanyId: req.companyId,
+      });
+
       // Find the agent
       const agent = await Agent.findOne({ agentId, companyId });
       if (!agent) {
-        console.log('❌ Agent not found:', { agentId, companyId });
-        return this.sendNotFound(res, 'Agent');
+        console.log("❌ Agent not found:", { agentId, companyId });
+        return this.sendNotFound(res, "Agent");
       }
-      
-      console.log('✅ Agent found, proceeding with deletion:', { agentId, agentName: agent.name });
-      
+
+      console.log("✅ Agent found, proceeding with deletion:", {
+        agentId,
+        agentName: agent.name,
+      });
+
       // Soft delete by updating status
-      agent.status = 'deleted';
+      agent.status = "deleted";
       agent.deletedAt = new Date();
       await agent.save();
-      
-      this.logAction('Deleted agent', { agentId, companyId });
-      
-      return this.sendSuccess(res, null, 'Agent deleted successfully');
+
+      this.logAction("Deleted agent", { agentId, companyId });
+
+      return this.sendSuccess(res, null, "Agent deleted successfully");
     } catch (error) {
-      this.logError('Delete agent', error, { agentId: req.params.agentId });
-      console.error('❌ Delete agent error details:', error);
+      this.logError("Delete agent", error, { agentId: req.params.agentId });
+      console.error("❌ Delete agent error details:", error);
       return this.sendError(res, `Failed to delete agent: ${error.message}`);
     }
   }
