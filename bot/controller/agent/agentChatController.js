@@ -70,7 +70,7 @@ class AgentChatController {
       try {
         if (!knowledgeContext || (confidence?.score ?? 0) < 0.5) {
           const { docsSearch } = (await import('../../services/tools/docsSearchService.js')).default;
-          const live = await docsSearch(agentId, companyId, message, { maxUrls: 2, timeoutMs: 2500 });
+          const live = await docsSearch(agentId, companyId, message, { maxUrls: 2, timeoutMs: 2000, loopAll: true });
           if (live?.snippets?.length) {
             knowledgeContext += '\n\n' + live.snippets.slice(0, 4).join('\n\n');
             // bump perceived confidence slightly

@@ -27,15 +27,37 @@ async function fetchWithTimeout(url, { timeoutMs = 3000 } = {}) {
   }
 }
 
+// Simple in-memory cache for fetched pages (TTL in ms)
+const pageCache = new Map(); // key: url, value: { text, ts }
+const DEFAULT_TTL_MS = 5 * 60 * 1000;
+
+async function fetchCached(
+  url,
+  { timeoutMs = 3000, ttlMs = DEFAULT_TTL_MS } = {}
+) {
+  const now = Date.now();
+  const cached = pageCache.get(url);
+  if (cached && now - cached.ts < ttlMs) return cached.text;
+  const html = await fetchWithTimeout(url, { timeoutMs });
+  const text = stripHtml(html).slice(0, 18000);
+  pageCache.set(url, { text, ts: now });
+  return text;
+}
+
 /**
  * docsSearch - lightweight live fetch over agent KB URLs as fallback context
  * Returns top snippets and their source URLs without persisting to DB
  */
-export async function docsSearch(
+async function docsSearch(
   agentId,
   companyId,
   query,
-  { maxUrls = 2, timeoutMs = 3000 } = {}
+  {
+    maxUrls = 2,
+    timeoutMs = 3000,
+    loopAll = false,
+    ttlMs = DEFAULT_TTL_MS,
+  } = {}
 ) {
   // 1) Get agent KB URLs
   const agent = await Agent.findOne({ agentId, companyId });
@@ -58,27 +80,37 @@ export async function docsSearch(
   });
 
   // Sort by score desc, then unique
-  const uniqueUrls = Array.from(
-    new Set(scored.sort((a, b) => b.score - a.score).map((s) => s.url))
-  ).slice(0, maxUrls);
+  const sorted = scored.sort((a, b) => b.score - a.score).map((s) => s.url);
+  const uniqueUrls = Array.from(new Set(sorted)).slice(
+    0,
+    loopAll ? Math.max(maxUrls, 10) : maxUrls
+  );
   if (uniqueUrls.length === 0) return { snippets: [], sources: [] };
 
   // 2) Fetch and extract text
   const results = [];
-  for (const url of uniqueUrls) {
-    try {
-      const html = await fetchWithTimeout(url, { timeoutMs });
-      const text = stripHtml(html).slice(0, 18000); // cap per page
-      results.push({ url, text });
-    } catch {
-      // ignore failures per URL
+  if (loopAll) {
+    const settled = await Promise.allSettled(
+      uniqueUrls.map((url) =>
+        fetchCached(url, { timeoutMs, ttlMs }).then((text) => ({ url, text }))
+      )
+    );
+    for (const r of settled)
+      if (r.status === "fulfilled") results.push(r.value);
+  } else {
+    for (const url of uniqueUrls) {
+      try {
+        const text = await fetchCached(url, { timeoutMs, ttlMs });
+        results.push({ url, text });
+      } catch {
+        // ignore failures per URL
+      }
     }
   }
 
   if (results.length === 0) return { snippets: [], sources: [] };
 
   // 3) Naive relevance: keep paragraphs containing any query term
-  const terms = (query || "").toLowerCase().split(/\W+/).filter(Boolean);
   const snippets = [];
   const sources = new Set();
 
