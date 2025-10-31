@@ -66,6 +66,23 @@ class AgentChatController {
         // Continue without knowledge context
       }
 
+      // 1b. Agentic RAG fallback: if low confidence, fetch from KB URLs live
+      try {
+        if (!knowledgeContext || (confidence?.score ?? 0) < 0.5) {
+          const { docsSearch } = (await import('../../services/tools/docsSearchService.js')).default;
+          const live = await docsSearch(agentId, companyId, message, { maxUrls: 2, timeoutMs: 2000, loopAll: true });
+          if (live?.snippets?.length) {
+            knowledgeContext += '\n\n' + live.snippets.slice(0, 4).join('\n\n');
+            // bump perceived confidence slightly
+            confidence = confidence || {}; 
+            confidence.score = Math.max(confidence.score || 0, 0.5);
+            confidence.level = confidence.score >= 0.7 ? 'high' : 'medium';
+          }
+        }
+      } catch (e) {
+        console.warn('⚠️ docs-search fallback failed', e?.message);
+      }
+
       // 2. Check if any tools should be executed
       let toolResults = '';
       if (agent.tools?.enabled?.length > 0) {
